@@ -12,7 +12,7 @@ const RepositoryStats: VisualizationPlugin<SettingsType, unknown> = {
   chartComponent: Chart,
   settingsComponent: Settings,
   helpComponent: Help,
-  defaultSettings: { commits: true, contributors: true, issues: true },
+  defaultSettings: { commits: true, contributors: true, issues: true, mergeRequests: true },
   export: {
     getSVGData: () => '<svg></svg>',
   },

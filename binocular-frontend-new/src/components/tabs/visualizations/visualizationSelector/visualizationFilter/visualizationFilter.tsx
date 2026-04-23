@@ -15,26 +15,18 @@ function VisualizationFilter(props: {
   const defaultDataPlugin = configuredDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.isDefault)[0];
 
   return (
-    <div className={VisualizationFilterStyles.filters + ' tabs tabs-box'}>
-      <div
-        className="tab"
-        onClick={() => {
-          if (databases && datatypes) {
+    <div className={VisualizationFilterStyles.filters}>
+      <div className={VisualizationFilterStyles.filterGroup}>
+        <button
+          className={`btn btn-xs ${datatypes ? 'btn-primary' : 'btn-ghost border border-base-300'}`}
+          onClick={() => {
+            setDatatypes(!datatypes);
             setDatabases(false);
-            setDatatypes(false);
-          } else {
-            setDatabases(true);
-            setDatatypes(true);
-          }
-        }}>
-        Filters:
-      </div>
-      <div className="tabs-content">
-        <a className={'tab no-underline ' + (datatypes ? 'tab-active' : '')} onClick={() => setDatatypes(!datatypes)}>
+          }}>
           Datatypes
-        </a>
+        </button>
         {datatypes && (
-          <div>
+          <div className={`${VisualizationFilterStyles.filterDropdown} bg-base-100 shadow-lg border border-base-300`}>
             <label className="label cursor-pointer flex w-full items-center mt-0.5">
               <span className="label-text">Github data:</span>
               <input
@@ -76,12 +68,18 @@ function VisualizationFilter(props: {
           </div>
         )}
       </div>
-      <div className="tabs-content">
-        <a className={'tab no-underline ' + (databases ? 'tab-active' : '')} onClick={() => setDatabases(!databases)}>
-          DataBases
-        </a>
+
+      <div className={VisualizationFilterStyles.filterGroup}>
+        <button
+          className={`btn btn-xs ${databases ? 'btn-primary' : 'btn-ghost border border-base-300'}`}
+          onClick={() => {
+            setDatabases(!databases);
+            setDatatypes(false);
+          }}>
+          Databases
+        </button>
         {databases && (
-          <div>
+          <div className={`${VisualizationFilterStyles.filterDropdown} bg-base-100 shadow-lg border border-base-300`}>
             <label className="label cursor-pointer flex w-full items-center mt-0.5">
               <span className="label-text">Binocular Backend:</span>
               <input
@@ -161,11 +159,10 @@ function VisualizationFilter(props: {
           </div>
         )}
       </div>
-      <div className="tabs-content">
-        <a className={'tab no-underline'} onClick={() => setDefaultFilter(defaultDataPlugin)}>
-          Auto detect
-        </a>
-      </div>
+
+      <button className="btn btn-xs btn-ghost border border-base-300" onClick={() => setDefaultFilter(defaultDataPlugin)}>
+        Auto detect
+      </button>
     </div>
   );
 

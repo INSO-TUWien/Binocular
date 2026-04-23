@@ -88,7 +88,7 @@ function Chart(props: {
         )}
         {dataState === DataState.COMPLETE && (
           <div className={styles.chartContainer}>
-            <div className="stats shadow stats-vertical m-2 w-11/12">
+            <div className="stats-vertical w-full">
               {props.settings.contributors && (
                 <div className="stat">
                   <div className="stat-title">Contributors</div>
