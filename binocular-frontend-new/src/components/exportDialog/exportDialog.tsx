@@ -10,6 +10,7 @@ import DataPluginStorage from '../../utils/dataPluginStorage.ts';
 import PouchDb from '../../plugins/dataPlugins/pouchDB/src/index.ts';
 import type { JSONObject } from '../../plugins/interfaces/dataPluginInterfaces/dataPluginFiles.ts';
 import type { DataPlugin } from '../../plugins/interfaces/dataPlugin.ts';
+import type BinocularBackend from '../../plugins/dataPlugins/binocularBackend/src/index.ts';
 
 function ExportDialog() {
   const exportType = useSelector((state: RootState) => state.export.exportType);
@@ -82,6 +83,11 @@ function ExportDialog() {
             data = await currentDataConnection.getAll(new Date(0).toISOString(), new Date().toISOString());
           }
           console.log(data);
+
+          if (name == 'commits') {
+            data = await (dP as BinocularBackend).export_temp.getAll();
+            console.log(data);
+          }
           
           break;
         default:
