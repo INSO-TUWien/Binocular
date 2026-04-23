@@ -19,6 +19,9 @@ import ConnectedDataPlugins from '../../../components/settingsDialog/connectedDa
 import SettingsReducer from '../../../redux/reducer/settings/settingsReducer.ts';
 import FilesReducer from '../../../redux/reducer/data/filesReducer.ts';
 import type { DatabaseSettingsDataPluginType } from '../../../types/settings/databaseSettingsType.ts';
+import { store as globalStore } from '../../../redux';
+import { addDashboardItem, clearDashboard } from '../../../redux/reducer/general/dashboardReducer.ts';
+import type { DashboardItemType } from '../../../types/general/dashboardItemType.ts';
 
 const basePlugin: DatabaseSettingsDataPluginType = {
   id: 1,
@@ -62,6 +65,7 @@ describe('ConnectedDataPlugins', () => {
   beforeEach(() => {
     localStorage.clear();
     vi.restoreAllMocks();
+    globalStore.dispatch(clearDashboard());
   });
 
   it('C32.1 empty plugin list shows empty-state text', () => {
@@ -131,5 +135,56 @@ describe('ConnectedDataPlugins', () => {
 
     const remaining = store.getState().settings.database.dataPlugins;
     expect(remaining.find((p: DatabaseSettingsDataPluginType) => p.id === 2)).toBeUndefined();
+  });
+
+  it('C32.10 deleting a plugin clears dataPluginId on dashboard items referencing it', () => {
+    const item1: DashboardItemType = { id: 0, width: 1, height: 1, pluginName: '', dataPluginId: 1, settings: undefined };
+    const item2: DashboardItemType = { id: 0, width: 1, height: 1, pluginName: '', dataPluginId: 2, settings: undefined };
+    globalStore.dispatch(addDashboardItem(item1));
+    globalStore.dispatch(addDashboardItem(item2));
+
+    const store = createTestStore([basePlugin]);
+    renderWithStore(store, true);
+
+    const deleteBtn = screen.getByRole('button', { name: /delete/i });
+    fireEvent.click(deleteBtn);
+
+    const items = globalStore.getState().dashboard.dashboardItems;
+    expect(items[0].dataPluginId).toBeUndefined();
+    expect(items[1].dataPluginId).toBe(2);
+  });
+
+  it('C32.11 deleting a plugin with no referencing items leaves dashboard state unchanged', () => {
+    const item: DashboardItemType = { id: 0, width: 1, height: 1, pluginName: '', dataPluginId: 2, settings: undefined };
+    globalStore.dispatch(addDashboardItem(item));
+
+    const store = createTestStore([basePlugin]);
+    renderWithStore(store, true);
+
+    const deleteBtn = screen.getByRole('button', { name: /delete/i });
+    fireEvent.click(deleteBtn);
+
+    const items = globalStore.getState().dashboard.dashboardItems;
+    expect(items[0].dataPluginId).toBe(2);
+  });
+
+  it('C32.12 deleting a plugin clears dataPluginId from multiple dashboard items referencing it', () => {
+    const plugin3: DatabaseSettingsDataPluginType = { ...basePlugin, id: 3 };
+    const item: DashboardItemType = { id: 0, width: 1, height: 1, pluginName: '', dataPluginId: 3, settings: undefined };
+    globalStore.dispatch(addDashboardItem(item));
+    globalStore.dispatch(addDashboardItem(item));
+    globalStore.dispatch(addDashboardItem(item));
+
+    const store = createTestStore([plugin3]);
+    renderWithStore(store, true);
+
+    const deleteBtn = screen.getByRole('button', { name: /delete/i });
+    fireEvent.click(deleteBtn);
+
+    const items = globalStore.getState().dashboard.dashboardItems;
+    expect(items).toHaveLength(3);
+    items.forEach((it: DashboardItemType) => {
+      expect(it.dataPluginId).toBeUndefined();
+    });
   });
 });
