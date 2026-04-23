@@ -10,12 +10,14 @@ export interface ExportInitialState {
   exportType: ExportType;
   exportSVGData: string;
   exportName: string;
+  exportLoading: boolean;
 }
 
 const initialState: ExportInitialState = {
   exportType: ExportType.all,
   exportSVGData: '<svg></svg>',
   exportName: 'export',
+  exportLoading: false,
 };
 
 export const exportSlice = createSlice({
@@ -30,9 +32,12 @@ export const exportSlice = createSlice({
     },
     setExportName: (state, action: PayloadAction<string>) => {
       state.exportName = action.payload;
+    },    
+    setExportLoading: (state, action: PayloadAction<boolean>) => {
+      state.exportLoading = action.payload;
     },
   },
 });
 
-export const { setExportType, setExportSVGData, setExportName } = exportSlice.actions;
+export const { setExportType, setExportSVGData, setExportName, setExportLoading } = exportSlice.actions;
 export default exportSlice.reducer;
