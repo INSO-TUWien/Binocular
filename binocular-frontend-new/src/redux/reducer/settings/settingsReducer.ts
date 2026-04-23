@@ -86,7 +86,14 @@ export const settingsSlice = createSlice({
       localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     removeDataPlugin: (state, action: PayloadAction<number>) => {
+      const wasDefault = state.database.defaultDataPluginItemId === action.payload;
       state.database.dataPlugins = state.database.dataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.id !== action.payload);
+      if (wasDefault && state.database.dataPlugins.length > 0) {
+        state.database.dataPlugins[0].isDefault = true;
+        state.database.defaultDataPluginItemId = state.database.dataPlugins[0].id;
+      } else if (wasDefault) {
+        state.database.defaultDataPluginItemId = undefined;
+      }
       localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setDataPluginAsDefault: (state, action: PayloadAction<number>) => {

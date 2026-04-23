@@ -166,9 +166,17 @@ function AuthorList(props: { orientation?: string }) {
     const runRefresh = async () => {
       if (configuredDataPlugins.length === 0) {
         dispatch(setAuthorsDataPluginId(undefined));
+        dispatch(setAccountsDataPluginId(undefined));
+        return;
       }
+      const currentPluginStillExists = configuredDataPlugins.some((dP: DatabaseSettingsDataPluginType) => dP.id === authorsDataPluginId);
+      if (authorsDataPluginId !== undefined && !currentPluginStillExists) {
+        dispatch(setAuthorsDataPluginId(undefined));
+        dispatch(setAccountsDataPluginId(undefined));
+      }
+      const effectiveDataPluginId = currentPluginStillExists ? authorsDataPluginId : undefined;
       for (const dP of configuredDataPlugins) {
-        if (authorsDataPluginId === undefined && dP.isDefault && dP.id !== undefined) {
+        if (effectiveDataPluginId === undefined && dP.isDefault && dP.id !== undefined) {
           dispatch(setAuthorsDataPluginId(dP.id));
           dispatch(setAccountsDataPluginId(dP.id));
         }

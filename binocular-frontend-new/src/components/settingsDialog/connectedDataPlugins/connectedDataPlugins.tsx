@@ -6,6 +6,18 @@ import { useSelector } from 'react-redux';
 import connectedDataPluginStyles from './connectedDataPlugins.module.scss';
 import type { DataPlugin } from '../../../plugins/interfaces/dataPlugin.ts';
 import { removeFileList } from '../../../redux/reducer/data/filesReducer.ts';
+import { store as globalStore } from '../../../redux';
+import { updateDashboardItem } from '../../../redux/reducer/general/dashboardReducer.ts';
+import type { DashboardItemType } from '../../../types/general/dashboardItemType.ts';
+
+function reassignDashboardItems(deletedId: number) {
+  const dashboardItems: DashboardItemType[] = globalStore.getState().dashboard.dashboardItems;
+  dashboardItems.forEach((item) => {
+    if (item.dataPluginId === deletedId) {
+      globalStore.dispatch(updateDashboardItem({ ...item, dataPluginId: undefined }));
+    }
+  });
+}
 
 function ConnectedDataPlugins(props: { interactable: boolean }) {
   const dispatch: AppDispatch = useAppDispatch();
@@ -115,6 +127,7 @@ function ConnectedDataPlugins(props: { interactable: boolean }) {
                                   .then(() => {
                                     console.log(`${settingsDatabaseDataPlugin.name} #${settingsDatabaseDataPlugin.id} cleared`);
                                     if (settingsDatabaseDataPlugin.id !== undefined) {
+                                      reassignDashboardItems(settingsDatabaseDataPlugin.id);
                                       dispatch(removeDataPlugin(settingsDatabaseDataPlugin.id));
                                       dispatch(removeFileList(settingsDatabaseDataPlugin.id));
                                     }
@@ -124,6 +137,7 @@ function ConnectedDataPlugins(props: { interactable: boolean }) {
                             })
                             .catch((e) => console.log(e));
                         } else {
+                          reassignDashboardItems(settingsDatabaseDataPlugin.id);
                           dispatch(removeDataPlugin(settingsDatabaseDataPlugin.id));
                           dispatch(removeFileList(settingsDatabaseDataPlugin.id));
                         }

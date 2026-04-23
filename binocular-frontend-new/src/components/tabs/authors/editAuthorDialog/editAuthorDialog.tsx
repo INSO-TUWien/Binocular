@@ -23,11 +23,15 @@ function EditAuthorDialog() {
   const authorsDataPluginId = useSelector((state: RootState) => state.authors.dataPluginId);
   const [authors, setAuthors] = useState(authorLists[authorsDataPluginId] || []);
   // use the same dataPluginId because there is no other use for a separate one and in current use case it should be the same id
-  const [accounts] = useState(accountLists[authorsDataPluginId] || []);
+  const [accounts, setAccounts] = useState(accountLists[authorsDataPluginId] || []);
 
   useEffect(() => {
     setAuthors(authorLists[authorsDataPluginId] || []);
   }, [authorLists, authorsDataPluginId]);
+
+  useEffect(() => {
+    setAccounts(accountLists[authorsDataPluginId] || []);
+  }, [accountLists, authorsDataPluginId]);
 
   const [displayName, setDisplayName] = useState(authorToEdit && authorToEdit.displayName ? authorToEdit.displayName : '');
   const [colorMain, setColorMain] = useState(authorToEdit ? authorToEdit.color.main : '#CCCCC');

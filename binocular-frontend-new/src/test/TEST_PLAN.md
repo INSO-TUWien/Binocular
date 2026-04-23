@@ -2215,6 +2215,9 @@ Verifies round-trip: every mutation writes to `localStorage` (`settingsStateV1`)
 | I2.8 | `setDataPluginAsDefault` marks exactly one plugin | add two plugins; set second as default | exactly one plugin has `isDefault === true` |
 | I2.9 | `clearSettingsStorage` removes `localStorage` key | dispatch `clearSettingsStorage` | `localStorage.getItem('settingsStateV1') === null` |
 | I2.10 | `setGeneralSettings` persists new value | dispatch with `gridSize: large` | `localStorage` and state both reflect new value |
+| I2.11 | Removing the default plugin promotes the first remaining plugin to default | add two plugins; remove default | remaining plugin has `isDefault === true`; `defaultDataPluginItemId` updated |
+| I2.12 | Removing the only (default) plugin clears `defaultDataPluginItemId` | add one plugin; remove it | `dataPlugins` empty; `defaultDataPluginItemId === undefined` |
+| I2.13 | Removing a non-default plugin leaves the default unchanged | add two plugins; remove non-default | `defaultDataPluginItemId` unchanged; remaining plugin still `isDefault === true` |
 
 ---
 

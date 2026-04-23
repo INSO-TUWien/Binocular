@@ -169,4 +169,51 @@ describe('I2 — settingsReducer + localStorage persistence', () => {
     expect(parsed.general.gridSize).toBe(SettingsGeneralGridSize.large);
     expect(store.getState().settings.general.gridSize).toBe(SettingsGeneralGridSize.large);
   });
+
+  // ── I2.11 — removeDataPlugin (default) promotes first remaining plugin ────
+
+  it('I2.11 — removing the default plugin promotes the first remaining plugin to default', () => {
+    const store = createStore();
+    store.dispatch(addDataPlugin(basePlugin));
+    store.dispatch(addDataPlugin({ ...basePlugin, name: 'Second' }));
+
+    const defaultId = store.getState().settings.database.defaultDataPluginItemId;
+    store.dispatch(removeDataPlugin(defaultId));
+
+    const plugins = store.getState().settings.database.dataPlugins;
+    expect(plugins).toHaveLength(1);
+    expect(plugins[0].isDefault).toBe(true);
+    expect(store.getState().settings.database.defaultDataPluginItemId).toBe(plugins[0].id);
+  });
+
+  // ── I2.12 — removeDataPlugin (default, last) clears defaultDataPluginItemId
+
+  it('I2.12 — removing the only (default) plugin clears defaultDataPluginItemId', () => {
+    const store = createStore();
+    store.dispatch(addDataPlugin(basePlugin));
+
+    const defaultId = store.getState().settings.database.defaultDataPluginItemId;
+    store.dispatch(removeDataPlugin(defaultId));
+
+    expect(store.getState().settings.database.dataPlugins).toHaveLength(0);
+    expect(store.getState().settings.database.defaultDataPluginItemId).toBeUndefined();
+  });
+
+  // ── I2.13 — removeDataPlugin (non-default) leaves default unchanged ────────
+
+  it('I2.13 — removing a non-default plugin leaves the default unchanged', () => {
+    const store = createStore();
+    store.dispatch(addDataPlugin(basePlugin));
+    store.dispatch(addDataPlugin({ ...basePlugin, name: 'Second' }));
+
+    const defaultId = store.getState().settings.database.defaultDataPluginItemId;
+    const nonDefaultId = store.getState().settings.database.dataPlugins.find((p: DatabaseSettingsDataPluginType) => p.id !== defaultId)!.id;
+
+    store.dispatch(removeDataPlugin(nonDefaultId));
+
+    expect(store.getState().settings.database.defaultDataPluginItemId).toBe(defaultId);
+    const remaining = store.getState().settings.database.dataPlugins;
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0].isDefault).toBe(true);
+  });
 });
