@@ -4,17 +4,24 @@ import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import ExportDialog from '../../../components/exportDialog/exportDialog';
 import ExportReducer, { ExportType } from '../../../redux/reducer/export/exportReducer';
+import SettingsReducer from '../../../redux/reducer/settings/settingsReducer';
 
-function makeStore(exportType: ExportType = ExportType.all, exportSVGData = '<svg></svg>', exportName = 'export') {
+vi.mock('../../../../utils/dataPluginStorage.ts', () => ({
+  default: {
+    getDataPlugin: vi.fn(() => new Promise(() => {})),
+  },
+}));
+
+function makeStore(exportType: ExportType = ExportType.all, exportSVGData = '<svg></svg>', exportName = 'export', exportLoading = false, exportData = {}, exportDataType = 'json') {
   return configureStore({
-    reducer: { export: ExportReducer },
-    preloadedState: { export: { exportType, exportSVGData, exportName } },
+    reducer: { export: ExportReducer, settings: SettingsReducer },
+    preloadedState: { export: { exportType, exportSVGData, exportName, exportLoading, exportData, exportDataType } },
   });
 }
 
-function renderDialog(exportType: ExportType = ExportType.all, exportSVGData = '<svg></svg>', exportName = 'export') {
+function renderDialog(exportType: ExportType = ExportType.all, exportSVGData = '<svg></svg>', exportName = 'export', exportLoading = false, exportData = {}, exportDataType = 'json') {
   return render(
-    <Provider store={makeStore(exportType, exportSVGData, exportName)}>
+    <Provider store={makeStore(exportType, exportSVGData, exportName, exportLoading, exportData, exportDataType)}>
       <ExportDialog />
     </Provider>,
   );
