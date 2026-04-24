@@ -22,7 +22,7 @@ interface InfoState {
   label: string;
   value: number;
   avgCommitsPerWeek: number;
-  segments?: { label: string; value: number }[];
+  segments?: { label: string; gitSignature: string; value: number }[];
 }
 
 export interface ColumnChartData {
@@ -344,7 +344,13 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
 
 function generateBars(
   palette: Palette,
-  data: { user: string; gitSignature: string; value: number; avgCommitsPerWeek: number; segments?: { label: string; value: number }[] }[],
+  data: {
+    user: string;
+    gitSignature: string;
+    value: number;
+    avgCommitsPerWeek: number;
+    segments?: { label: string; gitSignature: string; value: number }[];
+  }[],
   x: d3.ScaleBand<string>,
   y: d3.ScaleLinear<number, number>,
   svgRef: MutableRefObject<null>,
@@ -402,7 +408,7 @@ function generateBars(
           .attr('y', y(0))
           .attr('width', barWidth)
           .attr('height', 0)
-          .attr('fill', palette[seg.label]?.main)
+          .attr('fill', palette[seg.gitSignature]?.main)
           .on('mousedown', (e) => e.stopPropagation())
           .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
           .on('click', (e) => {
@@ -419,8 +425,8 @@ function generateBars(
               .select(tooltipRef.current)
               .style('top', 20 + e.pageY + 'px')
               .style('left', e.pageX + 'px')
-              .style('background', palette[seg.label]?.secondary)
-              .style('border-color', palette[seg.label]?.secondary)
+              .style('background', palette[seg.gitSignature]?.secondary)
+              .style('border-color', palette[seg.gitSignature]?.secondary)
               .text(`${d.user}: ${d.value} Commits`),
           )
           .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
@@ -441,7 +447,13 @@ function generateBars(
 
 function updateBars(
   palette: Palette,
-  data: { user: string; gitSignature: string; value: number; avgCommitsPerWeek: number; segments?: { label: string; value: number }[] }[],
+  data: {
+    user: string;
+    gitSignature: string;
+    value: number;
+    avgCommitsPerWeek: number;
+    segments?: { label: string; gitSignature: string; value: number }[];
+  }[],
   x: d3.ScaleBand<string>,
   y: d3.ScaleLinear<number, number>,
   svgRef: MutableRefObject<null>,

@@ -1,17 +1,17 @@
-import moment from 'moment/moment';
 import chroma from 'chroma-js';
 import _ from 'lodash';
 import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import type { AuthorType } from '../../../../../../types/data/authorType.ts';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import type { SumSettings } from '../settings/settings.tsx';
+import moment from 'moment';
 
 interface ColumnChartData {
   user: string;
   gitSignature: string;
   value: number;
   avgCommitsPerWeek: number;
-  segments?: { label: string; value: number }[];
+  segments?: { label: string; gitSignature: string; value: number }[];
 }
 
 interface Palette {
@@ -30,26 +30,19 @@ export function convertToChartData(
     return { chartData: [], palette: {}, scale: [0, 0] };
   }
 
-  /**
-   * Get time interval and filter out commits not in between the given dates
-   */
   const from = moment(props.parameters.parametersDateRange.from);
   const to = moment(props.parameters.parametersDateRange.to);
 
-  commits = commits.filter((c) => {
+  const filteredCommits = commits.filter((c) => {
     const date = moment(c.date);
-    const afterFrom = date.isSameOrAfter(from);
-    const beforeTo = date.isSameOrBefore(to);
-
-    return afterFrom && beforeTo;
+    return date.isSameOrAfter(from) && date.isSameOrBefore(to);
   });
 
   /**
    * Count the number of commits per user
    */
-  const combinedGroups = props.settings?.combinedUsers ?? [];
-  const countsByUser = _.countBy(commits, (c) => c.user.gitSignature);
-  const commitsByUser = _.groupBy(commits, (c) => c.user.gitSignature);
+  const countsByUser = _.countBy(filteredCommits, (c) => c.user.gitSignature);
+  const commitsByUser = _.groupBy(filteredCommits, (c) => c.user.gitSignature);
 
   /**
    * Calculate the average commits per week
@@ -70,11 +63,7 @@ export function convertToChartData(
    */
   const chartData: ColumnChartData[] = [];
   const palette: Palette = {};
-
-  /**
-   * Add the data for each author
-   */
-  const selectedIds = new Set<string>();
+  const parentAuthors = props.authorList.filter((a) => a.parent === -1 && a.selected);
   const knownIds = new Set(props.authorList.map((a) => a.user.id));
 
   function trimLabel(label: string): string {
@@ -96,54 +85,42 @@ export function convertToChartData(
     return result.slice(0, maxLength) + '...';
   }
 
-  props.authorList.forEach((author: AuthorType) => {
-    if (!author.selected) return;
+  parentAuthors.forEach((parentAuthor: AuthorType) => {
+    const mergedAuthors = [parentAuthor, ...props.authorList.filter((a) => a.parent === parentAuthor.id)];
+    mergedAuthors.forEach((a) => {
+      palette[a.user.gitSignature] = {
+        main: chroma(a.color.main).hex(),
+        secondary: chroma(a.color.secondary).hex(),
+      };
+    });
+    const signatures = mergedAuthors.map((a) => a.user.gitSignature);
 
-    const label = trimLabel(author.user.gitSignature);
-    const total = countsByUser[author.user.gitSignature] ?? 0;
+    const total = _.sumBy(signatures, (sig) => countsByUser[sig] ?? 0);
+    const mergedCommits = _.flatMap(signatures, (sig) => commitsByUser[sig] ?? []);
 
-    selectedIds.add(author.user.id);
-
-    palette[author.user.gitSignature] = {
-      main: chroma(author.color.main).hex(),
-      secondary: chroma(author.color.secondary).hex(),
-    };
-
-    const isGrouped = combinedGroups.some((group) => group.includes(author.user.gitSignature));
-    if (isGrouped) return;
+    const label = trimLabel(parentAuthor.user.gitSignature);
 
     chartData.push({
       user: label,
-      gitSignature: author.user.gitSignature,
+      gitSignature: parentAuthor.user.gitSignature,
       value: total,
-      avgCommitsPerWeek: avgCommitsPerWeek(commitsByUser[author.user.gitSignature] ?? []),
+      avgCommitsPerWeek: avgCommitsPerWeek(mergedCommits),
+      segments:
+        mergedAuthors.length > 1
+          ? mergedAuthors.map((a) => ({
+              label: trimLabel(a.user.gitSignature),
+              gitSignature: a.user.gitSignature,
+              value: countsByUser[a.user.gitSignature] ?? 0,
+            }))
+          : undefined,
     });
-  });
-
-  combinedGroups.forEach((group) => {
-    const activeSegs = group.filter((sig) => props.authorList.find((a) => a.user.gitSignature === sig && a.selected));
-
-    if (activeSegs.length < 2) return;
-
-    const value = _.sumBy(activeSegs, (sig) => countsByUser[sig] ?? 0);
-    if (value === 0) return;
-
-    const label = group.join(' + ');
-    const commitsByGroup = _.flatMap(activeSegs, (sig) => commitsByUser[sig] ?? []);
-
-    const segments = activeSegs.map((sig) => ({
-      label: sig,
-      value: countsByUser[sig] ?? 0,
-    }));
-
-    chartData.push({ user: label, gitSignature: label, value, avgCommitsPerWeek: avgCommitsPerWeek(commitsByGroup), segments });
   });
 
   /**
    *  optional: sum up commits from unknown users
    */
   if (props.settings.showOther) {
-    const unknown = commits.filter((c) => !knownIds.has(c.user.id));
+    const unknown = filteredCommits.filter((c) => !knownIds.has(c.user.id));
     if (unknown.length > 0) {
       chartData.push({
         user: 'others',
