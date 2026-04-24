@@ -40,7 +40,8 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
   const infoRef = useRef<HTMLDivElement | null>(null);
   const boundsWidth = width - MARGIN.right - MARGIN.left;
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
-  const MAX_CHARS = 20; // Maximum characters for x-axis labels
+  const MAX_CHARS = 15;
+  const [yDomain, setYDomain] = useState<[number, number] | null>(null);
 
   //Create array with users that are visible on zoom, otherwise when opening the infobox it zooms out
   const [visibleUsers, setVisibleUsers] = useState<string[]>([]);
@@ -81,13 +82,10 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
   const yScale = useMemo(() => {
     const max = scale[1] ?? 0;
     const paddedMax = max === 0 ? 1 : max * 1.1;
+    const domain = yDomain ?? [0, paddedMax || 1];
 
-    return d3
-      .scaleLinear()
-      .domain([0, paddedMax || 1])
-      .nice()
-      .range([boundsHeight, 0]);
-  }, [boundsHeight, scale]);
+    return d3.scaleLinear().domain(domain).nice().range([boundsHeight, 0]);
+  }, [boundsHeight, scale, yDomain]);
 
   // X axis
   const xScale = useMemo(() => {
@@ -114,7 +112,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
   }, [info]);
 
   const brush = d3
-    .brushX()
+    .brush()
     .extent([
       [0, 0],
       [boundsWidth, boundsHeight],
@@ -130,29 +128,51 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
         }
         setIsZoomed(false);
         setVisibleUsers(allUsers);
+        setYDomain(null);
       } else {
+        const [[x0, y0], [x1, y1]] = extent;
         const selectedUsers = allUsers.filter((u) => {
-          const x0 = xScale(u)!;
-          const x1 = x0 + xScale.bandwidth();
-          return x1 >= extent[0] && x0 <= extent[1];
+          const bandX = xScale(u);
+          if (bandX === null || bandX === undefined) {
+            return false;
+          }
+
+          const bandStart = bandX;
+          const bandEnd = bandX + xScale.bandwidth();
+          return bandEnd >= x0 && bandStart <= x1;
         });
+
+        const newYMax = yScale.invert(y0);
+        const newYMin = yScale.invert(y1);
+
         setIsZoomed(true);
         if (selectedUsers.length) {
           setVisibleUsers(selectedUsers);
         }
+        setYDomain([newYMin, newYMax]);
+        setIsZoomed(true);
       }
 
       //Needed to fix the brush being called endlessly leading to a stack overflow
       if (extent) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
-
         svgElement.select('.brush').call(brush.move, null);
       }
       // d3/typescript sometimes does weird things and throws an error where no error is.
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
+
       svgElement.select('.xAxis').transition().duration(1000).call(d3.axisBottom(xScale).tickFormat(ellipsis));
+
+      svgElement
+        .select('.yAxis')
+        .transition()
+        .duration(1000)
+        // d3/typescript sometimes does weird things and throws an error where no error is.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        .call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format('d')));
 
       if (settings.showMean) {
         svgElement.selectAll('.meanLine').remove();
@@ -334,6 +354,7 @@ function generateBars(
   const svg = d3.select(svgRef.current);
   const barWidth = x.bandwidth() / 2;
   const barOffset = x.bandwidth() / 4;
+  const xBar = y(y.domain()[0]);
 
   const bars = svg
     .selectAll('.bar.main')
@@ -343,7 +364,7 @@ function generateBars(
     .attr('class', 'bar main')
     .attr('x', (d) => x(d.user)! + barOffset)
     .attr('width', barWidth)
-    .attr('y', y(0))
+    .attr('y', xBar)
     .attr('height', 0)
     .attr('fill', (d) => palette[d.gitSignature]?.main)
     .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
@@ -415,7 +436,7 @@ function generateBars(
     .transition()
     .duration(600)
     .attr('y', (d) => y(d.value))
-    .attr('height', (d) => y(0) - y(d.value));
+    .attr('height', (d) => Math.max(0, xBar - y(d.value)));
 }
 
 function updateBars(
@@ -430,6 +451,7 @@ function updateBars(
   const svg = d3.select(svgRef.current);
   const barWidth = x.bandwidth() / 2;
   const barOffset = x.bandwidth() / 4;
+  const xBar = y(y.domain()[0]);
 
   const zoomedBars = svg
     .selectAll<SVGRectElement, ColumnChartData>('.bar.main')
@@ -440,14 +462,14 @@ function updateBars(
           .append('rect')
           .attr('class', 'bar main')
           .attr('x', (d) => x(d.user)! + barOffset)
-          .attr('y', y(0))
+          .attr('y', xBar)
           .attr('width', barWidth)
           .attr('height', 0)
           .attr('fill', (d) => palette[d.gitSignature]?.main)
           .transition()
           .duration(600)
           .attr('y', (d) => y(d.value))
-          .attr('height', (d) => y(0) - y(d.value)),
+          .attr('height', (d) => Math.max(0, xBar - y(d.value))),
 
       (update) =>
         update
@@ -456,9 +478,9 @@ function updateBars(
           .attr('x', (d) => x(d.user)! + barOffset)
           .attr('y', (d) => y(d.value))
           .attr('width', barWidth)
-          .attr('height', (d) => y(0) - y(d.value)),
+          .attr('height', (d) => Math.max(0, xBar - y(d.value))),
 
-      (exit) => exit.transition().duration(200).attr('y', y(0)).attr('height', 0).remove(),
+      (exit) => exit.transition().duration(200).attr('y', xBar).attr('height', 0).remove(),
     );
 
   zoomedBars
