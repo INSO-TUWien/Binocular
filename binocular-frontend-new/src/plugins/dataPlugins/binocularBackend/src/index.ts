@@ -13,7 +13,6 @@ import Accounts from './collections/accounts.ts';
 import MergeRequests from './collections/mergeRequests.ts';
 import AccountsIssues from './collections/accounts-issues.ts';
 import CommitsFiles from './collections/commitsFiles.ts';
-import Export from './export.ts';
 
 class BinocularBackend implements DataPlugin {
   public name = 'Binocular Backend';
@@ -38,7 +37,6 @@ class BinocularBackend implements DataPlugin {
   public commitByFile;
   public accountsIssues;
   public branches;
-  public export_temp;
 
   constructor() {
     this.commits = new Commits('/graphQl');
@@ -53,7 +51,6 @@ class BinocularBackend implements DataPlugin {
     this.branches = new Branches('/graphQl');
     this.accountsIssues = new AccountsIssues('graphQl');
     this.commitByFile = new CommitsFiles('/graphQl');
-    this.export_temp = new Export('/graphQl');
   }
 
   public async init(

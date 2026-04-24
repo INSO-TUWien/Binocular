@@ -91,6 +91,6 @@ export class WorkerPouchDB {
   }
 
   export() {
-    return this.send('downloadDB');
+    return this.send('export');
   }
 }

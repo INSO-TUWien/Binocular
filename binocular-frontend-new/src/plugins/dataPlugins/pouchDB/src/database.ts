@@ -160,42 +160,28 @@ export default class Database {
     });
   }
 
-  async export(metadata: MetadataType | undefined) {
+  async export() {
     const edges = await this.edgeStore.export();
     const docs = await this.documentStore.export();
-    const zip = await new JSZip();
-    const db_export = zip.folder('db_export');
-    db_export!.file('metadata.json', metadata ? JSON.stringify(metadata) : '');
-    let data: object[] = [];
-    let collectionName = docs.rows[0].id.split('/')[0];
+
+    let collectionName = '';
+    const data: { [id: string]: JSONObject[] } = {};
+
     docs.rows.forEach((row: { id: string; doc: JSONObject }) => {
-      if (row.id.split('/')[0] == collectionName) data.push(row.doc);
+      if (row.id.split('/')[0] == collectionName) data[collectionName].push(row.doc);
       else {
-        db_export!.file(collectionName + '.json', JSON.stringify(data));
-        data = [];
         collectionName = row.id.split('/')[0];
-        data.push(row.doc);
+        data[collectionName] = [row.doc];
       }
     });
+
     edges.rows.forEach((row: { id: string; doc: JSONObject }) => {
-      if (row.id.startsWith(collectionName)) data.push(row.doc);
+      if (row.id.split('/')[0] == collectionName) data[collectionName].push(row.doc);
       else {
-        db_export!.file(collectionName + '.json', JSON.stringify(data));
-        data = [];
         collectionName = row.id.split('/')[0];
-        data.push(row.doc);
+        data[collectionName] = [row.doc];
       }
     });
-    db_export!.file(collectionName + '.json', JSON.stringify(data));
-    zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } }).then((file) => {
-      const a = document.createElement('a');
-      document.body.appendChild(a);
-      a.style = 'display: none';
-      const url = window.URL.createObjectURL(file);
-      a.href = url;
-      a.download = 'db_export.zip';
-      a.click();
-      window.URL.revokeObjectURL(url);
-    });
+    return data;
   }
 }

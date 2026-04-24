@@ -2,7 +2,7 @@ import type { DataPluginGeneral } from './dataPluginInterfaces/dataPluginGeneral
 import type { DataPluginCommits } from './dataPluginInterfaces/dataPluginCommits.ts';
 import type { DataPluginUsers } from './dataPluginInterfaces/dataPluginUsers.ts';
 import type { DataPluginBuilds } from './dataPluginInterfaces/dataPluginBuilds.ts';
-import type { DataPluginFiles, FileConfig } from './dataPluginInterfaces/dataPluginFiles.ts';
+import type { DataPluginFiles, FileConfig, JSONObject } from './dataPluginInterfaces/dataPluginFiles.ts';
 import type { ProgressUpdateConfig } from '../../types/settings/databaseSettingsType.ts';
 import type { DataPluginIssues } from './dataPluginInterfaces/dataPluginIssues.ts';
 import type { DataPluginNotes } from './dataPluginInterfaces/dataPluginNotes.ts';
@@ -39,5 +39,5 @@ export interface DataPlugin {
     setUploadInfo: (message: string) => void | undefined,
   ) => Promise<MetadataType | undefined>;
   clearRemains: () => Promise<void>;
-  export?: (metadata: MetadataType | undefined) => void;
+  export?: () => Promise<{ [id: string]: JSONObject[] }>;
 }

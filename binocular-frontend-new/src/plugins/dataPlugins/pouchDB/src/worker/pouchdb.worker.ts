@@ -55,7 +55,7 @@ self.onmessage = async (event) => {
         result = await db.createIndex(options);
         break;
 
-      case 'downloadDB':
+      case 'export':
         result = await db.allDocs({ include_docs: true, attachments: true });
         break;
       default:

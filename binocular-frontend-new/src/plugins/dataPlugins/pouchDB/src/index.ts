@@ -4,7 +4,7 @@ import Users from './collections/users.ts';
 import General from './general.ts';
 import Files from './collections/files.ts';
 import Database from './database.ts';
-import type { FileConfig, JSONObject } from '../../../interfaces/dataPluginInterfaces/dataPluginFiles.ts';
+import type { FileConfig } from '../../../interfaces/dataPluginInterfaces/dataPluginFiles.ts';
 import type { ProgressUpdateConfig } from '../../../../types/settings/databaseSettingsType.ts';
 import Builds from './collections/builds.ts';
 import Notes from './collections/notes.ts';
@@ -14,8 +14,6 @@ import Branches from './collections/branches.ts';
 import MergeRequests from './collections/mergeRequests.ts';
 import AccountsIssues from './collections/accounts-issues';
 import CommitsFiles from './collections/commitsFiles';
-import type { MetadataType } from '../../../../types/data/MetadataType.ts';
-import { findAll } from './utils.ts';
 
 class PouchDb implements DataPlugin {
   public name = 'PouchDb';
@@ -90,13 +88,8 @@ class PouchDb implements DataPlugin {
     await this.database.delete();
   }
 
-  public async export(metadata: MetadataType | undefined) {
-    return this.database.export(metadata);
-  }
-
-  public async getCollection(name: string): Promise<JSONObject[]> {
-    if (name.includes('-')) return (await findAll(this.database.edgeStore, name)).docs;
-    else return (await findAll(this.database.documentStore, name)).docs;
+  public async export() {
+    return this.database.export();
   }
 }
 

@@ -9,6 +9,7 @@ import { removeFileList } from '../../../redux/reducer/data/filesReducer.ts';
 import { store as globalStore } from '../../../redux';
 import { updateDashboardItem } from '../../../redux/reducer/general/dashboardReducer.ts';
 import type { DashboardItemType } from '../../../types/general/dashboardItemType.ts';
+import { downloadExportCompressed } from '../../../plugins/utils/export.ts';
 
 function reassignDashboardItems(deletedId: number) {
   const dashboardItems: DashboardItemType[] = globalStore.getState().dashboard.dashboardItems;
@@ -57,7 +58,9 @@ function ConnectedDataPlugins(props: { interactable: boolean }) {
                           <a
                             onClick={() => {
                               DataPluginStorage.getDataPlugin(settingsDatabaseDataPlugin).then((dataPlugin: DataPlugin | undefined) => {
-                                if (dataPlugin && dataPlugin.export) dataPlugin.export(settingsDatabaseDataPlugin.metadata);
+                                if (dataPlugin && dataPlugin.export) {
+                                  dataPlugin.export().then((data) => downloadExportCompressed(data, settingsDatabaseDataPlugin.metadata));
+                                }
                               });
                             }}>
                             Download
