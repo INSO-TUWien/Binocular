@@ -6,7 +6,8 @@ function Help() {
       <p>
         The sum commits visualization is designed to show the amount of commits that were pushed to the repository by the individual authors
         and, optionally, external authors. It displays the absolute amount of all commits per author per time period, allowing for easy
-        tracking of pushed code.
+        tracking of pushed code. Authors combined in the author list will be displayed as one bar, with multiple colour sections respective
+        to each authors colour.
       </p>
       <h3>Parameters</h3>
       <div>
@@ -18,10 +19,6 @@ function Help() {
           <li>
             <span className={'font-bold'}>Show other authors:</span> Turns displaying of external authors on or off, if any have been added.
             They&#39;re represented by a black bar.
-          </li>
-          <li>
-            <span className={'font-bold'}>Combine users:</span> Combines or uncombines selected users, stacking their respective bars on top
-            of one another and adding the pushed commits together.
           </li>
         </ul>
       </div>
