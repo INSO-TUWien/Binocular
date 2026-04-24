@@ -12,14 +12,28 @@ vi.mock('../../../../utils/dataPluginStorage.ts', () => ({
   },
 }));
 
-function makeStore(exportType: ExportType = ExportType.all, exportSVGData = '<svg></svg>', exportName = 'export', exportLoading = false, exportData = {}, exportDataType = 'json') {
+function makeStore(
+  exportType: ExportType = ExportType.all,
+  exportSVGData = '<svg></svg>',
+  exportName = 'export',
+  exportLoading = false,
+  exportData = {},
+  exportDataType = 'json',
+) {
   return configureStore({
     reducer: { export: ExportReducer, settings: SettingsReducer },
     preloadedState: { export: { exportType, exportSVGData, exportName, exportLoading, exportData, exportDataType } },
   });
 }
 
-function renderDialog(exportType: ExportType = ExportType.all, exportSVGData = '<svg></svg>', exportName = 'export', exportLoading = false, exportData = {}, exportDataType = 'json') {
+function renderDialog(
+  exportType: ExportType = ExportType.all,
+  exportSVGData = '<svg></svg>',
+  exportName = 'export',
+  exportLoading = false,
+  exportData = {},
+  exportDataType = 'json',
+) {
   return render(
     <Provider store={makeStore(exportType, exportSVGData, exportName, exportLoading, exportData, exportDataType)}>
       <ExportDialog />
