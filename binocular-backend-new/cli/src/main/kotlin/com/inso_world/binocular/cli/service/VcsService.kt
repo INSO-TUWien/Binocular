@@ -37,6 +37,7 @@ import kotlin.io.path.Path
 @Service
 class VcsService(
     @Autowired private val repoService: RepositoryService,
+    @Autowired private val lizardService: LizardService,
 ) {
     companion object {
         private val logger by logger()
@@ -58,6 +59,9 @@ class VcsService(
      * @param repoPath Path to the Git repository (can be worktree or .git directory)
      * @param branch Name of the branch to index
      * @param project The project this repository belongs to
+     * @param lizardActive Boolean if lizard should be used or not
+     * @param lizardInclude A string that contains which folders are checked by lizard
+     * @param lizardThreads The number of threads used for lizard
      * @throws CliException if repository operations fail
      * @throws IllegalArgumentException if repoPath is null or branch doesn't exist
      */
@@ -65,6 +69,9 @@ class VcsService(
         repoPath: String?,
         branch: String,
         project: Project,
+        lizardActive: Boolean,
+        lizardInclude: String?,
+        lizardThreads: Int,
     ) {
         logger.trace(">>> indexRepository({}, {}, {})", repoPath, branch, project)
 
@@ -92,7 +99,15 @@ class VcsService(
         logCommitStatistics(commits, branch)
         repoService.addCommits(vcsRepo, commits)
 
+        if(lizardActive) {
+            runLizardWithSettings(repoPath, lizardInclude, lizardThreads)
+        }
+
         logger.trace("<<< indexRepository({}, {}, {})", repoPath, branch, project)
+    }
+
+    private fun runLizardWithSettings(repoPath: String?, lizardInclude: String?, lizardThreads: Int) {
+        lizardService.runLizard(repoPath,lizardInclude,lizardThreads)
     }
 
     /**

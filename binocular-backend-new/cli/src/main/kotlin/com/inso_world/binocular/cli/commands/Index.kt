@@ -73,7 +73,7 @@ open class Index(
             logger.debug("Lizard inactive")
         }
         val project = this.projectService.getOrCreateProject(projectName)
-        vcsService.indexRepository(path.toString(), branchName, project)
+        vcsService.indexRepository(path.toString(), branchName, project, lizardActive, lizardInclude, lizardThreads)
         logger.trace("<<< index($path, $branchName)")
     }
 }
