@@ -4,7 +4,6 @@ import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInter
 import type { AuthorType } from '../../../../../../types/data/authorType.ts';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import type { SumSettings } from '../settings/settings.tsx';
-import moment from 'moment';
 
 interface ColumnChartData {
   user: string;
@@ -30,19 +29,11 @@ export function convertToChartData(
     return { chartData: [], palette: {}, scale: [0, 0] };
   }
 
-  const from = moment(props.parameters.parametersDateRange.from);
-  const to = moment(props.parameters.parametersDateRange.to);
-
-  const filteredCommits = commits.filter((c) => {
-    const date = moment(c.date);
-    return date.isSameOrAfter(from) && date.isSameOrBefore(to);
-  });
-
   /**
    * Count the number of commits per user
    */
-  const countsByUser = _.countBy(filteredCommits, (c) => c.user.gitSignature);
-  const commitsByUser = _.groupBy(filteredCommits, (c) => c.user.gitSignature);
+  const countsByUser = _.countBy(commits, (c) => c.user.gitSignature);
+  const commitsByUser = _.groupBy(commits, (c) => c.user.gitSignature);
 
   /**
    * Calculate the average commits per week
@@ -120,7 +111,7 @@ export function convertToChartData(
    *  optional: sum up commits from unknown users
    */
   if (props.settings.showOther) {
-    const unknown = filteredCommits.filter((c) => !knownIds.has(c.user.id));
+    const unknown = commits.filter((c) => !knownIds.has(c.user.id));
     if (unknown.length > 0) {
       chartData.push({
         user: 'others',
