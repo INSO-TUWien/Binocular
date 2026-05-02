@@ -5,7 +5,6 @@ import { getSVGData } from './utilities/utilities.ts';
 import Reducer from './reducer';
 import Saga from './saga';
 import Help from './help/help.tsx';
-import { convertToChartData } from './utilities/dataConverter.ts';
 import type { DataPluginCommit } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import { VisualizationPluginMetadataCategory } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata';
 import Chart from './chart/chart.tsx';
@@ -15,7 +14,6 @@ const SumCommits: VisualizationPlugin<SumSettings, DataPluginCommit> = {
   chartComponent: Chart,
   settingsComponent: Settings,
   helpComponent: Help,
-  dataConverter: convertToChartData,
   dataConnectionName: 'commits',
   defaultSettings: { showMean: false, showOther: false },
   export: {

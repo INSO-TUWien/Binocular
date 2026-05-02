@@ -6,6 +6,7 @@ import type { SumSettings } from '../settings/settings.tsx';
 import { handlePopoutResizing } from '../../../../../utils/resizing.ts';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginCommits';
+import { convertToChartData } from '../utilities/dataConverter';
 
 export type { ColumnChartData, Palette };
 
@@ -52,14 +53,12 @@ function Chart(props: VisualizationPluginProperties<SumSettings, DataPluginCommi
   // Effect on data change
   useEffect(() => {
     try {
-      if (props.dataConverter) {
-        setCalculating(true);
-        const { chartData, scale, palette } = props.dataConverter(commits, props);
-        setChartData(chartData);
-        setChartScale(scale);
-        setChartPalette(palette);
-        setCalculating(false);
-      }
+      setCalculating(true);
+      const { chartData, scale, palette } = convertToChartData(commits, props);
+      setChartData(chartData);
+      setChartScale(scale);
+      setChartPalette(palette);
+      setCalculating(false);
     } catch (e) {
       console.error(e);
     }
