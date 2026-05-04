@@ -17,8 +17,21 @@ function Help() {
             dashed line.
           </li>
           <li>
-            <span className={'font-bold'}>Show other authors:</span> Turns displaying of external authors on or off, if any have been added.
+            <span className={'font-bold'}>Show other authors:</span> Turns displaying of other authors on or off, if any have been added.
             They&#39;re represented by a black bar.
+          </li>
+        </ul>
+      </div>
+      <h3>Filtering authors</h3>
+      <p>Authors can be filtered with the following two options, defaulting them to 0 shows all authors.</p>
+      <div>
+        <ul className={'list-disc ml-5'}>
+          <li>
+            <span className={'font-bold'}>Minimum Commits:</span> Filters out authors that have less than the set amount of commits.
+          </li>
+          <li>
+            <span className={'font-bold'}>Top N Authors:</span> Filters out all but the top N authors, showing only N authors with the most
+            commits.
           </li>
         </ul>
       </div>
