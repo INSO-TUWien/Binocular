@@ -15,7 +15,7 @@ const SumCommits: VisualizationPlugin<SumSettings, DataPluginCommit> = {
   settingsComponent: Settings,
   helpComponent: Help,
   dataConnectionName: 'commits',
-  defaultSettings: { showMean: false, showOther: false },
+  defaultSettings: { showMean: false, showOther: false, minCommits: 0, topN: 0 },
   export: {
     getSVGData: getSVGData,
   },

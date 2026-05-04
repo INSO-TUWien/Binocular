@@ -126,8 +126,17 @@ export function convertToChartData(
   /**
    * Scale
    */
-  const max = _.max(chartData.map((d) => d.value)) ?? 0;
+  const minCommits =  props.settings.minCommits ?? 0;
+  const topN = props.settings.topN ?? 0;
+
+  let filteredChartData = chartData.filter((d) => d.value >= minCommits).sort((a, b) => b.value - a.value);
+
+  if (topN > 0) {
+    filteredChartData = filteredChartData.slice(0, topN);
+  }
+
+  const max = _.max(filteredChartData.map((d) => d.value)) ?? 0;
   const scale: number[] = [0, max];
 
-  return { chartData, scale, palette };
+  return { chartData: filteredChartData, scale, palette };
 }

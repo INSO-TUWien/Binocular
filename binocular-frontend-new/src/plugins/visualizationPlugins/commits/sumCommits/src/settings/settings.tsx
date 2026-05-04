@@ -3,6 +3,8 @@ import type { DefaultSettings } from '../../../../simpleVisualizationPlugin/src/
 export interface SumSettings extends DefaultSettings {
   showMean: boolean;
   showOther: boolean;
+  minCommits: number;
+  topN: number;
 }
 
 function Settings(props: { settings: SumSettings; setSettings: (newSettings: SumSettings) => void }) {
@@ -40,8 +42,42 @@ function Settings(props: { settings: SumSettings; setSettings: (newSettings: Sum
       </div>
 
       <div className="divider my-0" />
+      <label className="label cursor-pointer">
+        <span className="label-text">Minimum Commits</span>
+        <input
+          type="number"
+          min={0}
+          step={1}
+          className="input input-xs input-bordered w-20"
+          value={props.settings.minCommits}
+          onChange={(event) =>
+            props.setSettings({
+              ...props.settings,
+              minCommits: Math.max(0, Number(event.target.value)),
+            })
+          }
+        />
+      </label>
 
-      <p className="text-xs text-base-content/70">Author merging is handled globally by the sidebar.</p>
+      <label className="label cursor-pointer">
+        <span className="label-text">Top N Authors</span>
+        <input
+          type="number"
+          min={0}
+          step={1}
+          className="input input-xs input-bordered w-20"
+          value={props.settings.topN}
+          onChange={(event) =>
+            props.setSettings({
+              ...props.settings,
+              topN: Math.max(0, Number(event.target.value)),
+            })
+          }
+        />
+        <div className="label">
+          <span className="label-text-alt">Use 0 to show all authors</span>
+        </div>
+      </label>
     </>
   );
 }
