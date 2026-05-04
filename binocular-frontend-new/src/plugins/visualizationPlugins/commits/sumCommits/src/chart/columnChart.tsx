@@ -347,6 +347,14 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
   );
 };
 
+function styleTooltipText(tooltip: d3.Selection<null, unknown, null, undefined>) {
+  return tooltip
+    .style('color', '#ffffff')
+    .style('font-weight', '700')
+    .style('-webkit-text-stroke', '1px #000')
+    .style('paint-order', 'stroke fill');
+}
+
 function generateBars(
   palette: Palette,
   data: {
@@ -379,15 +387,17 @@ function generateBars(
     .attr('height', 0)
     .attr('fill', (d) => palette[d.gitSignature]?.main)
     .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
-    .on('mousemove', (e, d) =>
-      d3
+    .on('mousemove', (e, d) => {
+      const tooltip = d3
         .select(tooltipRef.current)
         .style('top', 20 + e.pageY + 'px')
         .style('left', e.pageX + 'px')
-        .style('background', palette[d.gitSignature]?.secondary)
-        .style('border-color', palette[d.gitSignature]?.secondary)
-        .text(`${d.gitSignature}: ${d.value} Commits`),
-    )
+        .style('background', palette[d.gitSignature]?.main ?? '#ffffff')
+        .style('border-color', palette[d.gitSignature]?.main ?? '#000000')
+        .text(`${d.gitSignature}: ${d.value} Commits`);
+
+      styleTooltipText(tooltip);
+    })
     .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
     .on('mousedown', (e) => e.stopPropagation())
     .on('click', (e, d) => {
@@ -425,15 +435,17 @@ function generateBars(
               avgCommitsPerWeek: d.avgCommitsPerWeek,
             });
           })
-          .on('mousemove', (e) =>
-            d3
+          .on('mousemove', (e) => {
+            const tooltip = d3
               .select(tooltipRef.current)
               .style('top', 20 + e.pageY + 'px')
               .style('left', e.pageX + 'px')
-              .style('background', palette[seg.gitSignature]?.secondary)
-              .style('border-color', palette[seg.gitSignature]?.secondary)
-              .text(`${d.user}: ${d.value} Commits`),
-          )
+              .style('background', palette[seg.gitSignature]?.main ?? '#ffffff')
+              .style('border-color', palette[seg.gitSignature]?.main ?? '#000000')
+              .text(`${seg.label}: ${seg.value} Commits`);
+
+            styleTooltipText(tooltip);
+          })
           .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
           .transition()
           .duration(600)
@@ -502,15 +514,17 @@ function updateBars(
 
   zoomedBars
     .on('mouseover', () => d3.select(tooltipRef.current).style('visibility', 'visible'))
-    .on('mousemove', (e, d) =>
-      d3
+    .on('mousemove', (e, d) => {
+      const tooltip = d3
         .select(tooltipRef.current)
         .style('top', 20 + e.pageY + 'px')
         .style('left', e.pageX + 'px')
-        .style('background', palette[d.gitSignature]?.secondary)
-        .style('border-color', palette[d.gitSignature]?.secondary)
-        .text(`${d.user}: ${d.value} Commits`),
-    )
+        .style('background', palette[d.gitSignature]?.main ?? '#ffffff')
+        .style('border-color', palette[d.gitSignature]?.main ?? '#000000')
+        .text(`${d.user}: ${d.value} Commits`);
+
+      styleTooltipText(tooltip);
+    })
     .on('mouseout', () => d3.select(tooltipRef.current).style('visibility', 'hidden'))
     .on('mousedown', (e) => e.stopPropagation())
     .on('click', (e, d) => {
