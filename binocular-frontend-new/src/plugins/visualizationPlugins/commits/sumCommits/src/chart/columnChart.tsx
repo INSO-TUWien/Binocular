@@ -200,6 +200,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
       .call(d3.axisBottom(xScale).tickFormat(ellipsis))
       .selectAll('text')
       .append('title')
+      .style('font-size', '10px')
       .style('text-anchor', 'middle');
 
     svg
