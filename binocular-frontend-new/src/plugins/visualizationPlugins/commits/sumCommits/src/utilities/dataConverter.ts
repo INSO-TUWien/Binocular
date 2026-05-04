@@ -126,7 +126,7 @@ export function convertToChartData(
   /**
    * Scale
    */
-  const minCommits =  props.settings.minCommits ?? 0;
+  const minCommits = props.settings.minCommits ?? 0;
   const topN = props.settings.topN ?? 0;
 
   let filteredChartData = chartData.filter((d) => d.value >= minCommits).sort((a, b) => b.value - a.value);

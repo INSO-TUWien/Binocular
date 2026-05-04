@@ -3,7 +3,7 @@ import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'rea
 import * as d3 from 'd3';
 import type { SumSettings } from '../settings/settings';
 
-const MARGIN = { top: 30, right: 30, bottom: 50, left: 50 };
+const MARGIN = { top: 30, right: 30, bottom: 70, left: 50 };
 
 export interface Palette {
   [signature: string]: { main: string; secondary: string };
@@ -40,13 +40,13 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
   const infoRef = useRef<HTMLDivElement | null>(null);
   const boundsWidth = width - MARGIN.right - MARGIN.left;
   const boundsHeight = height - MARGIN.top - MARGIN.bottom;
-  const MAX_CHARS = 15;
   const [yDomain, setYDomain] = useState<[number, number] | null>(null);
 
   //Create array with users that are visible on zoom, otherwise when opening the infobox it zooms out
   const [visibleUsers, setVisibleUsers] = useState<string[]>([]);
   const [isZoomed, setIsZoomed] = useState(false);
   const allUsers = useMemo(() => data.map((d) => d.user), [data]);
+  const MAX_CHARS = visibleUsers.length > 20 ? 10 : 15;
 
   //Create userdata for the infobox (sum/diff commits)
   const [compareUser, setCompareUser] = useState<string>('');
@@ -199,9 +199,13 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
       .attr('transform', `translate(0,${boundsHeight})`)
       .call(d3.axisBottom(xScale).tickFormat(ellipsis))
       .selectAll('text')
-      .append('title')
       .style('font-size', '10px')
-      .style('text-anchor', 'middle');
+      .style('text-anchor', 'end')
+      .attr('transform', 'rotate(-35)')
+      .attr('dx', '-0.4em')
+      .attr('dy', '0.6em')
+      .append('title')
+      .text((d) => String(d));
 
     svg
       .append('g')
