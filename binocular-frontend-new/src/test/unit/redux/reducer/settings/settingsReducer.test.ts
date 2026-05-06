@@ -2,9 +2,16 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 vi.mock('distinct-colors', () => ({
   default: vi.fn(() =>
-    Array.from({ length: 100 }, (_, i) => ({
-      hex: () => `#${String(i).padStart(6, '0')}`,
-    })),
+    Array.from({ length: 10 }, (_, i) => {
+      const color = {
+        hex: () => `#${String(i).padStart(6, '0')}`,
+        get: () => 0.5,
+        set: function () {
+          return this;
+        },
+      };
+      return color;
+    }),
   ),
 }));
 
