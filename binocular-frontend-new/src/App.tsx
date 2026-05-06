@@ -16,6 +16,7 @@ import ExportGray from './assets/export_gray.svg';
 import { type AppDispatch, type RootState, useAppDispatch } from './redux';
 import { useSelector } from 'react-redux';
 import { setParametersDateRange, setParametersGeneral } from './redux/reducer/parameters/parametersReducer.ts';
+import { recalculateDataPluginColors } from './redux/reducer/settings/settingsReducer.ts';
 import SprintView from './components/tabs/sprints/sprintView/sprintView.tsx';
 import AddSprint from './components/tabs/sprints/addSprint/addSprint.tsx';
 import { ExportType, setExportType } from './redux/reducer/export/exportReducer.ts';
@@ -96,6 +97,7 @@ function App() {
             onChange={(theme: string) => {
               localStorage.setItem('theme', theme);
               setTheme(theme);
+              dispatch(recalculateDataPluginColors(theme));
             }}></TabControllerButtonThemeSwitch>
           <TabControllerButton
             onClick={() => {

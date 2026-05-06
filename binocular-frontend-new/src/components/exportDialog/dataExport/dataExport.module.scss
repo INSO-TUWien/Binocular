@@ -3,26 +3,6 @@
   overflow: scroll;
 }
 
-.previewTable {
-}
-
-.previewTableCell {
-  border: 1px solid lightgrey;
-}
-
-.previewTableHeader {
-}
-
-.previewTableHeaderEven {
-  border: 1px solid lightgrey;
-  background: #eeeeee;
-}
-
-.previewTableHeaderOdd {
-  border: 1px solid lightgrey;
-  background: #cccccc;
-}
-
 .chartContainer {
   position: relative;
   height: 100%;
@@ -31,15 +11,17 @@
 
   h1 {
     font-weight: bold;
-    font-size: 1.5em;
+    font-size: 1.1em;
     margin-bottom: 0.5rem;
     margin-top: 1rem;
+    text-decoration: none;
   }
 
   h2 {
     font-weight: bold;
     font-size: 1.1em;
     margin-bottom: 0.5rem;
+    text-align: center;
   }
 }
 

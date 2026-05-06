@@ -13,7 +13,7 @@ function DataPluginQuickSelect(props: {
     <>
       <select
         className={'select select-bordered w-full max-w-xs'}
-        style={{ background: props.selected ? getHueFromRGBA(props.selected.color, theme) : 'white' }}
+        style={{ background: props.selected?.color ? getHueFromRGBA(props.selected.color, theme) : 'white' }}
         disabled={currentDataPlugins.length === 0}
         value={props.selected ? props.selected.id : 0}
         onChange={(e) => {
