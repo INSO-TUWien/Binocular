@@ -106,8 +106,16 @@ class VcsService(
         logger.trace("<<< indexRepository({}, {}, {})", repoPath, branch, project)
     }
 
+    /**
+     * First removes the paths that do not exist in the folder from the list for lizard
+     * Afterwards runs lizard on the given paths that do exist in the project
+     */
     private fun runLizardWithSettings(repoPath: String?, lizardInclude: String?, lizardThreads: Int) {
-        lizardService.runLizard(repoPath,lizardInclude,lizardThreads)
+
+        val lizardIncludeCleaned = lizardService.removeNonexistendPaths(repoPath,lizardInclude)
+
+        lizardService.runLizard(repoPath,lizardIncludeCleaned,lizardThreads)
+
     }
 
     /**

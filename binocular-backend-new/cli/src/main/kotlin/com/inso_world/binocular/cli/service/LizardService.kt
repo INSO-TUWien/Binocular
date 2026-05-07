@@ -32,29 +32,41 @@ class LizardService()
         private val logger by logger()
     }
 
-    fun runLizard(
+    fun removeNonexistendPaths(
         repoPath: String?,
         lizardInclude: String?,
-        threads: Int,
-    ){
-        val normalizedRepoPath = Path.of(repoPath).toRealPath().toString().replace("\\", "/") //converts windows paths into a normalized path
-
+    ): List<String> {
         val listOfPaths  = lizardInclude?.split(",")?.map{it.trim()}?.filter{it.isNotEmpty()}?:listOf("backend/src", "frontend/src")
 
-        listOfPaths.forEach { includePath->
+        val includeListOfPathsCleaned = mutableListOf<String>()
 
-            val safeFileEnding = includePath.replace("\\", "_").replace("/", "_")
+        listOfPaths.forEach { includePath ->
 
-            val outputFileName = "analysis_$safeFileEnding.csv"
+            val normalizedIncludePath = includePath.replace("\\", "/")
 
-            val normalizedIncludePath = includePath.replace("\\", "/") //converts windows paths into a normalized path
+            val includePathCleaned = Path.of(repoPath, normalizedIncludePath).normalize().toAbsolutePath()
 
-            val includePathReal = Path.of(repoPath, normalizedIncludePath).normalize().toAbsolutePath()
-
-            if (!includePathReal.toFile().isDirectory) {                                                       //Exists so that folders that do not exist are skipped, otherwhise new folders would be created
-                logger.warn("Skipping Lizard path because it is not a directory: {}", includePathReal)
+            if (!includePathCleaned.toFile().isDirectory) {
+                logger.warn("Skipping Lizard path because it is not a directory: {}", includePathCleaned)
                 return@forEach
             }
+            includeListOfPathsCleaned.add(normalizedIncludePath)
+        }
+        return includeListOfPathsCleaned
+    }
+
+    fun runLizard(
+        repoPath: String?,
+        lizardInclude: List<String>,
+        threads: Int,
+    ){
+        val normalizedRepoPath = Path.of(repoPath).toRealPath().toString().replace("\\", "/")
+
+        lizardInclude.forEach { includePath->
+
+            val safeFileEnding = includePath.replace("/", "_")
+
+            val outputFileName = "analysis_$safeFileEnding.csv"
 
             val lizardCommand = mutableListOf(
                 "docker",
