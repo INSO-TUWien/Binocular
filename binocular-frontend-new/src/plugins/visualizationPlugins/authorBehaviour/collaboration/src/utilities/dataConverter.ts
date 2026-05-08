@@ -1,5 +1,7 @@
 import type { DataPluginAccountIssues } from '../../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts';
+import type { DataPluginAccountMergeRequests } from '../../../../../interfaces/dataPluginInterfaces/dataPluginAccountsMergeRequests.ts';
 import type { DataPluginIssue } from '../../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import type { DataPluginMergeRequest } from '../../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests.ts';
 import type { CollaborationSettings } from '../settings/settings.tsx';
 import type { NodeType, LinkType } from '../chart/networkChart.tsx';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties';
@@ -10,31 +12,59 @@ const DUMMY_CHART_DATA = [] as unknown as ChartData[];
 const DUMMY_SCALE = [] as number[];
 const DUMMY_PALETTE = {} as unknown as Palette;
 
-/**
- * Convert accounts and shared issues into graph data consisting of nodes and links.
- * Filters links by issue count, then assigns connected-component groups.
- */
-export function convertIssuesToGraphData(
-  accounts: DataPluginAccountIssues[],
+type Account = {
+  id: string;
+  login: string;
+  name: string;
+  avatarUrl: string;
+  url: string;
+  issues: DataPluginIssue[];
+  mergeRequests: DataPluginMergeRequest[];
+};
+
+function mergeAccounts(issueAccounts: DataPluginAccountIssues[], mrAccounts: DataPluginAccountMergeRequests[]): Account[] {
+  const map = new Map<string, Account>();
+  issueAccounts.forEach((a) =>
+    map.set(a.id, { id: a.id, login: a.login, name: a.name, avatarUrl: a.avatarUrl, url: a.url, issues: a.issues, mergeRequests: [] }),
+  );
+  mrAccounts.forEach((a) => {
+    const existing = map.get(a.id);
+    if (existing) {
+      existing.mergeRequests = a.mergeRequests;
+    } else {
+      map.set(a.id, {
+        id: a.id,
+        login: a.login,
+        name: a.name,
+        avatarUrl: a.avatarUrl,
+        url: a.url,
+        issues: [],
+        mergeRequests: a.mergeRequests,
+      });
+    }
+  });
+  return Array.from(map.values());
+}
+
+export function convertToGraphData(
+  issueAccounts: DataPluginAccountIssues[],
+  mrAccounts: DataPluginAccountMergeRequests[],
   settings: CollaborationSettings,
 ): {
-  nodes: {
-    id: string;
-    group: string;
-    url: string;
-    name: string;
-    avatarUrl: string;
-  }[];
+  nodes: { id: string; group: string; url: string; name: string; avatarUrl: string }[];
   links: LinkType[];
   chartData: ChartData[];
   scale: number[];
   palette: Palette;
 } {
   const { minEdgeValue, maxEdgeValue } = settings;
-  const issueAccountMap = buildIssueMap(accounts);
+  const accounts = mergeAccounts(issueAccounts, mrAccounts);
   const nodeMap = initializeNodeMap(accounts);
-  const allLinks = buildLinks(issueAccountMap);
 
+  const issueMap = buildParticipantMap(accounts, (a) => a.issues);
+  const mrMap = buildParticipantMap(accounts, (a) => a.mergeRequests);
+
+  const allLinks = buildLinks(issueMap, mrMap);
   const filteredLinks = allLinks.filter(({ value }) => value >= minEdgeValue && value <= maxEdgeValue);
 
   const adjacencyMap = buildAdjacencyMap(nodeMap, filteredLinks);
@@ -54,18 +84,19 @@ export function convertIssuesToGraphData(
 /**
  * For each issue across all accounts, collect the set of participating account IDs
  */
-function buildIssueMap(accounts: DataPluginAccountIssues[]): Map<string, { participants: Set<string>; issue: DataPluginIssue }> {
-  const map = new Map<string, { participants: Set<string>; issue: DataPluginIssue }>();
+function buildParticipantMap<T extends DataPluginIssue | DataPluginMergeRequest>(
+  accounts: Account[],
+  getItems: (account: Account) => T[],
+): Map<string, { participants: Set<string>; item: T }> {
+  const map = new Map<string, { participants: Set<string>; item: T }>();
   for (const account of accounts) {
-    for (const issue of account.issues) {
-      const entry = map.get(issue.id);
+    for (const item of getItems(account)) {
+      const entry = map.get(item.id);
       if (entry) {
-        entry!.participants.add(account.id);
+        entry.participants.add(account.id);
       } else {
-        map.set(issue.id, {
-          participants: new Set([account.id]),
-          issue,
-        });
+        const participants = new Set<string>([account.id]);
+        map.set(item.id, { participants, item });
       }
     }
   }
@@ -75,16 +106,10 @@ function buildIssueMap(accounts: DataPluginAccountIssues[]): Map<string, { parti
 /**
  * Initialize a map from account ID to GraphNode with default group "unassigned"
  */
-function initializeNodeMap(accounts: DataPluginAccountIssues[]): Map<string, NodeType> {
+function initializeNodeMap(accounts: Account[]): Map<string, NodeType> {
   const map = new Map<string, NodeType>();
-  accounts.forEach((account) => {
-    map.set(account.id, {
-      id: account.id,
-      group: 'unassigned',
-      url: account.url,
-      avatarUrl: account.avatarUrl,
-      name: account.name,
-    });
+  accounts.forEach((a) => {
+    map.set(a.id, { id: a.id, group: 'unassigned', url: a.url, avatarUrl: a.avatarUrl, name: a.name });
   });
   return map;
 }
@@ -92,28 +117,34 @@ function initializeNodeMap(accounts: DataPluginAccountIssues[]): Map<string, Nod
 /**
  * Builds an array of all links between the given participants according to shared issues
  */
-function buildLinks(issueMap: Map<string, { participants: Set<string>; issue: DataPluginIssue }>): LinkType[] {
+function buildLinks(
+  issueMap: Map<string, { participants: Set<string>; item: DataPluginIssue }>,
+  mrMap: Map<string, { participants: Set<string>; item: DataPluginMergeRequest }>,
+): LinkType[] {
   const linkMap = new Map<string, LinkType>();
-  for (const { participants, issue } of issueMap.values()) {
-    const ids = Array.from(participants).sort();
-    for (let i = 0; i < ids.length; i++) {
-      for (let j = i + 1; j < ids.length; j++) {
-        const [source, target] = [ids[i], ids[j]];
-        const key = `${source}--${target}`;
-        if (linkMap.has(key)) {
-          const existingLink = linkMap.get(key)!;
-          existingLink.value += 1;
-          existingLink.issues.push(issue);
+
+  const addToLink = (ids: string[], issue?: DataPluginIssue, mr?: DataPluginMergeRequest) => {
+    const sorted = Array.from(ids).sort();
+    for (let i = 0; i < sorted.length; i++) {
+      for (let j = i + 1; j < sorted.length; j++) {
+        const key = `${sorted[i]}--${sorted[j]}`;
+        const existing = linkMap.get(key);
+        if (existing) {
+          existing.value += 1;
+          if (issue) existing.issues.push(issue);
+          if (mr) existing.mergeRequests.push(mr);
         } else {
-          linkMap.set(key, {
-            source: source as string,
-            target: target as string,
-            value: 1,
-            issues: [issue],
-          });
+          linkMap.set(key, { source: sorted[i], target: sorted[j], value: 1, issues: issue ? [issue] : [], mergeRequests: mr ? [mr] : [] });
         }
       }
     }
+  };
+
+  for (const { participants, item } of issueMap.values()) {
+    if (participants.size >= 2) addToLink(Array.from(participants), item as DataPluginIssue, undefined);
+  }
+  for (const { participants, item } of mrMap.values()) {
+    if (participants.size >= 2) addToLink(Array.from(participants), undefined, item as DataPluginMergeRequest);
   }
 
   return Array.from(linkMap.values());
@@ -128,8 +159,8 @@ function buildAdjacencyMap(nodeMap: Map<string, NodeType>, links: LinkType[]) {
 
   //populate neighbour sets based on filtered links
   for (const link of links) {
-    const source: string = link.source as string;
-    const target: string = link.target as string;
+    const source = link.source as string;
+    const target = link.target as string;
     adjacency.get(source)!.add(target);
     adjacency.get(target)!.add(source);
   }
@@ -169,4 +200,4 @@ function assignGroups(nodeMap: Map<string, NodeType>, adjacency: Map<string, Set
 export const dataConverter = (
   data: DataPluginAccountIssues[],
   props: VisualizationPluginProperties<CollaborationSettings, DataPluginAccountIssues>,
-) => convertIssuesToGraphData(data, props.settings);
+) => convertToGraphData(data, [], props.settings);

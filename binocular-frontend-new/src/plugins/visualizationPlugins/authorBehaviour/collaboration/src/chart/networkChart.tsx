@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import type { DataPluginIssue } from '../../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import type { DataPluginMergeRequest } from '../../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests.ts';
 
 // Types
 export interface NodeType extends d3.SimulationNodeDatum {
@@ -16,6 +17,7 @@ export interface LinkType extends d3.SimulationLinkDatum<NodeType> {
   target: string | NodeType;
   value: number;
   issues: DataPluginIssue[];
+  mergeRequests: DataPluginMergeRequest[];
 }
 
 type NetworkData = {
@@ -32,6 +34,8 @@ type NetworkChartProps = {
 export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const tooltipElRef = useRef<HTMLDivElement | null>(null);
+  const simulationRef = useRef<d3.Simulation<NodeType, LinkType> | null>(null);
+  const prevDataRef = useRef<NetworkData | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const selectedLinkRef = useRef<LinkType | null>(null);
   const clipId = useId();
@@ -80,6 +84,19 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
 
   //clip avatars to circles
   useEffect(() => {
+    const dataChanged = data !== prevDataRef.current;
+    prevDataRef.current = data;
+
+    if (!dataChanged && simulationRef.current) {
+      // Dimension-only change: update SVG size and center force without full teardown
+      d3.select(svgRef.current).attr('width', width).attr('height', height);
+      (simulationRef.current.force('center') as d3.ForceCenter<NodeType>)?.x(width / 2).y(height / 2);
+      if (simulationRef.current.alpha() < 0.001) {
+        simulationRef.current.alpha(0.3).restart();
+      }
+      return;
+    }
+
     if (!hasData) {
       // nothing to draw; canvas is cleared
       const svg = d3.select(svgRef.current);
@@ -111,6 +128,7 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
     svg.call(zoomBehavior);
 
     const simulation = initializeForceSimulation(data.nodes, data.links, width, height);
+    simulationRef.current = simulation;
 
     const linkSelection = container
       .append('g')
@@ -146,9 +164,7 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
     };
 
     //remove tooltip when click on sth else
-    document.body.addEventListener('click', () => {
-      bodyClick();
-    });
+    document.body.addEventListener('click', bodyClick);
 
     //draw node groups
     const nodeSelection = container
@@ -233,6 +249,7 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
 
     return () => {
       simulation.stop();
+      simulationRef.current = null;
       svg.on('.zoom', null);
       document.body.removeEventListener('click', bodyClick);
     };
@@ -274,22 +291,43 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
       const lineGen = d3.line().curve(d3.curveBasisClosed);
       return lineGen(hull) ?? '';
     }
-  }, [data, width, height, colorScale, clipId, hasData, HULL_RADIUS_OFFSET]);
+  }, [data, width, height, colorScale, clipId, hasData]);
 
   function showLinkTooltip(link: LinkType) {
     if (!tooltipElRef.current) return;
-    const tooltip = d3.select(tooltipElRef.current);
-    const count = link.value;
-    const title = count > 1 ? 'Issues' : 'Issue';
-    const issueList = link.issues
-      .map(
-        (issue) =>
-          `<a href="${issue.webUrl}" target="_blank" style="color:lightblue; text-decoration:none;">
-             • ${issue.title}
-           </a>`,
-      )
-      .join('<br>');
-    tooltip.html(`<strong>${count} shared ${title}:</strong><br>${issueList}`).style('visibility', 'visible');
+
+    const fragment = document.createDocumentFragment();
+
+    const appendItem = (url: string, title: string) => {
+      fragment.appendChild(document.createElement('br'));
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'noopener noreferrer');
+      a.style.color = 'lightblue';
+      a.style.textDecoration = 'none';
+      a.textContent = `• ${title}`;
+      fragment.appendChild(a);
+    };
+
+    if (link.issues.length > 0) {
+      const header = document.createElement('strong');
+      header.textContent = `${link.issues.length} shared ${link.issues.length > 1 ? 'Issues' : 'Issue'}:`;
+      fragment.appendChild(header);
+      link.issues.forEach((issue) => appendItem(issue.webUrl, issue.title));
+    }
+
+    if (link.mergeRequests.length > 0) {
+      if (link.issues.length > 0) fragment.appendChild(document.createElement('br'));
+      const header = document.createElement('strong');
+      header.textContent = `${link.mergeRequests.length} shared ${link.mergeRequests.length > 1 ? 'Merge Requests' : 'Merge Request'}:`;
+      fragment.appendChild(header);
+      link.mergeRequests.forEach((mr) => appendItem(mr.webUrl, mr.title));
+    }
+
+    const el = tooltipElRef.current;
+    el.replaceChildren(fragment);
+    el.style.visibility = 'visible';
   }
 
   function showNodeTooltip(name: string) {
@@ -310,7 +348,7 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
   }
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', width, height }}>
       {!isVisible && (
         <div
           style={{

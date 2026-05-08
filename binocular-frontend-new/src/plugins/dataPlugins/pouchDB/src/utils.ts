@@ -548,6 +548,27 @@ export async function findAllAccountsIssues(database: PouchDB.Database, relation
   return accounts;
 }
 
+export async function findAllAccountsMergeRequests(database: PouchDB.Database, relations: PouchDB.Database) {
+  const users = (await findAll(database, 'users')).docs;
+  const accounts = await findAll(database, 'accounts');
+  const accountsUsersConnection = sortByAttributeString((await findAccountUserConnections(relations)).docs, 'from');
+  const mergeRequests = (await findAll(database, 'mergeRequests')).docs;
+  const accountsMRsConnection = sortByAttributeString((await findAll(relations, 'mergeRequests-accounts')).docs, 'to');
+
+  accounts.docs = await Promise.all(accounts.docs.map((u) => preprocessAccount(u, accountsUsersConnection, users)));
+  accounts.docs.forEach((account) => {
+    account.mergeRequests = [];
+    const relevantMRs = binarySearchArray(accountsMRsConnection, account._id, 'to');
+    relevantMRs.forEach((mrConnection) => {
+      const mr = binarySearch(mergeRequests, mrConnection.from, '_id');
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      if (mr) account.mergeRequests.push(mr);
+    });
+  });
+  return accounts;
+}
+
 // ###################### OTHER ######################
 
 export function findIssue(database: PouchDB.Database, iid: number) {

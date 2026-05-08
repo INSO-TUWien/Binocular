@@ -8,6 +8,7 @@ const aql = arangodb.aql;
 const commitsToUsers = db._collection('commits-users');
 const accountsToUsers = db._collection('accounts-users')
 const issuesToAccounts = db._collection('issues-accounts')
+const mergeRequestsToAccounts = db._collection('mergeRequests-accounts')
 const paginated = require("./paginated.js");
 
 module.exports = new gql.GraphQLObjectType({
@@ -50,6 +51,20 @@ module.exports = new gql.GraphQLObjectType({
               ${args.from ? aql`FILTER DATE_TIMESTAMP(issue.createdAt) >= DATE_TIMESTAMP(${args.from})` : aql``}
               ${args.to   ? aql`FILTER DATE_TIMESTAMP(issue.createdAt) <= DATE_TIMESTAMP(${args.to})` : aql``}
               RETURN issue
+          `).toArray();
+        },
+      },
+      mergeRequests: {
+        type: new gql.GraphQLList(require('./mergeRequest.js')),
+        description: 'Merge requests where this account is an author or assignee',
+        args: { from: { type: Timestamp }, to: { type: Timestamp } },
+        resolve(account, args) {
+          return db._query(aql`
+            FOR mr, edge IN INBOUND ${account} ${mergeRequestsToAccounts}
+              FILTER edge.role IN ["assignees","author","reviewer","commenter"]
+              ${args.from ? aql`FILTER DATE_TIMESTAMP(mr.createdAt) >= DATE_TIMESTAMP(${args.from})` : aql``}
+              ${args.to   ? aql`FILTER DATE_TIMESTAMP(mr.createdAt) <= DATE_TIMESTAMP(${args.to})` : aql``}
+              RETURN mr
           `).toArray();
         },
       },

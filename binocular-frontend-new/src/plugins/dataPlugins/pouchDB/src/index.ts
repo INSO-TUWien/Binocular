@@ -13,6 +13,7 @@ import Accounts from './collections/accounts.ts';
 import Branches from './collections/branches.ts';
 import MergeRequests from './collections/mergeRequests.ts';
 import AccountsIssues from './collections/accounts-issues';
+import AccountsMergeRequests from './collections/accounts-merge-requests';
 import CommitsFiles from './collections/commitsFiles';
 
 class PouchDb implements DataPlugin {
@@ -37,6 +38,7 @@ class PouchDb implements DataPlugin {
   public notes;
   public issues;
   public accountsIssues;
+  public accountsMergeRequests;
   public mergeRequests;
   public commitByFile;
 
@@ -55,6 +57,7 @@ class PouchDb implements DataPlugin {
     this.database = new Database();
     this.branches = new Branches(undefined);
     this.accountsIssues = new AccountsIssues(undefined);
+    this.accountsMergeRequests = new AccountsMergeRequests(undefined);
     this.commitByFile = new CommitsFiles(); // not yet implemented
   }
 
@@ -79,6 +82,7 @@ class PouchDb implements DataPlugin {
       this.files = new Files(this.database);
       this.branches = new Branches(this.database);
       this.accountsIssues = new AccountsIssues(this.database);
+      this.accountsMergeRequests = new AccountsMergeRequests(this.database);
       return metadata || undefined;
     }
     return undefined;

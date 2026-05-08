@@ -12,6 +12,7 @@ import Notes from './collections/notes.ts';
 import Accounts from './collections/accounts.ts';
 import MergeRequests from './collections/mergeRequests.ts';
 import AccountsIssues from './collections/accounts-issues.ts';
+import AccountsMergeRequests from './collections/accounts-merge-requests.ts';
 import CommitsFiles from './collections/commitsFiles.ts';
 
 class BinocularBackend implements DataPlugin {
@@ -36,6 +37,7 @@ class BinocularBackend implements DataPlugin {
   public files;
   public commitByFile;
   public accountsIssues;
+  public accountsMergeRequests;
   public branches;
 
   constructor() {
@@ -49,7 +51,8 @@ class BinocularBackend implements DataPlugin {
     this.general = new General('/graphQl', undefined);
     this.files = new Files('/graphQl');
     this.branches = new Branches('/graphQl');
-    this.accountsIssues = new AccountsIssues('graphQl');
+    this.accountsIssues = new AccountsIssues('/graphQl');
+    this.accountsMergeRequests = new AccountsMergeRequests('/graphQl');
     this.commitByFile = new CommitsFiles('/graphQl');
   }
 
@@ -73,6 +76,7 @@ class BinocularBackend implements DataPlugin {
     this.general = new General(endpoint, progressUpdateConfig);
     this.files = new Files(endpoint);
     this.accountsIssues = new AccountsIssues(endpoint);
+    this.accountsMergeRequests = new AccountsMergeRequests(endpoint);
     this.commitByFile = new CommitsFiles(endpoint);
     return undefined; // TODO when BE provides metadata
   }

@@ -1,53 +1,50 @@
 function Help() {
   return (
     <>
-      <h2>Collaboration Visualization - Help</h2>
+      <h2>Collaboration Visualization</h2>
 
       <p>
-        This view shows how authors work together based on shared issues. Each picture is an author; lines between them mean they worked on
-        the same issue. Thicker lines = more shared work.
+        This view shows collaboration between contributors based on shared issues and merge requests. Two people are connected when they are
+        both linked to the same issue or merge request — as its <strong>author</strong> or as an <strong>assignee</strong>. Enable{' '}
+        <em>Include note authors</em> in settings to also connect people who commented on the same issue or merge request. The more items
+        they share, the thicker the line between them.
       </p>
 
-      <h3>What you’re seeing</h3>
+      <h3>What you&apos;re seeing</h3>
       <ul>
         <li>
-          <strong>Authors:</strong> Avatars you can click to open their profile.
+          <strong>Nodes:</strong> Contributors — click an avatar to open their profile.
         </li>
         <li>
-          <strong>Connections:</strong> Lines showing shared issues.
+          <strong>Lines:</strong> Shared issues or merge requests between two contributors. Hover to see which ones; click to lock the
+          tooltip open with links.
         </li>
         <li>
-          <strong>Groups:</strong> Soft, colored outlines that surround related people.
+          <strong>Colored outlines:</strong> Groups of contributors who are all connected to each other (directly or indirectly).
         </li>
       </ul>
 
       <h3>How to use it</h3>
       <ul>
         <li>
-          <strong>Zoom &amp; Pan:</strong> Scroll to zoom, drag the background to move the view.
+          <strong>Zoom &amp; Pan:</strong> Scroll to zoom, drag the background to pan.
         </li>
         <li>
-          <strong>Drag authors:</strong> Move nodes to untangle or highlight connections.
+          <strong>Drag nodes:</strong> Reposition contributors to untangle overlapping connections.
         </li>
         <li>
-          <strong>Hover:</strong> See names or details about shared issues.
+          <strong>Filter by strength:</strong> Use the settings to set a minimum and maximum number of shared issues, hiding weak or very
+          strong connections.
         </li>
         <li>
-          <strong>Click a connection:</strong> Lock open a tooltip with links to the shared issues.
-        </li>
-        <li>
-          <strong>Filter by collaboration strength:</strong> Use the settings to hide weaker connections and focus on strong ones.
-        </li>
-        <li>
-          <strong>Filter by date:</strong> Limit the graph to issues created or updated within a chosen time range to focus on recent
-          collaboration.
+          <strong>Filter by date:</strong> Limit the graph to issues created within a chosen time range.
         </li>
       </ul>
 
       <h3>Tips</h3>
       <ul>
-        <li>Thicker lines show closer collaboration.</li>
-        <li>Clusters of authors inside one outline usually indicate a sub-team.</li>
+        <li>Contributors with no shared issues in the selected range appear as isolated nodes.</li>
+        <li>Clusters inside one colored outline typically indicate a sub-team or work area.</li>
       </ul>
     </>
   );

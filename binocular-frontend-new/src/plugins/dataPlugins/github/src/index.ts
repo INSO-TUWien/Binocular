@@ -10,6 +10,7 @@ import Accounts from './collections/accounts.ts';
 import Files from './collections/files.ts';
 import CommitByFile from './collections/commitsFiles';
 import AccountsIssues from './collections/accountsIssues';
+import AccountsMergeRequests from './collections/accountsMergeRequests';
 import Branches from './collections/branches';
 
 class Github implements DataPlugin {
@@ -34,6 +35,7 @@ class Github implements DataPlugin {
   public files = Files;
   public commitByFile = CommitByFile;
   public accountsIssues = AccountsIssues;
+  public accountsMergeRequests = AccountsMergeRequests;
   public branches = Branches;
 
   constructor() {

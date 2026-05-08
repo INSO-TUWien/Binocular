@@ -10,6 +10,7 @@ import Accounts from './collections/accounts.ts';
 import Branches from './collections/branches.ts';
 import MergeRequests from './collections/mergeRequests.ts';
 import AccountsIssues from './collections/accounts-issues.ts';
+import AccountsMergeRequests from './collections/accounts-merge-requests.ts';
 import CommitsFiles from './collections/commitsFiles.ts';
 
 class MockData implements DataPlugin {
@@ -30,6 +31,7 @@ class MockData implements DataPlugin {
   public general;
   public files;
   public accountsIssues;
+  public accountsMergeRequests;
   public branches;
   public issues;
   public mergeRequests;
@@ -49,6 +51,7 @@ class MockData implements DataPlugin {
     this.mergeRequests = new MergeRequests();
     this.notes = new Notes();
     this.accountsIssues = new AccountsIssues();
+    this.accountsMergeRequests = new AccountsMergeRequests();
   }
 
   public async init() {

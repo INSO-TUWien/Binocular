@@ -10,6 +10,7 @@ import type { DataPluginAccounts } from './dataPluginInterfaces/dataPluginAccoun
 import type { DataPluginBranches } from './dataPluginInterfaces/dataPluginBranches.ts';
 import type { DataPluginMergeRequests } from './dataPluginInterfaces/dataPluginMergeRequests.ts';
 import type { DataPluginAccountsIssues } from './dataPluginInterfaces/dataPluginAccountsIssues.ts';
+import type { DataPluginAccountsMergeRequests } from './dataPluginInterfaces/dataPluginAccountsMergeRequests.ts';
 import type { DataPluginCommitsFiles } from './dataPluginInterfaces/dataPluginCommitsFiles.ts';
 import type { MetadataType } from '../../types/data/MetadataType.ts';
 
@@ -27,6 +28,7 @@ export interface DataPlugin {
   accounts: DataPluginAccounts;
   files: DataPluginFiles;
   accountsIssues: DataPluginAccountsIssues;
+  accountsMergeRequests: DataPluginAccountsMergeRequests;
   branches: DataPluginBranches;
   capabilities: string[];
   experimental: boolean;
