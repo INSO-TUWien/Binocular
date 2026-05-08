@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
-// These 9 files use the children[1].outerHTML pattern (no optional chaining on index access)
+// These 8 files use the children[1].outerHTML pattern (no optional chaining on index access)
 const childrenIndexPaths = [
-  '../../../../plugins/visualizationPlugins/authorBehaviour/collaboration/src/utilities/utilities',
   '../../../../plugins/visualizationPlugins/authorBehaviour/repositoryActivity/src/utilities/utilities',
   '../../../../plugins/visualizationPlugins/authorBehaviour/timeSpent/src/utilities/utilities',
   '../../../../plugins/visualizationPlugins/builds/builds/src/utilities/utilities',
@@ -13,8 +12,9 @@ const childrenIndexPaths = [
   '../../../../plugins/visualizationPlugins/simpleVisualizationPlugin/src/utilities/utilities',
 ];
 
-// These 2 files use a safer find-SVGElement pattern
+// These 3 files use a safer find-SVGElement pattern
 const svgElementFindPaths = [
+  '../../../../plugins/visualizationPlugins/authorBehaviour/collaboration/src/utilities/utilities',
   '../../../../plugins/visualizationPlugins/expertise/codeExpertise/src/utilities/utilities',
   '../../../../plugins/visualizationPlugins/expertise/knowledgeRadar/src/utilities/utilities',
 ];
