@@ -44,6 +44,7 @@ const DashboardItem = memo(function DashboardItem(props: {
 
   const authorLists = useSelector((state: RootState) => state.authors.authorLists);
   const fileLists = useSelector((state: RootState) => state.files.fileLists);
+  const filesInitialized = useSelector((state: RootState) => state.files.initialized);
   const sprintList = useSelector((state: RootState) => state.sprints.sprintList);
   const availableDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
 
@@ -121,6 +122,7 @@ const DashboardItem = memo(function DashboardItem(props: {
   const [files, setFiles] = useState<FileListElementType[]>([]);
 
   useEffect(() => {
+    if (!filesInitialized) return;
     if (props.item.dataPluginId !== undefined) {
       if (fileLists[props.item.dataPluginId] == undefined) {
         const dataPlugin = availableDataPlugins.filter((dP: DatabaseSettingsDataPluginType) => dP.id === props.item.dataPluginId)[0];
@@ -130,7 +132,7 @@ const DashboardItem = memo(function DashboardItem(props: {
         setFiles(fileLists[props.item.dataPluginId]);
       }
     }
-  }, [availableDataPlugins, fileLists, props.item.dataPluginId]);
+  }, [availableDataPlugins, fileLists, filesInitialized, props.item.dataPluginId]);
   const [settings, setSettingsState] = useState(props.item.settings ?? plugin.defaultSettings);
 
   // Persist settings changes to the dashboard store (and localStorage)

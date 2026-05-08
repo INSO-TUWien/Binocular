@@ -9,6 +9,7 @@ export interface FilesInitialState {
   fileCounts: { [id: number]: number };
   dataPluginId: number | undefined;
   selectedFileTreeElement?: FileTreeElementType;
+  initialized: boolean;
 }
 
 const initialState: FilesInitialState = {
@@ -17,6 +18,7 @@ const initialState: FilesInitialState = {
   fileCounts: {},
   dataPluginId: undefined,
   selectedFileTreeElement: undefined,
+  initialized: false,
 };
 
 export const filesSlice = createSlice({
@@ -25,11 +27,14 @@ export const filesSlice = createSlice({
     return initialState;
   },
   reducers: {
-    loadState: (state, action: PayloadAction<FilesInitialState>) => {
-      state.fileCounts = action.payload.fileCounts;
-      state.fileTrees = action.payload.fileTrees;
-      state.fileLists = action.payload.fileLists;
-      state.dataPluginId = action.payload.dataPluginId;
+    loadState: (state, action: PayloadAction<FilesInitialState | undefined>) => {
+      if (action.payload != undefined) {
+        state.fileCounts = action.payload.fileCounts;
+        state.fileTrees = action.payload.fileTrees;
+        state.fileLists = action.payload.fileLists;
+        state.dataPluginId = action.payload.dataPluginId;
+      }
+      state.initialized = true;
     },
     setFileList: (state, action: PayloadAction<{ dataPluginId: number; fileTree: FileTreeElementType; files: FileListElementType[] }>) => {
       state.fileTrees[action.payload.dataPluginId] = action.payload.fileTree;

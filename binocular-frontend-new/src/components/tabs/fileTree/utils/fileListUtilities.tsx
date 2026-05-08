@@ -19,27 +19,21 @@ try {
   console.log('Could not access OPFS', e);
 }
 
-export function loadFileList(dP: DatabaseSettingsDataPluginType, dispatch: AppDispatch) {
+export function loadFileList(dispatch: AppDispatch) {
   if (fileHandle)
     fileHandle.getFile().then((files) => {
       if (files !== null) {
         files.text().then(
           (list) => {
-            const files = list ? JSON.parse(list) : undefined;
-            if (files && Object.keys(files.fileLists).includes('' + dP.id)) {
-              dispatch(loadState(JSON.parse(list)));
-            } else refreshFileList(dP, dispatch);
+            if (list != '') dispatch(loadState(JSON.parse(list)));
           },
           (error) => {
-            console.log('Could not access files: Reloading list', error);
-            refreshFileList(dP, dispatch);
+            console.log('Could not access files', error);
           },
         );
       }
     });
-  else {
-    refreshFileList(dP, dispatch);
-  }
+  else dispatch(loadState(undefined));
 }
 
 export function refreshFileList(dP: DatabaseSettingsDataPluginType, dispatch: AppDispatch) {

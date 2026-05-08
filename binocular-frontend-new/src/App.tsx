@@ -34,6 +34,7 @@ import OverlayController from './components/overlayController/overlayController.
 import FileSearch from './components/tabs/fileTree/fileSearch/fileSearch.tsx';
 import { TabAlignment } from './types/general/tabType.ts';
 import LayoutSelector from './components/tabs/layouts/layoutSelector/layoutSelector.tsx';
+import { loadFileList } from './components/tabs/fileTree/utils/fileListUtilities.tsx';
 
 function App() {
   // #v-ifdef PRE_CONFIGURE_DB=='pouchdb'
@@ -49,6 +50,7 @@ function App() {
 
   const settingsInitialized = useSelector((state: RootState) => state.settings.initialized);
   const dashboardInitialized = useSelector((state: RootState) => state.dashboard.initialized);
+  const filesInitialized = useSelector((state: RootState) => state.files.initialized);
 
   useEffect(() => {
     setAuthorsDataPlugin(
@@ -87,6 +89,12 @@ function App() {
       setupDialog.showModal();
     }
   }, [settingsInitialized, dashboardInitialized]);
+
+  useEffect(() => {
+    if (!filesInitialized) {
+      loadFileList(dispatch);
+    }
+  }, [filesInitialized]);
 
   return (
     <>

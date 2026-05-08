@@ -17,7 +17,7 @@ import {
   updateFileListElement,
   showFileTreeElementInfo,
 } from '../../../../redux/reducer/data/filesReducer.ts';
-import { loadFileList, refreshFileList } from '../utils/fileListUtilities';
+import { refreshFileList } from '../utils/fileListUtilities';
 
 function FileList(props: { orientation?: string; search: string }) {
   const dispatch: AppDispatch = useAppDispatch();
@@ -29,7 +29,7 @@ function FileList(props: { orientation?: string; search: string }) {
 
   function refreshFileTree(dP?: DatabaseSettingsDataPluginType) {
     if (dP && dP.id !== undefined) {
-      loadFileList(dP, dispatch);
+      refreshFileList(dP, dispatch);
     } else {
       if (currentDataPlugins.length > 0) {
         dispatch(setFilesDataPluginId(currentDataPlugins[0].id));
