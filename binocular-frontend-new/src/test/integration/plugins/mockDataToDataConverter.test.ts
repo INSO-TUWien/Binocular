@@ -6,7 +6,7 @@
 //
 // Converters used:
 //   - convertCommitDataToMetrics   (commits/fileChanges/src/utilities/dataConverter.ts)
-//   - convertIssuesToGraphData     (authorBehaviour/collaboration/src/utilities/dataConverter.ts)
+//   - convertToGraphData            (authorBehaviour/collaboration/src/utilities/dataConverter.ts)
 //
 // convertToChartData from Changes is intentionally excluded because it requires
 // a full VisualizationPluginProperties object (authorList, fileList, granularity).
@@ -15,7 +15,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 
 import MockData from '../../../plugins/dataPlugins/mockData/src/index.ts';
 import { convertCommitDataToMetrics } from '../../../plugins/visualizationPlugins/commits/fileChanges/src/utilities/dataConverter.ts';
-import { convertIssuesToGraphData } from '../../../plugins/visualizationPlugins/authorBehaviour/collaboration/src/utilities/dataConverter.ts';
+import { convertToGraphData } from '../../../plugins/visualizationPlugins/authorBehaviour/collaboration/src/utilities/dataConverter.ts';
 
 const FROM = '2024-01-01T00:00:00.000Z';
 const TO = '2024-12-31T23:59:59.000Z';
@@ -66,14 +66,11 @@ describe('I7 — MockData → dataConverter pipeline', () => {
 
   // ── I7.4 — accounts → convertIssuesToGraphData produces valid graph ────────
 
-  it('I7.4 — convertIssuesToGraphData returns nodes and links with no NaN values', async () => {
+  it('I7.4 — convertToGraphData returns nodes and links with no NaN values', async () => {
     const accounts = await plugin.accountsIssues.getAll(FROM, TO);
-    const result = convertIssuesToGraphData(accounts, {
+    const result = convertToGraphData(accounts, [], {
       minEdgeValue: 1,
       maxEdgeValue: 100,
-      data: { nodes: [], links: [] },
-      from: FROM,
-      to: TO,
       visualizationStyle: '',
       showSprints: false,
     });

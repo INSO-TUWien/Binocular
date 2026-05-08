@@ -134,7 +134,7 @@ Verifies that real MockData output can be piped through each `dataConverter` wit
 | I7.1 | `commits.getAll()` resolves to a non-empty array | call with 2024 date range | `length > 0`; first item has `sha` and `date` |
 | I7.2 | `accountsIssues.getAll()` resolves to a non-empty array | call `getAll()` | `length > 0`; first item has `id` and `issues` |
 | I7.3 | `convertCommitDataToMetrics` returns valid metrics with no `NaN` | pipe commits through converter | object has `mpc`, `entropy`, `maxBurst`, etc.; no `NaN` values |
-| I7.4 | `convertIssuesToGraphData` returns nodes and links with no `NaN` | pipe accounts through converter | `nodes.length > 0`; no `NaN` in `node.group` |
+| I7.4 | `convertToGraphData` returns nodes and links with no `NaN` | pipe accounts through converter | `nodes.length > 0`; no `NaN` in `node.group` |
 | I7.5 | No exception thrown when piping commits through converter | call pipeline end-to-end | promise resolves without throwing |
 
 ---
@@ -350,7 +350,7 @@ The collaboration saga selects via `yield select((root) => root.plugin)` — sto
 |---|---|---|---|
 | I20.1 | Fresh store has `dataState: EMPTY` | create store | `plugin.dataState === DataState.EMPTY` |
 | I20.2 | `dataState` reaches `COMPLETE` after `setDateRange` | dispatch `setDateRange` | `dataState === DataState.COMPLETE` |
-| I20.3 | `accounts` array is non-empty after saga | dispatch `setDateRange` | `accounts.length > 0` |
+| I20.3 | `issueAccounts` array is non-empty after saga | dispatch `setDateRange` | `issueAccounts.length > 0` |
 | I20.4 | Each account has `id` and `issues` fields | dispatch `setDateRange` | all accounts have required fields |
 
 ---

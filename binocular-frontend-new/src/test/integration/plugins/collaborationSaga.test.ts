@@ -67,7 +67,7 @@ describe('I20 — collaboration saga + MockData', () => {
     const store = createTestStore(mockData);
     store.dispatch(setDateRange({ from: FROM, to: TO }));
 
-    await vi.waitFor(() => expect(store.getState().plugin.accounts.length).toBeGreaterThan(0), { timeout: 3000 });
+    await vi.waitFor(() => expect(store.getState().plugin.issueAccounts.length).toBeGreaterThan(0), { timeout: 3000 });
   });
 
   // ── I20.4 — each account has required fields ──────────────────────────────
@@ -78,7 +78,7 @@ describe('I20 — collaboration saga + MockData', () => {
 
     await vi.waitFor(() => expect(store.getState().plugin.dataState).toBe(DataState.COMPLETE), { timeout: 3000 });
 
-    for (const account of store.getState().plugin.accounts) {
+    for (const account of store.getState().plugin.issueAccounts) {
       expect(account).toHaveProperty('id');
       expect(account).toHaveProperty('issues');
     }

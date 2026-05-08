@@ -11,7 +11,7 @@ Tests cover pure functions and utility helpers with no DOM, no Redux, and no net
 **File**: `src/test/unit/plugins/visualizationPlugins/authorBehaviour/collaboration/dataConverter.test.ts`
 **Source**: `src/plugins/visualizationPlugins/authorBehaviour/collaboration/src/utilities/dataConverter.ts`
 
-### `convertIssuesToGraphData(accounts, settings)`
+### `convertToGraphData(issueAccounts, mrAccounts, settings)`
 
 | # | Description | Input | Expected output |
 |---|---|---|---|
