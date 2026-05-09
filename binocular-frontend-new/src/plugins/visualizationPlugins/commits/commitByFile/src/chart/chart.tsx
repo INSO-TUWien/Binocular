@@ -1,4 +1,4 @@
-import { createRef, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CommitByFileViz } from './commitByFileViz.tsx';
 import type { SettingsType } from '../settings/settings.tsx';
 import type { DataPluginCommitFile } from '../../../../../interfaces/dataPluginInterfaces/dataPluginCommitsFiles.ts';
@@ -30,25 +30,22 @@ function Chart(props: Readonly<VisualizationPluginProperties<SettingsType, DataP
     });
   }, [props.dataConnection]);
 
-  const chartContainerRef = createRef<HTMLDivElement>();
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const chartAreaRef = useRef<HTMLDivElement>(null);
 
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
 
   useEffect(() => {
-    if (!chartContainerRef.current) return;
+    if (!chartAreaRef.current) return;
     const resizeObserver = new ResizeObserver(() => {
-      if (!chartContainerRef.current) return;
-      if (chartContainerRef.current?.offsetWidth !== chartWidth) {
-        setChartWidth(chartContainerRef.current.offsetWidth);
-      }
-      if (chartContainerRef.current?.offsetHeight !== chartHeight) {
-        setChartHeight(chartContainerRef.current.offsetHeight - 20);
-      }
+      if (!chartAreaRef.current) return;
+      setChartWidth(chartAreaRef.current.offsetWidth);
+      setChartHeight(chartAreaRef.current.offsetHeight);
     });
-    resizeObserver.observe(chartContainerRef.current);
+    resizeObserver.observe(chartAreaRef.current);
     return () => resizeObserver.disconnect();
-  }, [chartContainerRef, chartHeight, chartWidth]);
+  }, [chartAreaRef]);
 
   const handleCommitSelect = (selectedOption: { value: string; label: string } | null) => {
     if (!selectedOption) {
@@ -77,7 +74,9 @@ function Chart(props: Readonly<VisualizationPluginProperties<SettingsType, DataP
           <span className="loading loading-spinner loading-lg text-accent"></span>
         </div>
       )}
-      {dataState === DataState.COMPLETE && <CommitByFileViz data={data} width={chartWidth} height={chartHeight} />}
+      <div ref={chartAreaRef} className={'w-full flex-1'}>
+        {dataState === DataState.COMPLETE && <CommitByFileViz data={data} width={chartWidth} height={chartHeight} />}
+      </div>
     </div>
   );
 }

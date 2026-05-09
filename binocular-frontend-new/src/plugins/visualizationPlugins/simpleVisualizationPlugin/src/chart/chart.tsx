@@ -1,5 +1,5 @@
 import { StackedAreaChart, type ChartData, type Palette } from '../../../../../components/stackedAreaChart/StackedAreaChart.tsx';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DataState, getDataSlice } from '../reducer';
 import type { DefaultSettings } from '../settings/settings.tsx';
@@ -45,6 +45,9 @@ function Chart<SettingsType extends DefaultSettings, DataType>(props: Visualizat
     }
   }
 
+  const resizeFnRef = useRef<() => void>(() => {});
+  resizeFnRef.current = resize;
+
   function recalculate() {
     try {
       if (props.dataConverter) {
@@ -62,9 +65,11 @@ function Chart<SettingsType extends DefaultSettings, DataType>(props: Visualizat
 
   useEffect(() => {
     resize();
-  }, [props.chartContainerRef, chartHeight, chartWidth]);
+  }, [props.chartContainerRef]);
 
-  handlePopoutResizing(props.store, resize);
+  useEffect(() => {
+    return handlePopoutResizing(props.store, () => resizeFnRef.current());
+  }, [props.store]);
   /**
    * RESIZE Logic END
    */

@@ -74,6 +74,9 @@ export default function PopoutController(props: PropsType) {
       popoutWindow.current.document.body.appendChild(container);
       popoutWindow.current.addEventListener('beforeunload', popoutWindowUnloading);
       popoutWindow.current.addEventListener('resize', throttledResize);
+      // Trigger an initial resize after the container is in the popout window's DOM
+      // so visualizations can measure their correct dimensions.
+      setTimeout(() => props.onResize(), 0);
 
       const styleSheets = Array.from(document.styleSheets);
       styleSheets.forEach((styleSheet) => {

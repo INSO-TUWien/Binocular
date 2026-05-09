@@ -1,11 +1,11 @@
 import { AreaChart } from './areaChart.tsx';
-import { createRef, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { SettingsType } from '../settings/settings.tsx';
 import { handlePopoutResizing } from '../../../../../utils/resizing.ts';
 import type { Store } from '@reduxjs/toolkit';
 
 function Chart(props: { settings: SettingsType; store: Store }) {
-  const chartContainerRef = createRef<HTMLDivElement>();
+  const chartContainerRef = useRef<HTMLDivElement>(null);
 
   const [chartWidth, setChartWidth] = useState(100);
   const [chartHeight, setChartHeight] = useState(100);
@@ -23,11 +23,16 @@ function Chart(props: { settings: SettingsType; store: Store }) {
     }
   }
 
+  const resizeFnRef = useRef<() => void>(() => {});
+  resizeFnRef.current = resize;
+
   useEffect(() => {
     resize();
-  }, [chartContainerRef, chartHeight, chartWidth]);
+  }, [chartContainerRef]);
 
-  handlePopoutResizing(props.store, resize);
+  useEffect(() => {
+    return handlePopoutResizing(props.store, () => resizeFnRef.current());
+  }, [props.store]);
   /**
    * RESIZE Logic END
    */

@@ -245,36 +245,29 @@ function Dashboard() {
     }
   }, [columnCount, gridSize]);
 
-  const resizeObserver = new ResizeObserver(
+  useEffect(() => {
+    if (!dashboardRef.current) return;
     /**
      * Throttle the resize of the dashboard to every 100ms to not overwhelm the renderer.
      * As a general resize action triggers a resize action for every single visualization as well, this can be quite intensive.
      */
-    debounce(100, () => {
-      requestAnimationFrame(() => {
-        if (dashboardRef.current) {
-          setCellSize(dashboardRef.current.offsetWidth / columnCount);
-          if (dashboardHeight != dashboardRef.current.offsetHeight || dashboardWidth != dashboardRef.current.offsetWidth) {
-            dispatch({ type: 'RESIZE' });
-            setDashboardHeight(dashboardRef.current.offsetHeight);
-            setDashboardWidth(dashboardRef.current.offsetWidth);
+    const observer = new ResizeObserver(
+      debounce(100, () => {
+        requestAnimationFrame(() => {
+          if (dashboardRef.current) {
+            setCellSize(dashboardRef.current.offsetWidth / columnCount);
+            if (dashboardHeight !== dashboardRef.current.offsetHeight || dashboardWidth !== dashboardRef.current.offsetWidth) {
+              dispatch({ type: 'RESIZE' });
+              setDashboardHeight(dashboardRef.current.offsetHeight);
+              setDashboardWidth(dashboardRef.current.offsetWidth);
+            }
           }
-        }
-      });
-    }),
-  );
-
-  useEffect(() => {
-    if (dashboardRef.current) {
-      resizeObserver.observe(dashboardRef.current);
-      return () => {
-        if (dashboardRef.current) {
-          resizeObserver.unobserve(dashboardRef.current);
-          resizeObserver.disconnect();
-        }
-      };
-    }
-  }, [dashboardRef, resizeObserver]);
+        });
+      }),
+    );
+    observer.observe(dashboardRef.current);
+    return () => observer.disconnect();
+  }, [dashboardRef, columnCount]);
 
   return (
     <>

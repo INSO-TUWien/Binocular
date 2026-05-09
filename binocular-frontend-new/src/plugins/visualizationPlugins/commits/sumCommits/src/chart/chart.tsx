@@ -1,5 +1,5 @@
 import { ColumnChart, type ColumnChartData, type Palette } from './columnChart.tsx';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { DataState, setDateRange } from '../reducer';
 import type { SumSettings } from '../settings/settings.tsx';
@@ -41,11 +41,16 @@ function Chart(props: VisualizationPluginProperties<SumSettings, DataPluginCommi
     }
   }
 
+  const resizeFnRef = useRef<() => void>(() => {});
+  resizeFnRef.current = resize;
+
   useEffect(() => {
     resize();
-  }, [props.chartContainerRef, chartHeight, chartWidth]);
+  }, [props.chartContainerRef]);
 
-  handlePopoutResizing(props.store, resize);
+  useEffect(() => {
+    return handlePopoutResizing(props.store, () => resizeFnRef.current());
+  }, [props.store]);
   /**
    * RESIZE Logic END
    */

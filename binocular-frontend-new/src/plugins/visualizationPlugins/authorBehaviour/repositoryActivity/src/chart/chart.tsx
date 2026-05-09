@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { HeatmapCell } from '../utilities/types';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties';
 import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginCommits';
@@ -52,11 +52,16 @@ function Chart(props: VisualizationPluginProperties<RepositoryActivitySettings, 
     }
   }
 
+  const resizeFnRef = useRef<() => void>(() => {});
+  resizeFnRef.current = resize;
+
   useEffect(() => {
     resize();
-  }, [props.chartContainerRef, chartHeight, chartWidth]);
+  }, [props.chartContainerRef]);
 
-  handlePopoutResizing(props.store, resize);
+  useEffect(() => {
+    return handlePopoutResizing(props.store, () => resizeFnRef.current());
+  }, [props.store]);
 
   // resize logic end
 

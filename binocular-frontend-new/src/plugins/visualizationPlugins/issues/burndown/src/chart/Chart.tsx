@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DataState, type IssuesState } from '../reducer';
 import type { BurndownSettings } from '../settings/settings.tsx';
@@ -42,11 +42,16 @@ const Chart = (props: VisualizationPluginProperties<BurndownSettings, DataPlugin
     }
   };
 
+  const resizeFnRef = useRef<() => void>(() => {});
+  resizeFnRef.current = resize;
+
   useEffect(() => {
     resize();
   }, [props.chartContainerRef]);
 
-  handlePopoutResizing(props.store, resize);
+  useEffect(() => {
+    return handlePopoutResizing(props.store, () => resizeFnRef.current());
+  }, [props.store]);
   /**
    * RESIZE Logic END
    */

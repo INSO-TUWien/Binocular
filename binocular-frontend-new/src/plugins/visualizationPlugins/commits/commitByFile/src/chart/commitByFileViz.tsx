@@ -22,7 +22,7 @@ type CommitByFileVizProps = {
   data: FileChange[];
 };
 
-const MARGIN = { top: 30, right: 30, bottom: 30, left: 30 };
+const MARGIN = { top: 8, right: 8, bottom: 8, left: 8 };
 
 export const CommitByFileViz: React.FC<CommitByFileVizProps> = ({ width, height, data }) => {
   const root = buildFolderTree(data);
@@ -34,7 +34,7 @@ export const CommitByFileViz: React.FC<CommitByFileVizProps> = ({ width, height,
   const currentFolder = getFolderByPath(root, currentPath);
 
   return (
-    <div style={{ width: boundsWidth, height: boundsHeight, position: 'relative' }}>
+    <div style={{ width: boundsWidth, height: boundsHeight, position: 'relative', marginLeft: MARGIN.left, marginTop: MARGIN.top }}>
       {currentPath.length > 0 && (
         <>
           <button

@@ -1,5 +1,5 @@
 import { NetworkChart } from './networkChart.tsx';
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { convertToGraphData } from '../utilities/dataConverter.ts';
 import { DataState, type DateRange, setDateRange } from '../reducer';
 import type { DataPluginAccountIssues } from '../../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts';
@@ -38,11 +38,17 @@ export default function Chart<SettingsType extends CollaborationSettings, DataTy
     if (el.offsetWidth !== chartWidth) setChartWidth(el.offsetWidth);
     if (el.offsetHeight !== chartHeight) setChartHeight(el.offsetHeight);
   }
+
+  const resizeFnRef = useRef<() => void>(() => {});
+  resizeFnRef.current = resize;
+
   useEffect(() => {
     resize();
-  }, [chartContainerRef, chartHeight, chartWidth]);
+  }, [chartContainerRef]);
 
-  handlePopoutResizing(store, () => resize());
+  useEffect(() => {
+    return handlePopoutResizing(store, () => resizeFnRef.current());
+  }, [store]);
 
   useEffect(() => {
     if (props.parameters?.parametersDateRange) {

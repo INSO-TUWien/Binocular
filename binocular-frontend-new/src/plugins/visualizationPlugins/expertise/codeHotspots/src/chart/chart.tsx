@@ -58,11 +58,16 @@ function Chart(props: {
     }
   }
 
+  const resizeFnRef = useRef<() => void>(() => {});
+  resizeFnRef.current = resize;
+
   useEffect(() => {
     resize();
-  }, [chartContainerRef, chartHeight, chartWidth]);
+  }, [chartContainerRef]);
 
-  handlePopoutResizing(props.store, resize);
+  useEffect(() => {
+    return handlePopoutResizing(props.store, () => resizeFnRef.current());
+  }, [props.store]);
   /**
    * RESIZE Logic END
    */

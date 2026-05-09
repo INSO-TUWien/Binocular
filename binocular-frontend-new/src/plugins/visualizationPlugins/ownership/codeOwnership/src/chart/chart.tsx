@@ -2,7 +2,7 @@ import { extractOwnershipFromFileExcludingCommits } from '../utils/ownershipUtil
 import { useDispatch, useSelector } from 'react-redux';
 import { StackedAreaChart, type ChartData, type Palette } from '../../../../../../components/stackedAreaChart/StackedAreaChart.tsx';
 import * as d3 from 'd3';
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import _ from 'lodash';
 import chroma from 'chroma-js';
 import type { CodeOwnerShipSettings } from '../settings/settings.tsx';
@@ -50,11 +50,16 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Visu
     }
   }
 
+  const resizeFnRef = useRef<() => void>(() => {});
+  resizeFnRef.current = resize;
+
   useEffect(() => {
     resize();
-  }, [props.chartContainerRef, chartHeight, chartWidth]);
+  }, [props.chartContainerRef]);
 
-  handlePopoutResizing(props.store, resize);
+  useEffect(() => {
+    return handlePopoutResizing(props.store, () => resizeFnRef.current());
+  }, [props.store]);
 
   const resetData = () => {
     setChartData([]);

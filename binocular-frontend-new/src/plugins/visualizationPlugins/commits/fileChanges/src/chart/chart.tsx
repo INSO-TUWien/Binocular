@@ -1,5 +1,5 @@
 import { StackedAreaChart } from '../../../../../../components/stackedAreaChart/StackedAreaChart.tsx';
-import { type RefObject, useEffect, useState, useMemo } from 'react';
+import { type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import type { DataPlugin } from '../../../../../interfaces/dataPlugin.ts';
 import type { SettingsType } from '../settings/settings.tsx';
 import type { AuthorType } from '../../../../../../types/data/authorType.ts';
@@ -80,11 +80,16 @@ function Chart(props: {
     }
   }
 
+  const resizeFnRef = useRef<() => void>(() => {});
+  resizeFnRef.current = resize;
+
   useEffect(() => {
     resize();
-  }, [props.chartContainerRef, chartHeight, chartWidth]);
+  }, [props.chartContainerRef]);
 
-  handlePopoutResizing(props.store, resize);
+  useEffect(() => {
+    return handlePopoutResizing(props.store, () => resizeFnRef.current());
+  }, [props.store]);
   /**
    * RESIZE Logic END
    */

@@ -128,89 +128,137 @@ export function moveDragIndicator(
   columnCount: number,
 ) {
   if (dragIndicatorRef.current !== null && movingItem.current.x !== undefined && movingItem.current.y !== undefined) {
+    // Capture offset values before any style mutations — prevents forced-reflow ambiguity.
+    const curLeft = dragIndicatorRef.current.offsetLeft;
+    const curTop = dragIndicatorRef.current.offsetTop;
+    const curWidth = dragIndicatorRef.current.offsetWidth;
+    const curHeight = dragIndicatorRef.current.offsetHeight;
+
+    // The drag indicator is placed with `calc(X% + 10px)` for left/top and `calc(W% - 20px)` for
+    // width/height to account for panel margins.  Compensate when converting back to grid units so
+    // that the snap threshold is exactly half a cell rather than 70 %.
+    const MARGIN_LT = 10; // left / top offset added by placeDragIndicator
+    const MARGIN_WH = 20; // width / height reduction added by placeDragIndicator
+
+    // Fixed edges (grid units) for resize modes where one edge must stay constant.
+    const rightEdge = (movingItem.current.x + movingItem.current.width) / gridMultiplier;
+    const bottomEdge = (movingItem.current.y + movingItem.current.height) / gridMultiplier;
+
     switch (dragResizeMode.current) {
-      case DragResizeMode.drag:
-        dragIndicatorRef.current.style.left = dragIndicatorRef.current.offsetLeft + movement.movementX + 'px';
-        dragIndicatorRef.current.style.top = dragIndicatorRef.current.offsetTop + movement.movementY + 'px';
-        targetX = Math.round((dragIndicatorRef.current.offsetLeft + movement.movementX) / cellSize);
-        targetY = Math.round((dragIndicatorRef.current.offsetTop + movement.movementY) / cellSize);
+      case DragResizeMode.drag: {
+        const newLeft = curLeft + movement.movementX;
+        const newTop = curTop + movement.movementY;
+        dragIndicatorRef.current.style.left = newLeft + 'px';
+        dragIndicatorRef.current.style.top = newTop + 'px';
+        targetX = Math.round((newLeft - MARGIN_LT) / cellSize);
+        targetY = Math.round((newTop - MARGIN_LT) / cellSize);
         targetWidth = movingItem.current.width / gridMultiplier;
         targetHeight = movingItem.current.height / gridMultiplier;
         break;
-      case DragResizeMode.resizeTopLeft:
-        dragIndicatorRef.current.style.left = dragIndicatorRef.current.offsetLeft + movement.movementX + 'px';
-        dragIndicatorRef.current.style.width = dragIndicatorRef.current.offsetWidth - movement.movementX + 'px';
-        dragIndicatorRef.current.style.top = dragIndicatorRef.current.offsetTop + movement.movementY + 'px';
-        dragIndicatorRef.current.style.height = dragIndicatorRef.current.offsetHeight - movement.movementY + 'px';
-        targetX = Math.round((dragIndicatorRef.current.offsetLeft + movement.movementX) / cellSize);
-        targetY = Math.round((dragIndicatorRef.current.offsetTop + movement.movementY) / cellSize);
-        targetWidth = Math.round((dragIndicatorRef.current.offsetWidth + movement.movementX) / cellSize);
-        targetHeight = Math.round((dragIndicatorRef.current.offsetHeight + movement.movementY) / cellSize);
+      }
+      case DragResizeMode.resizeTopLeft: {
+        const newLeft = curLeft + movement.movementX;
+        const newTop = curTop + movement.movementY;
+        const newWidth = curWidth - movement.movementX;
+        const newHeight = curHeight - movement.movementY;
+        dragIndicatorRef.current.style.left = newLeft + 'px';
+        dragIndicatorRef.current.style.top = newTop + 'px';
+        dragIndicatorRef.current.style.width = newWidth + 'px';
+        dragIndicatorRef.current.style.height = newHeight + 'px';
+        targetX = Math.round((newLeft - MARGIN_LT) / cellSize);
+        targetY = Math.round((newTop - MARGIN_LT) / cellSize);
+        targetWidth = rightEdge - targetX;
+        targetHeight = bottomEdge - targetY;
         break;
-      case DragResizeMode.resizeTop:
-        dragIndicatorRef.current.style.top = dragIndicatorRef.current.offsetTop + movement.movementY + 'px';
-        dragIndicatorRef.current.style.height = dragIndicatorRef.current.offsetHeight - movement.movementY + 'px';
+      }
+      case DragResizeMode.resizeTop: {
+        const newTop = curTop + movement.movementY;
+        const newHeight = curHeight - movement.movementY;
+        dragIndicatorRef.current.style.top = newTop + 'px';
+        dragIndicatorRef.current.style.height = newHeight + 'px';
         targetX = movingItem.current.x / gridMultiplier;
-        targetY = Math.round((dragIndicatorRef.current.offsetTop + movement.movementY) / cellSize);
+        targetY = Math.round((newTop - MARGIN_LT) / cellSize);
         targetWidth = movingItem.current.width / gridMultiplier;
-        targetHeight = Math.round((dragIndicatorRef.current.offsetHeight + movement.movementY) / cellSize);
+        targetHeight = bottomEdge - targetY;
         break;
-      case DragResizeMode.resizeTopRight:
-        dragIndicatorRef.current.style.width = dragIndicatorRef.current.offsetWidth + movement.movementX + 'px';
-        dragIndicatorRef.current.style.top = dragIndicatorRef.current.offsetTop + movement.movementY + 'px';
-        dragIndicatorRef.current.style.height = dragIndicatorRef.current.offsetHeight - movement.movementY + 'px';
+      }
+      case DragResizeMode.resizeTopRight: {
+        const newTop = curTop + movement.movementY;
+        const newWidth = curWidth + movement.movementX;
+        const newHeight = curHeight - movement.movementY;
+        dragIndicatorRef.current.style.top = newTop + 'px';
+        dragIndicatorRef.current.style.width = newWidth + 'px';
+        dragIndicatorRef.current.style.height = newHeight + 'px';
         targetX = movingItem.current.x / gridMultiplier;
-        targetY = Math.round((dragIndicatorRef.current.offsetTop + movement.movementY) / cellSize);
-        targetWidth = Math.round((dragIndicatorRef.current.offsetWidth + movement.movementX) / cellSize);
-        targetHeight = Math.round((dragIndicatorRef.current.offsetHeight + movement.movementY) / cellSize);
+        targetY = Math.round((newTop - MARGIN_LT) / cellSize);
+        targetWidth = Math.round((newWidth + MARGIN_WH) / cellSize);
+        targetHeight = bottomEdge - targetY;
         break;
-      case DragResizeMode.resizeRight:
-        dragIndicatorRef.current.style.width = dragIndicatorRef.current.offsetWidth + movement.movementX + 'px';
+      }
+      case DragResizeMode.resizeRight: {
+        const newWidth = curWidth + movement.movementX;
+        dragIndicatorRef.current.style.width = newWidth + 'px';
         targetX = movingItem.current.x / gridMultiplier;
         targetY = movingItem.current.y / gridMultiplier;
-        targetWidth = Math.round((dragIndicatorRef.current.offsetWidth + movement.movementX) / cellSize);
+        targetWidth = Math.round((newWidth + MARGIN_WH) / cellSize);
         targetHeight = movingItem.current.height / gridMultiplier;
         break;
-      case DragResizeMode.resizeBottomRight:
-        dragIndicatorRef.current.style.height = dragIndicatorRef.current.offsetHeight + movement.movementY + 'px';
-        dragIndicatorRef.current.style.width = dragIndicatorRef.current.offsetWidth + movement.movementX + 'px';
+      }
+      case DragResizeMode.resizeBottomRight: {
+        const newWidth = curWidth + movement.movementX;
+        const newHeight = curHeight + movement.movementY;
+        dragIndicatorRef.current.style.width = newWidth + 'px';
+        dragIndicatorRef.current.style.height = newHeight + 'px';
         targetX = movingItem.current.x / gridMultiplier;
         targetY = movingItem.current.y / gridMultiplier;
-        targetWidth = Math.round((dragIndicatorRef.current.offsetWidth + movement.movementX) / cellSize);
-        targetHeight = Math.round((dragIndicatorRef.current.offsetHeight + movement.movementX) / cellSize);
+        targetWidth = Math.round((newWidth + MARGIN_WH) / cellSize);
+        targetHeight = Math.round((newHeight + MARGIN_WH) / cellSize);
         break;
-      case DragResizeMode.resizeBottom:
-        dragIndicatorRef.current.style.height = dragIndicatorRef.current.offsetHeight + movement.movementY + 'px';
+      }
+      case DragResizeMode.resizeBottom: {
+        const newHeight = curHeight + movement.movementY;
+        dragIndicatorRef.current.style.height = newHeight + 'px';
         targetX = movingItem.current.x / gridMultiplier;
         targetY = movingItem.current.y / gridMultiplier;
         targetWidth = movingItem.current.width / gridMultiplier;
-        targetHeight = Math.round((dragIndicatorRef.current.offsetHeight + movement.movementX) / cellSize);
+        targetHeight = Math.round((newHeight + MARGIN_WH) / cellSize);
         break;
-      case DragResizeMode.resizeBottomLeft:
-        dragIndicatorRef.current.style.left = dragIndicatorRef.current.offsetLeft + movement.movementX + 'px';
-        dragIndicatorRef.current.style.width = dragIndicatorRef.current.offsetWidth - movement.movementX + 'px';
-        dragIndicatorRef.current.style.height = dragIndicatorRef.current.offsetHeight + movement.movementY + 'px';
-        targetX = Math.round((dragIndicatorRef.current.offsetLeft + movement.movementX) / cellSize);
+      }
+      case DragResizeMode.resizeBottomLeft: {
+        const newLeft = curLeft + movement.movementX;
+        const newWidth = curWidth - movement.movementX;
+        const newHeight = curHeight + movement.movementY;
+        dragIndicatorRef.current.style.left = newLeft + 'px';
+        dragIndicatorRef.current.style.width = newWidth + 'px';
+        dragIndicatorRef.current.style.height = newHeight + 'px';
+        targetX = Math.round((newLeft - MARGIN_LT) / cellSize);
         targetY = movingItem.current.y / gridMultiplier;
-        targetWidth = Math.round((dragIndicatorRef.current.offsetWidth + movement.movementX) / cellSize);
-        targetHeight = Math.round((dragIndicatorRef.current.offsetHeight + movement.movementX) / cellSize);
+        targetWidth = rightEdge - targetX;
+        targetHeight = Math.round((newHeight + MARGIN_WH) / cellSize);
         break;
-      case DragResizeMode.resizeLeft:
-        dragIndicatorRef.current.style.left = dragIndicatorRef.current.offsetLeft + movement.movementX + 'px';
-        dragIndicatorRef.current.style.width = dragIndicatorRef.current.offsetWidth - movement.movementX + 'px';
-        targetX = Math.round((dragIndicatorRef.current.offsetLeft + movement.movementX) / cellSize);
+      }
+      case DragResizeMode.resizeLeft: {
+        const newLeft = curLeft + movement.movementX;
+        const newWidth = curWidth - movement.movementX;
+        dragIndicatorRef.current.style.left = newLeft + 'px';
+        dragIndicatorRef.current.style.width = newWidth + 'px';
+        targetX = Math.round((newLeft - MARGIN_LT) / cellSize);
         targetY = movingItem.current.y / gridMultiplier;
-        targetWidth = Math.round((dragIndicatorRef.current.offsetWidth + movement.movementX) / cellSize);
+        targetWidth = rightEdge - targetX;
         targetHeight = movingItem.current.height / gridMultiplier;
         break;
-      case DragResizeMode.place:
-        dragIndicatorRef.current.style.left = dragIndicatorRef.current.offsetLeft + movement.movementX + 'px';
-        dragIndicatorRef.current.style.top = dragIndicatorRef.current.offsetTop + movement.movementY + 'px';
-        targetX = Math.round((dragIndicatorRef.current.offsetLeft + movement.movementX) / cellSize);
-        targetY = Math.round((dragIndicatorRef.current.offsetTop + movement.movementY) / cellSize);
+      }
+      case DragResizeMode.place: {
+        const newLeft = curLeft + movement.movementX;
+        const newTop = curTop + movement.movementY;
+        dragIndicatorRef.current.style.left = newLeft + 'px';
+        dragIndicatorRef.current.style.top = newTop + 'px';
+        targetX = Math.round((newLeft - MARGIN_LT) / cellSize);
+        targetY = Math.round((newTop - MARGIN_LT) / cellSize);
         targetWidth = placeableItem.width / gridMultiplier;
         targetHeight = placeableItem.height / gridMultiplier;
         break;
+      }
       default:
         break;
     }
