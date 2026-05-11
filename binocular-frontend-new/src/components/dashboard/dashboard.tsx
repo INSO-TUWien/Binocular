@@ -124,36 +124,45 @@ function Dashboard() {
 
   function positionDashboardItem() {
     if (movingItem.current.x !== undefined && movingItem.current.y !== undefined) {
-      if (targetX < 0 || targetY < 0 || targetX + targetWidth > columnCount || targetY + targetHeight > rowCount) {
-        targetX = movingItem.current.x;
-        targetY = movingItem.current.y;
-        targetWidth = movingItem.current.width;
-        targetHeight = movingItem.current.height;
-        setDragResizeMode(dragResizeZoneRef, dragResizeMode, DragResizeMode.none);
-        clearHighlightDropArea(dragIndicatorRef, columnCount, rowCount);
-        dispatch(
-          addNotification({
-            text: `Cannot move/resize to position ${targetX},${targetY} with size ${targetWidth},${targetHeight} as its out of bounds`,
-            type: AlertType.warning,
-          }),
-        );
-        console.warn(`Cannot move/resize to position ${targetX},${targetY} with size ${targetWidth},${targetHeight} as its out of bounds`);
-        return;
-      }
-
-      if (targetWidth < 1 || targetHeight < 1) {
-        targetX = movingItem.current.x;
-        targetY = movingItem.current.y;
-        targetWidth = movingItem.current.width;
-        targetHeight = movingItem.current.height;
-        dispatch(
-          addNotification({
-            text: `Cannot resize to size ${targetWidth},${targetHeight} as its too small`,
-            type: AlertType.warning,
-          }),
-        );
-        console.warn(`Cannot resize to size ${targetWidth},${targetHeight} as its too small`);
-        return;
+      const rightEdge = (movingItem.current.x + movingItem.current.width) / gridMultiplier;
+      const bottomEdge = (movingItem.current.y + movingItem.current.height) / gridMultiplier;
+      switch (dragResizeMode.current) {
+        case DragResizeMode.drag:
+        case DragResizeMode.place: {
+          targetWidth = Math.max(1, targetWidth);
+          targetHeight = Math.max(1, targetHeight);
+          targetX = Math.max(0, Math.min(columnCount - targetWidth, targetX));
+          targetY = Math.max(0, Math.min(rowCount - targetHeight, targetY));
+          break;
+        }
+        case DragResizeMode.resizeRight:
+        case DragResizeMode.resizeBottom:
+        case DragResizeMode.resizeBottomRight: {
+          targetWidth = Math.max(1, Math.min(columnCount - targetX, targetWidth));
+          targetHeight = Math.max(1, Math.min(rowCount - targetY, targetHeight));
+          break;
+        }
+        case DragResizeMode.resizeLeft:
+        case DragResizeMode.resizeBottomLeft: {
+          targetX = Math.max(0, Math.min(rightEdge - 1, targetX));
+          targetWidth = rightEdge - targetX;
+          targetHeight = Math.max(1, Math.min(rowCount - targetY, targetHeight));
+          break;
+        }
+        case DragResizeMode.resizeTop:
+        case DragResizeMode.resizeTopRight: {
+          targetY = Math.max(0, Math.min(bottomEdge - 1, targetY));
+          targetHeight = bottomEdge - targetY;
+          targetWidth = Math.max(1, Math.min(columnCount - targetX, targetWidth));
+          break;
+        }
+        case DragResizeMode.resizeTopLeft: {
+          targetX = Math.max(0, Math.min(rightEdge - 1, targetX));
+          targetY = Math.max(0, Math.min(bottomEdge - 1, targetY));
+          targetWidth = rightEdge - targetX;
+          targetHeight = bottomEdge - targetY;
+          break;
+        }
       }
 
       switch (dragResizeMode.current) {
@@ -411,8 +420,8 @@ function Dashboard() {
                 event.dataTransfer.clearData();
               }}
               onMouseUp={() => {
-                setDragResizeMode(dragResizeZoneRef, dragResizeMode, DragResizeMode.none);
                 positionDashboardItem();
+                setDragResizeMode(dragResizeZoneRef, dragResizeMode, DragResizeMode.none);
               }}
               onDragLeave={() => {
                 setDragResizeMode(dragResizeZoneRef, dragResizeMode, DragResizeMode.none);
