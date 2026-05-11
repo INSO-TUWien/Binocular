@@ -19,6 +19,7 @@ const CollaborationVisualization: VisualizationPlugin<CollaborationSettings, Dat
   defaultSettings: {
     minEdgeValue: 1,
     maxEdgeValue: 99,
+    includeCommitMessageRefs: false,
   },
   dataConverter,
   dataConnectionName: 'accountsIssues',

@@ -5,9 +5,13 @@ function Help() {
 
       <p>
         This view shows collaboration between contributors based on shared issues and merge requests. Two people are connected when they are
-        both linked to the same issue or merge request — as its <strong>author</strong> or as an <strong>assignee</strong>. Enable{' '}
-        <em>Include note authors</em> in settings to also connect people who commented on the same issue or merge request. The more items
+        both linked to the same issue or merge request — as its <strong>author</strong> or as an <strong>assignee</strong>. The more items
         they share, the thicker the line between them.
+      </p>
+      <p>
+        Enable <em>Include commit message references</em> in settings to also connect contributors via commit messages: if a commit message
+        references an issue or merge request (e.g. <code>#42</code> or <code>!15</code>), the commit author is treated as a participant in
+        that item and linked to its existing author and assignees.
       </p>
 
       <h3>What you&apos;re seeing</h3>

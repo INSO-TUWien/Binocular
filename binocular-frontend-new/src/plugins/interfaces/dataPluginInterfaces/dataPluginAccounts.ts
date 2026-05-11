@@ -7,6 +7,7 @@ export interface DataPluginAccounts {
 
 export interface DataPluginAccount {
   id: string;
+  login?: string;
   name: string;
   user: DataPluginUser | null;
   platform: string;

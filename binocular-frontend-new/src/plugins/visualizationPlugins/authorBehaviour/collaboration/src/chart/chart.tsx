@@ -4,6 +4,7 @@ import { convertToGraphData } from '../utilities/dataConverter.ts';
 import { DataState, type DateRange, setDateRange } from '../reducer';
 import type { DataPluginAccountIssues } from '../../../../../interfaces/dataPluginInterfaces/dataPluginAccountsIssues.ts';
 import type { DataPluginAccountMergeRequests } from '../../../../../interfaces/dataPluginInterfaces/dataPluginAccountsMergeRequests.ts';
+import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import type { CollaborationSettings } from '../settings/settings.tsx';
 import { handlePopoutResizing } from '../../../../../utils/resizing.ts';
@@ -12,6 +13,7 @@ type RootState = {
   plugin: {
     issueAccounts: DataPluginAccountIssues[];
     mrAccounts: DataPluginAccountMergeRequests[];
+    commits: DataPluginCommit[];
     dataState: DataState;
     dateRange: DateRange;
   };
@@ -28,6 +30,7 @@ export default function Chart<SettingsType extends CollaborationSettings, DataTy
   );
   const issueAccounts = state.plugin.issueAccounts ?? [];
   const mrAccounts = state.plugin.mrAccounts ?? [];
+  const commits = state.plugin.commits ?? [];
   const dataState = state.plugin.dataState;
   const [chartWidth, setChartWidth] = useState(chartContainerRef.current?.offsetWidth ?? 150);
   const [chartHeight, setChartHeight] = useState(chartContainerRef.current?.offsetHeight ?? 100);
@@ -67,8 +70,8 @@ export default function Chart<SettingsType extends CollaborationSettings, DataTy
 
   const graphData = useMemo(() => {
     if (issueAccounts.length === 0 && mrAccounts.length === 0) return { nodes: [], links: [] };
-    return convertToGraphData(issueAccounts, mrAccounts, settings);
-  }, [issueAccounts, mrAccounts, settings]);
+    return convertToGraphData(issueAccounts, mrAccounts, settings, commits, props.authorList);
+  }, [issueAccounts, mrAccounts, commits, props.authorList, settings]);
 
   const networkData = useMemo(() => ({ nodes: graphData.nodes, links: graphData.links }), [graphData]);
 

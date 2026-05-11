@@ -4,6 +4,7 @@ import type { DefaultSettings } from '../../../../simpleVisualizationPlugin/src/
 export interface CollaborationSettings extends DefaultSettings {
   minEdgeValue: number;
   maxEdgeValue: number;
+  includeCommitMessageRefs: boolean;
 }
 
 const MIN_POSSIBLE = 1;
@@ -14,7 +15,7 @@ interface SettingsProps {
 }
 
 export default function Settings({ settings, setSettings }: SettingsProps) {
-  const { minEdgeValue, maxEdgeValue } = settings;
+  const { minEdgeValue, maxEdgeValue, includeCommitMessageRefs } = settings;
 
   const handleMinChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +42,7 @@ export default function Settings({ settings, setSettings }: SettingsProps) {
   return (
     <div className=" space-y-2">
       <label className="block text-sm font-medium ">Collaboration Strength Range</label>
+
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
           <span className="text-sm w-12">Min</span>
@@ -64,6 +66,15 @@ export default function Settings({ settings, setSettings }: SettingsProps) {
           />
         </div>
       </div>
+      <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
+        <span className="label-text">Include commit message references</span>
+        <input
+          type="checkbox"
+          className="toggle toggle-primary toggle-sm"
+          checked={includeCommitMessageRefs}
+          onChange={(e) => setSettings({ ...settings, includeCommitMessageRefs: e.target.checked })}
+        />
+      </label>
     </div>
   );
 }

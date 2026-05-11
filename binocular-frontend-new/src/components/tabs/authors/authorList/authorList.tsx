@@ -62,6 +62,7 @@ function AuthorList(props: { orientation?: string }) {
                         return {
                           localId: 0, // real id gets set in reducer
                           id: account.id,
+                          login: account.login,
                           name: account.name,
                           platform: account.platform,
                           user: null, // is not set, because it is not needed in the accounts list
@@ -122,6 +123,7 @@ function AuthorList(props: { orientation?: string }) {
                                 : {
                                     user: null,
                                     id: account.id,
+                                    login: account.login,
                                     localId: account.localId,
                                     name: account.name,
                                     platform: account.platform,

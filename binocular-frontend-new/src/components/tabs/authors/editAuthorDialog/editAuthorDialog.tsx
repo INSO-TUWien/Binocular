@@ -214,7 +214,7 @@ function EditAuthorDialog() {
               <datalist id="allAccounts">
                 {accounts.map((a: AccountType) => (
                   <option key={a.localId} value={a.localId}>
-                    {a.name || a.user?.gitSignature}
+                    {a.name || a.login}
                   </option>
                 ))}
               </datalist>
@@ -223,7 +223,7 @@ function EditAuthorDialog() {
               {assignedAccount !== undefined && assignedAccount !== null ? (
                 <div className={editAuthorDialogStyles.authorListItem} key={assignedAccount.id}>
                   <span style={{ borderColor: 'green', background: 'lightgreen' }} className={editAuthorDialogStyles.authorName}>
-                    {assignedAccount.name}
+                    {assignedAccount.name || assignedAccount.login}
                   </span>
                   <button className={editAuthorDialogStyles.removeButton} onClick={() => dispatch(resetAccount(assignedAccount.id))}>
                     Remove

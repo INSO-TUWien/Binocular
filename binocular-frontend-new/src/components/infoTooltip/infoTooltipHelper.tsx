@@ -23,9 +23,11 @@ export function showInfoTooltip(
 
   const contentElement = ref.current.querySelector('#infoTooltipContent') as HTMLDivElement;
   contentElement.innerHTML = '';
-  const headline = document.createElement('h1');
-  headline.innerText = content.headline;
-  tooltipContent.appendChild(headline);
+  if (content.headline) {
+    const headline = document.createElement('h1');
+    headline.innerText = content.headline;
+    tooltipContent.appendChild(headline);
+  }
   if (content.textContent) {
     const text = document.createElement('p');
     text.innerText = content.textContent;
