@@ -65,6 +65,7 @@ function Dashboard() {
   const movingItem = useRef<DashboardItemDTO>({ id: 0, x: 0, y: 0, width: 0, height: 0 });
 
   const dragResizeMode = useRef(DragResizeMode.none);
+  const rawIndicatorSize = useRef({ width: 0, height: 0, left: 0, top: 0, initialized: false });
 
   let targetX = 0;
   let targetY = 0;
@@ -111,6 +112,7 @@ function Dashboard() {
 
   function setDragResizeItem(itemId: number, mode: DragResizeMode) {
     movingItem.current = dashboardItems.find((dashboardItem: DashboardItemType) => dashboardItem.id === itemId);
+    rawIndicatorSize.current.initialized = false;
     setDragResizeMode(dragResizeZoneRef, dragResizeMode, mode);
   }
 
@@ -384,6 +386,7 @@ function Dashboard() {
                   dashboardState1,
                   rowCount,
                   columnCount,
+                  rawIndicatorSize,
                 );
                 targetX = __ret.targetX;
                 targetY = __ret.targetY;
@@ -407,6 +410,7 @@ function Dashboard() {
                   dashboardState1,
                   rowCount,
                   columnCount,
+                  rawIndicatorSize,
                 );
                 targetX = __ret.targetX;
                 targetY = __ret.targetY;
@@ -428,6 +432,7 @@ function Dashboard() {
                 clearHighlightDropArea(dragIndicatorRef, columnCount, rowCount);
               }}
               onMouseLeave={() => {
+                rawIndicatorSize.current.initialized = false;
                 setDragResizeMode(dragResizeZoneRef, dragResizeMode, DragResizeMode.none);
                 clearHighlightDropArea(dragIndicatorRef, columnCount, rowCount);
               }}></div>

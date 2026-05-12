@@ -126,13 +126,23 @@ export function moveDragIndicator(
   dashboardState: number[][],
   rowCount: number,
   columnCount: number,
+  rawSize: MutableRefObject<{ width: number; height: number; left: number; top: number; initialized: boolean }>,
 ) {
   if (dragIndicatorRef.current !== null && movingItem.current.x !== undefined && movingItem.current.y !== undefined) {
-    // Capture offset values before any style mutations — prevents forced-reflow ambiguity.
-    const curLeft = dragIndicatorRef.current.offsetLeft;
-    const curTop = dragIndicatorRef.current.offsetTop;
-    const curWidth = dragIndicatorRef.current.offsetWidth;
-    const curHeight = dragIndicatorRef.current.offsetHeight;
+    // Seed raw size from the DOM on the first move of each drag session. Subsequent frames use
+    // the tracked value to avoid browser clamping (offsetWidth can't go below 0) causing drift.
+    if (!rawSize.current.initialized) {
+      rawSize.current.width = dragIndicatorRef.current.offsetWidth;
+      rawSize.current.height = dragIndicatorRef.current.offsetHeight;
+      rawSize.current.left = dragIndicatorRef.current.offsetLeft;
+      rawSize.current.top = dragIndicatorRef.current.offsetTop;
+      rawSize.current.initialized = true;
+    }
+
+    const curLeft = rawSize.current.left;
+    const curTop = rawSize.current.top;
+    const curWidth = rawSize.current.width;
+    const curHeight = rawSize.current.height;
 
     // The drag indicator is placed with `calc(X% + 10px)` for left/top and `calc(W% - 20px)` for
     // width/height to account for panel margins.  Compensate when converting back to grid units so
@@ -148,12 +158,16 @@ export function moveDragIndicator(
       case DragResizeMode.drag: {
         const newLeft = curLeft + movement.movementX;
         const newTop = curTop + movement.movementY;
-        dragIndicatorRef.current.style.left = newLeft + 'px';
-        dragIndicatorRef.current.style.top = newTop + 'px';
-        targetX = Math.round((newLeft - MARGIN_LT) / cellSize);
-        targetY = Math.round((newTop - MARGIN_LT) / cellSize);
+        rawSize.current.left = newLeft;
+        rawSize.current.top = newTop;
         targetWidth = movingItem.current.width / gridMultiplier;
         targetHeight = movingItem.current.height / gridMultiplier;
+        const maxLeft = (columnCount - targetWidth) * cellSize + MARGIN_LT;
+        const maxTop = (rowCount - targetHeight) * cellSize + MARGIN_LT;
+        dragIndicatorRef.current.style.left = Math.max(MARGIN_LT, Math.min(maxLeft, newLeft)) + 'px';
+        dragIndicatorRef.current.style.top = Math.max(MARGIN_LT, Math.min(maxTop, newTop)) + 'px';
+        targetX = Math.max(0, Math.min(columnCount - targetWidth, Math.round((newLeft - MARGIN_LT) / cellSize)));
+        targetY = Math.max(0, Math.min(rowCount - targetHeight, Math.round((newTop - MARGIN_LT) / cellSize)));
         break;
       }
       case DragResizeMode.resizeTopLeft: {
@@ -161,12 +175,20 @@ export function moveDragIndicator(
         const newTop = curTop + movement.movementY;
         const newWidth = curWidth - movement.movementX;
         const newHeight = curHeight - movement.movementY;
-        dragIndicatorRef.current.style.left = newLeft + 'px';
-        dragIndicatorRef.current.style.top = newTop + 'px';
-        dragIndicatorRef.current.style.width = newWidth + 'px';
-        dragIndicatorRef.current.style.height = newHeight + 'px';
+        rawSize.current.width = newWidth;
+        rawSize.current.height = newHeight;
+        rawSize.current.left = newLeft;
+        rawSize.current.top = newTop;
+        const clampedLeft = Math.max(MARGIN_LT, Math.min((rightEdge - 1) * cellSize + MARGIN_LT, newLeft));
+        const clampedTop = Math.max(MARGIN_LT, Math.min((bottomEdge - 1) * cellSize + MARGIN_LT, newTop));
+        dragIndicatorRef.current.style.left = clampedLeft + 'px';
+        dragIndicatorRef.current.style.top = clampedTop + 'px';
+        dragIndicatorRef.current.style.width = Math.max(1, newLeft + newWidth - clampedLeft) + 'px';
+        dragIndicatorRef.current.style.height = Math.max(1, newTop + newHeight - clampedTop) + 'px';
         targetX = Math.round((newLeft - MARGIN_LT) / cellSize);
         targetY = Math.round((newTop - MARGIN_LT) / cellSize);
+        targetX = Math.max(0, Math.min(rightEdge - 1, targetX));
+        targetY = Math.max(0, Math.min(bottomEdge - 1, targetY));
         targetWidth = rightEdge - targetX;
         targetHeight = bottomEdge - targetY;
         break;
@@ -174,11 +196,16 @@ export function moveDragIndicator(
       case DragResizeMode.resizeTop: {
         const newTop = curTop + movement.movementY;
         const newHeight = curHeight - movement.movementY;
-        dragIndicatorRef.current.style.top = newTop + 'px';
-        dragIndicatorRef.current.style.height = newHeight + 'px';
+        rawSize.current.height = newHeight;
+        rawSize.current.top = newTop;
+        const clampedTop = Math.max(MARGIN_LT, Math.min((bottomEdge - 1) * cellSize + MARGIN_LT, newTop));
+        dragIndicatorRef.current.style.top = clampedTop + 'px';
+        dragIndicatorRef.current.style.height = Math.max(1, newTop + newHeight - clampedTop) + 'px';
         targetX = movingItem.current.x / gridMultiplier;
         targetY = Math.round((newTop - MARGIN_LT) / cellSize);
         targetWidth = movingItem.current.width / gridMultiplier;
+        targetHeight = bottomEdge - targetY;
+        targetY = Math.max(0, Math.min(bottomEdge - 1, targetY));
         targetHeight = bottomEdge - targetY;
         break;
       }
@@ -186,83 +213,110 @@ export function moveDragIndicator(
         const newTop = curTop + movement.movementY;
         const newWidth = curWidth + movement.movementX;
         const newHeight = curHeight - movement.movementY;
-        dragIndicatorRef.current.style.top = newTop + 'px';
-        dragIndicatorRef.current.style.width = newWidth + 'px';
-        dragIndicatorRef.current.style.height = newHeight + 'px';
+        rawSize.current.width = newWidth;
+        rawSize.current.height = newHeight;
+        rawSize.current.top = newTop;
+        const clampedTop = Math.max(MARGIN_LT, Math.min((bottomEdge - 1) * cellSize + MARGIN_LT, newTop));
+        dragIndicatorRef.current.style.top = clampedTop + 'px';
+        dragIndicatorRef.current.style.width = Math.max(1, newWidth) + 'px';
+        dragIndicatorRef.current.style.height = Math.max(1, newTop + newHeight - clampedTop) + 'px';
         targetX = movingItem.current.x / gridMultiplier;
         targetY = Math.round((newTop - MARGIN_LT) / cellSize);
-        targetWidth = Math.round((newWidth + MARGIN_WH) / cellSize);
+        targetWidth = Math.min(columnCount - targetX, Math.round((newWidth + MARGIN_WH) / cellSize));
+        targetHeight = bottomEdge - targetY;
+        targetY = Math.max(0, Math.min(bottomEdge - 1, targetY));
         targetHeight = bottomEdge - targetY;
         break;
       }
       case DragResizeMode.resizeRight: {
         const newWidth = curWidth + movement.movementX;
-        dragIndicatorRef.current.style.width = newWidth + 'px';
+        rawSize.current.width = newWidth;
+        dragIndicatorRef.current.style.width = Math.max(1, newWidth) + 'px';
         targetX = movingItem.current.x / gridMultiplier;
         targetY = movingItem.current.y / gridMultiplier;
-        targetWidth = Math.round((newWidth + MARGIN_WH) / cellSize);
+        targetWidth = Math.min(columnCount - targetX, Math.round((newWidth + MARGIN_WH) / cellSize));
         targetHeight = movingItem.current.height / gridMultiplier;
         break;
       }
       case DragResizeMode.resizeBottomRight: {
         const newWidth = curWidth + movement.movementX;
         const newHeight = curHeight + movement.movementY;
-        dragIndicatorRef.current.style.width = newWidth + 'px';
-        dragIndicatorRef.current.style.height = newHeight + 'px';
+        rawSize.current.width = newWidth;
+        rawSize.current.height = newHeight;
+        dragIndicatorRef.current.style.width = Math.max(1, newWidth) + 'px';
+        dragIndicatorRef.current.style.height = Math.max(1, newHeight) + 'px';
         targetX = movingItem.current.x / gridMultiplier;
         targetY = movingItem.current.y / gridMultiplier;
-        targetWidth = Math.round((newWidth + MARGIN_WH) / cellSize);
-        targetHeight = Math.round((newHeight + MARGIN_WH) / cellSize);
+        targetWidth = Math.min(columnCount - targetX, Math.round((newWidth + MARGIN_WH) / cellSize));
+        targetHeight = Math.min(rowCount - targetY, Math.round((newHeight + MARGIN_WH) / cellSize));
         break;
       }
       case DragResizeMode.resizeBottom: {
         const newHeight = curHeight + movement.movementY;
-        dragIndicatorRef.current.style.height = newHeight + 'px';
+        rawSize.current.height = newHeight;
+        dragIndicatorRef.current.style.height = Math.max(1, newHeight) + 'px';
         targetX = movingItem.current.x / gridMultiplier;
         targetY = movingItem.current.y / gridMultiplier;
         targetWidth = movingItem.current.width / gridMultiplier;
-        targetHeight = Math.round((newHeight + MARGIN_WH) / cellSize);
+        targetHeight = Math.min(rowCount - targetY, Math.round((newHeight + MARGIN_WH) / cellSize));
         break;
       }
       case DragResizeMode.resizeBottomLeft: {
         const newLeft = curLeft + movement.movementX;
         const newWidth = curWidth - movement.movementX;
         const newHeight = curHeight + movement.movementY;
-        dragIndicatorRef.current.style.left = newLeft + 'px';
-        dragIndicatorRef.current.style.width = newWidth + 'px';
-        dragIndicatorRef.current.style.height = newHeight + 'px';
+        rawSize.current.width = newWidth;
+        rawSize.current.height = newHeight;
+        rawSize.current.left = newLeft;
+        const clampedLeft = Math.max(MARGIN_LT, Math.min((rightEdge - 1) * cellSize + MARGIN_LT, newLeft));
+        dragIndicatorRef.current.style.left = clampedLeft + 'px';
+        dragIndicatorRef.current.style.width = Math.max(1, newLeft + newWidth - clampedLeft) + 'px';
+        dragIndicatorRef.current.style.height = Math.max(1, newHeight) + 'px';
         targetX = Math.round((newLeft - MARGIN_LT) / cellSize);
         targetY = movingItem.current.y / gridMultiplier;
         targetWidth = rightEdge - targetX;
-        targetHeight = Math.round((newHeight + MARGIN_WH) / cellSize);
+        targetHeight = Math.min(rowCount - targetY, Math.round((newHeight + MARGIN_WH) / cellSize));
+        targetX = Math.max(0, Math.min(rightEdge - 1, targetX));
+        targetWidth = rightEdge - targetX;
         break;
       }
       case DragResizeMode.resizeLeft: {
         const newLeft = curLeft + movement.movementX;
         const newWidth = curWidth - movement.movementX;
-        dragIndicatorRef.current.style.left = newLeft + 'px';
-        dragIndicatorRef.current.style.width = newWidth + 'px';
+        rawSize.current.width = newWidth;
+        rawSize.current.left = newLeft;
+        const clampedLeft = Math.max(MARGIN_LT, Math.min((rightEdge - 1) * cellSize + MARGIN_LT, newLeft));
+        dragIndicatorRef.current.style.left = clampedLeft + 'px';
+        dragIndicatorRef.current.style.width = Math.max(1, newLeft + newWidth - clampedLeft) + 'px';
         targetX = Math.round((newLeft - MARGIN_LT) / cellSize);
         targetY = movingItem.current.y / gridMultiplier;
         targetWidth = rightEdge - targetX;
         targetHeight = movingItem.current.height / gridMultiplier;
+        targetX = Math.max(0, Math.min(rightEdge - 1, targetX));
+        targetWidth = rightEdge - targetX;
         break;
       }
       case DragResizeMode.place: {
         const newLeft = curLeft + movement.movementX;
         const newTop = curTop + movement.movementY;
-        dragIndicatorRef.current.style.left = newLeft + 'px';
-        dragIndicatorRef.current.style.top = newTop + 'px';
-        targetX = Math.round((newLeft - MARGIN_LT) / cellSize);
-        targetY = Math.round((newTop - MARGIN_LT) / cellSize);
+        rawSize.current.left = newLeft;
+        rawSize.current.top = newTop;
         targetWidth = placeableItem.width / gridMultiplier;
         targetHeight = placeableItem.height / gridMultiplier;
+        const maxLeft = (columnCount - targetWidth) * cellSize + MARGIN_LT;
+        const maxTop = (rowCount - targetHeight) * cellSize + MARGIN_LT;
+        dragIndicatorRef.current.style.left = Math.max(MARGIN_LT, Math.min(maxLeft, newLeft)) + 'px';
+        dragIndicatorRef.current.style.top = Math.max(MARGIN_LT, Math.min(maxTop, newTop)) + 'px';
+        targetX = Math.max(0, Math.min(columnCount - targetWidth, Math.round((newLeft - MARGIN_LT) / cellSize)));
+        targetY = Math.max(0, Math.min(rowCount - targetHeight, Math.round((newTop - MARGIN_LT) / cellSize)));
         break;
       }
       default:
         break;
     }
 
+    targetWidth = Math.max(1, targetWidth);
+    targetHeight = Math.max(1, targetHeight);
     highlightDropArea(movingItem, dashboardState, rowCount, columnCount, gridMultiplier, targetX, targetY, targetWidth, targetHeight);
   }
   return { targetX, targetY, targetWidth, targetHeight };
