@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import SetupDialogStartPage from './pages/start/setupDialogStartPage.tsx';
 import SetupDialogDatabasePage from './pages/database/setupDialogDatabasePage.tsx';
 import SetupDialogDashboardPage from './pages/dashboard/setupDialogDashboardPage.tsx';
+import SetupDialogAuthorsPage from './pages/authors/setupDialogAuthorsPage.tsx';
 import SetupDialogSummaryPage from './pages/summary/setupDialogSummaryPage.tsx';
 import { type AppDispatch, useAppDispatch } from '../../redux';
 import { initializeDashboardState } from '../../redux/reducer/general/dashboardReducer';
@@ -11,7 +12,7 @@ function SetupDialog() {
   const [page, setPage] = useState(1);
   const dispatch: AppDispatch = useAppDispatch();
 
-  const pageCount = 4;
+  const pageCount = 5;
 
   useEffect(() => {
     for (let i = 1; i <= pageCount; i++) {
@@ -34,17 +35,21 @@ function SetupDialog() {
             Database
           </li>
           <li data-content="?" className="step" id={'setupStep3'}>
+            Authors
+          </li>
+          <li data-content="?" className="step" id={'setupStep4'}>
             Dashboard
           </li>
-          <li data-content="!" className="step" id={'setupStep4'}>
+          <li data-content="!" className="step" id={'setupStep5'}>
             Summary
           </li>
         </ul>
 
         {page === 1 && <SetupDialogStartPage></SetupDialogStartPage>}
         {page === 2 && <SetupDialogDatabasePage></SetupDialogDatabasePage>}
-        {page === 3 && <SetupDialogDashboardPage></SetupDialogDashboardPage>}
-        {page === 4 && <SetupDialogSummaryPage></SetupDialogSummaryPage>}
+        {page === 3 && <SetupDialogAuthorsPage></SetupDialogAuthorsPage>}
+        {page === 4 && <SetupDialogDashboardPage></SetupDialogDashboardPage>}
+        {page === 5 && <SetupDialogSummaryPage></SetupDialogSummaryPage>}
 
         <div className={'modal-action'}>
           {page > 1 && page <= pageCount && (

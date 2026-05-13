@@ -39,12 +39,14 @@ function AddDataPluginCard(props: { dataPlugin: DataPlugin }) {
           {props.dataPlugin.experimental && <div className="badge badge-warning">Experimental</div>}
         </h2>
         <div>{props.dataPlugin.description}</div>
-        <h3 className="font-bold">Capabilities:</h3>
-        <ul className={'list-disc ml-6'}>
+        <p className="font-bold">Capabilities:</p>
+        <div className={'flex flex-wrap gap-1'}>
           {props.dataPlugin.capabilities.map((capability) => (
-            <li key={`plugin${props.dataPlugin.name}Capability${capability}`}>{capability}</li>
+            <span key={`plugin${props.dataPlugin.name}Capability${capability}`} className="badge badge-outline">
+              {capability}
+            </span>
           ))}
-        </ul>
+        </div>
         {props.dataPlugin.requirements.apiKey && (
           <label className="form-control w-full max-w-xs">
             <div className="label">

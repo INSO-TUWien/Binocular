@@ -31,7 +31,7 @@ function SetupDialogDatabasePage() {
 
   return (
     <>
-      <h1>Setup Data Connection</h1>
+      <p className="text-xl font-bold mb-2">Setup Data Connection</p>
       {settingsInitialized === true && (
         <div role="alert" className="alert alert-success">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">

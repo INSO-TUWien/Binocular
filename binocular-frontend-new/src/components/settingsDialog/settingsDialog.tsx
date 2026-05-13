@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import DatabaseSettings from './databaseSettings/databaseSettings.tsx';
 import GeneralSettings from './generalSettings/generalSettings.tsx';
+import AuthorManagementView from '../authorManagement/authorManagementView.tsx';
 import LogoIcon from '../../assets/logo_icon.svg';
 
 function SettingsDialog() {
@@ -30,10 +31,21 @@ function SettingsDialog() {
               onClick={() => setActiveTab('Database')}>
               Database
             </a>
+            <a
+              role={'tab'}
+              className={'tab no-underline ' + (activeTab === 'Authors' ? 'tab-active' : '')}
+              onClick={() => setActiveTab('Authors')}>
+              Authors
+            </a>
           </div>
         </div>
         {activeTab === 'General' && <GeneralSettings></GeneralSettings>}
         {activeTab === 'Database' && <DatabaseSettings></DatabaseSettings>}
+        {activeTab === 'Authors' && (
+          <div className={'mt-4'}>
+            <AuthorManagementView></AuthorManagementView>
+          </div>
+        )}
       </div>
       <form method="dialog" className="modal-backdrop">
         <button>close</button>
