@@ -7,6 +7,7 @@ import { type AppDispatch, type RootState, store, useAppDispatch } from '../../r
 import {
   addDashboardItem,
   clearDashboard,
+  clearDashboardItem,
   deleteDashboardItem,
   moveDashboardItem,
   placeDashboardItem,
@@ -202,6 +203,7 @@ function Dashboard() {
                 type: AlertType.warning,
               }),
             );
+            dispatch(clearDashboardItem());
             console.warn(
               `Cannot place to position ${targetX},${targetY} with size ${targetWidth},${targetHeight} as it would overlap with a different item`,
             );
@@ -239,6 +241,7 @@ function Dashboard() {
                 type: AlertType.warning,
               }),
             );
+            dispatch(clearDashboardItem());
             console.warn(
               `Cannot move to position ${targetX},${targetY} with size ${targetWidth},${targetHeight} as it would overlap with a different item`,
             );
@@ -247,6 +250,8 @@ function Dashboard() {
       }
     }
     clearHighlightDropArea(dragIndicatorRef, columnCount, rowCount);
+    movingItem.current = { id: 0, x: 0, y: 0, width: 0, height: 0 };
+    rawIndicatorSize.current = { width: 0, height: 0, left: 0, top: 0, initialized: false };
   }
 
   // Dashboard Resizing
@@ -354,6 +359,17 @@ function Dashboard() {
               }}
               onMouseEnter={(event) => {
                 event.stopPropagation();
+                if (placeableItem && dashboardRef.current) {
+                  movingItem.current.x =
+                    _.floor(((event.clientX - dashboardRef.current.getBoundingClientRect().x) / cellSize) * gridMultiplier) -
+                    placeableItem.width / 2;
+                  movingItem.current.y =
+                    _.floor(
+                      ((event.clientY + dashboardRef.current.scrollTop - dashboardRef.current.getBoundingClientRect().y) / cellSize) *
+                        gridMultiplier,
+                    ) -
+                    placeableItem.width / 2;
+                }
                 placeDragIndicator(dragIndicatorRef, movingItem, columnCount, gridMultiplier, rowCount);
               }}
               onDragOver={(event) => {

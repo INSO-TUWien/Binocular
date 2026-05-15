@@ -79,6 +79,11 @@ export const dashboardSlice = createSlice({
       state.initialized = true;
       localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
+    clearDashboardItem: (state) => {
+      state.placeableItem = undefined;
+      state.initialized = true;
+      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+    },
     deleteDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
       state.dashboardItems = state.dashboardItems.filter((item: DashboardItemType) => item.id !== action.payload.id);
       updateDashboardState(state.dashboardState, action.payload, DashboardStateUpdateType.delete);
@@ -147,6 +152,7 @@ export const {
   addDashboardItem,
   moveDashboardItem,
   placeDashboardItem,
+  clearDashboardItem,
   deleteDashboardItem,
   updateDashboardItem,
   increasePopupCount,
