@@ -40,6 +40,15 @@ const initialState: SettingsInitialState = {
   localDatabaseLoadingMessage: '',
 };
 
+function persistSettings(state: SettingsInitialState) {
+  const stateToSave = {
+    ...state,
+    localDatabaseLoadingState: LocalDatabaseLoadingState.none,
+    localDatabaseLoadingMessage: '',
+  };
+  localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(stateToSave));
+}
+
 export const settingsSlice = createSlice({
   name: 'settings',
   initialState: () => {
@@ -48,13 +57,16 @@ export const settingsSlice = createSlice({
       localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
       return initialState;
     } else {
-      return JSON.parse(storedState);
+      const parsed = JSON.parse(storedState) as SettingsInitialState;
+      parsed.localDatabaseLoadingState = LocalDatabaseLoadingState.none;
+      parsed.localDatabaseLoadingMessage = '';
+      return parsed;
     }
   },
   reducers: {
     setGeneralSettings: (state, action: PayloadAction<GeneralSettingsType>) => {
       state.general = action.payload;
-      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      persistSettings(state);
     },
     addDataPlugin: (state, action: PayloadAction<DatabaseSettingsDataPluginType>) => {
       const newDataPlugin = cloneDeep(action.payload);
@@ -92,7 +104,7 @@ export const settingsSlice = createSlice({
         }
       }
       state.initialized = true;
-      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      persistSettings(state);
     },
     removeDataPlugin: (state, action: PayloadAction<number>) => {
       const wasDefault = state.database.defaultDataPluginItemId === action.payload;
@@ -103,7 +115,7 @@ export const settingsSlice = createSlice({
       } else if (wasDefault) {
         state.database.defaultDataPluginItemId = undefined;
       }
-      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      persistSettings(state);
     },
     setDataPluginAsDefault: (state, action: PayloadAction<number>) => {
       state.database.dataPlugins = state.database.dataPlugins.map((dP: DatabaseSettingsDataPluginType) => {
@@ -111,14 +123,14 @@ export const settingsSlice = createSlice({
         return dP;
       });
       state.database.defaultDataPluginItemId = action.payload;
-      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      persistSettings(state);
     },
     clearSettingsStorage: () => {
       localStorage.removeItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`);
     },
     importSettingsStorage: (state, action: PayloadAction<SettingsInitialState>) => {
       state = action.payload;
-      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      persistSettings(state);
     },
     setLocalDatabaseLoadingState: (state, action: PayloadAction<LocalDatabaseLoadingState>) => {
       state.localDatabaseLoadingState = action.payload;
@@ -128,7 +140,7 @@ export const settingsSlice = createSlice({
     },
     initializeSettingsState: (state) => {
       state.initialized = true;
-      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      persistSettings(state);
     },
     recalculateDataPluginColors: (state, action: PayloadAction<string>) => {
       const isDark = action.payload === 'binocularDark';
@@ -136,7 +148,7 @@ export const settingsSlice = createSlice({
         ...dp,
         color: generateColorById(dp.id ?? 0, isDark),
       }));
-      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      persistSettings(state);
     },
   },
 });

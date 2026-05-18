@@ -1,8 +1,9 @@
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../../../redux';
-import { LocalDatabaseLoadingState } from '../../../../redux/reducer/settings/settingsReducer.ts';
+import { LocalDatabaseLoadingState, setLocalDatabaseLoadingState } from '../../../../redux/reducer/settings/settingsReducer.ts';
 
 function LoadingLocalDatabaseOverlay() {
+  const dispatch = useDispatch();
   const localDatabaseLoadingState = useSelector((state: RootState) => state.settings.localDatabaseLoadingState);
   const localDatabaseLoadingMessage = useSelector((state: RootState) => state.settings.localDatabaseLoadingMessage);
   return (
@@ -20,6 +21,11 @@ function LoadingLocalDatabaseOverlay() {
                 max={localDatabaseLoadingMessage.includes('/') ? parseInt(localDatabaseLoadingMessage.split('/')[1]) : 0}></progress>
               <span>{localDatabaseLoadingMessage}</span>
             </p>
+            <div className="modal-action">
+              <button className="btn btn-sm" onClick={() => dispatch(setLocalDatabaseLoadingState(LocalDatabaseLoadingState.none))}>
+                Dismiss
+              </button>
+            </div>
           </div>
         </dialog>
       )}

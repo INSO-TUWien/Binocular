@@ -100,6 +100,7 @@ export default abstract class DatabaseLoaders {
     // Skip if existing is same or newer
     if (existingPlugin?.metadata?.createdAt && new Date(existingPlugin.metadata.createdAt) >= new Date(metadata.createdAt)) {
       console.log(`Skipping preloaded PouchDB: existing is same or newer than preloaded (${metadata.createdAt})`);
+      dispatch(setLocalDatabaseLoadingState(LocalDatabaseLoadingState.none));
       return;
     }
 
@@ -112,27 +113,38 @@ export default abstract class DatabaseLoaders {
     }
 
     dispatch(setLocalDatabaseLoadingState(LocalDatabaseLoadingState.loading));
-    await PouchDB.init(undefined, undefined, { name: metadata.namespace, file: undefined, dbObjects: dbObjects }, undefined, (message) => {
-      dispatch(setLocalDatabaseLoadingMessage(message));
-    });
-
-    dispatch(
-      addDataPlugin({
-        name: 'PouchDb',
-        color: existingPlugin?.color ?? '#8cadfc',
-        id: existingPlugin?.id ?? 0,
-        isDefault: existingPlugin?.isDefault ?? true,
-        parameters: {
-          apiKey: undefined,
-          endpoint: undefined,
-          fileName: metadata.namespace,
-          progressUpdate: undefined,
+    try {
+      await PouchDB.init(
+        undefined,
+        undefined,
+        { name: metadata.namespace, file: undefined, dbObjects: dbObjects },
+        undefined,
+        (message) => {
+          dispatch(setLocalDatabaseLoadingMessage(message));
         },
-        metadata: metadata,
-      }),
-    );
-    dispatch(setLocalDatabaseLoadingState(LocalDatabaseLoadingState.none));
-    dispatch({ type: 'REFRESH_PLUGIN', payload: { pluginId: existingPlugin?.id ?? 0 } });
+      );
+
+      dispatch(
+        addDataPlugin({
+          name: 'PouchDb',
+          color: existingPlugin?.color ?? '#8cadfc',
+          id: existingPlugin?.id ?? 0,
+          isDefault: existingPlugin?.isDefault ?? true,
+          parameters: {
+            apiKey: undefined,
+            endpoint: undefined,
+            fileName: metadata.namespace,
+            progressUpdate: undefined,
+          },
+          metadata: metadata,
+        }),
+      );
+      dispatch({ type: 'REFRESH_PLUGIN', payload: { pluginId: existingPlugin?.id ?? 0 } });
+    } catch (e) {
+      console.error('Failed to load preloaded PouchDB:', e);
+    } finally {
+      dispatch(setLocalDatabaseLoadingState(LocalDatabaseLoadingState.none));
+    }
   }
 }
 // #v-endif
