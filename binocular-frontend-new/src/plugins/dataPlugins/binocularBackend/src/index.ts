@@ -18,7 +18,7 @@ import CommitsFiles from './collections/commitsFiles.ts';
 class BinocularBackend implements DataPlugin {
   public name = 'Binocular Backend';
   public description = 'Connection to the Binocular GraphQL Backend.';
-  public capabilities = ['authors', 'commits', 'files'];
+  public capabilities = ['Commits', 'Issues', 'Branches', 'Ownership', 'Author Behaviour', 'Statistics', 'Expertise'];
   public experimental = false;
   public requirements = {
     apiKey: false,

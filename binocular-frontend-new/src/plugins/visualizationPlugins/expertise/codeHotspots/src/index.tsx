@@ -7,7 +7,7 @@ import Saga from './saga';
 import Help from './help/help.tsx';
 import { VisualizationPluginMetadataCategory } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
-const ExampleComplex: VisualizationPlugin<SettingsType, null> = {
+const CodeHotspots: VisualizationPlugin<SettingsType, null> = {
   name: 'Code Hotspots',
   chartComponent: Chart,
   settingsComponent: Settings,
@@ -25,8 +25,9 @@ const ExampleComplex: VisualizationPlugin<SettingsType, null> = {
   },
   metadata: {
     category: VisualizationPluginMetadataCategory.Expertise,
+    compatibility: { binocularBackend: true, githubAPI: false, mockData: true, pouchDB: true, github: true, gitlab: true },
   },
   reducer: Reducer,
   saga: Saga,
 };
-export default ExampleComplex;
+export default CodeHotspots;

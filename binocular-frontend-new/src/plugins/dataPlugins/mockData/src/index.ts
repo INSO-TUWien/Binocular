@@ -16,7 +16,7 @@ import CommitsFiles from './collections/commitsFiles.ts';
 class MockData implements DataPlugin {
   public name = 'Mock Data';
   public description = 'Mocked Data for testing purposes.';
-  public capabilities = ['authors', 'commits', 'files', 'issues', 'builds', 'collaboration'];
+  public capabilities = ['Commits', 'Issues', 'Branches', 'Ownership', 'Author Behaviour', 'Statistics', 'Expertise'];
   public experimental = false;
   public requirements = {
     apiKey: false,

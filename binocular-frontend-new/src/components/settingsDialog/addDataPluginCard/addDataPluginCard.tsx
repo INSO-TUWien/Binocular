@@ -39,7 +39,7 @@ function AddDataPluginCard(props: { dataPlugin: DataPlugin }) {
           {props.dataPlugin.experimental && <div className="badge badge-warning">Experimental</div>}
         </h2>
         <div>{props.dataPlugin.description}</div>
-        <p className="font-bold">Capabilities:</p>
+        <div className="font-bold ">Capabilities:</div>
         <div className={'flex flex-wrap gap-1'}>
           {props.dataPlugin.capabilities.map((capability) => (
             <span key={`plugin${props.dataPlugin.name}Capability${capability}`} className="badge badge-outline">

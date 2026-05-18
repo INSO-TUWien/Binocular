@@ -9,7 +9,7 @@ function SettingsDialog() {
 
   return (
     <dialog id={'settingsDialog'} className={'modal'}>
-      <div className={'modal-box max-w-full'} style={{ height: '95vh' }}>
+      <div className={'modal-box max-w-full flex flex-col'} style={{ height: '95vh' }}>
         <form method={'dialog'}>
           <button className="btn btn-sm btn-circle absolute right-2 top-2 btn-ghost">✕</button>
         </form>
@@ -42,7 +42,7 @@ function SettingsDialog() {
         {activeTab === 'General' && <GeneralSettings></GeneralSettings>}
         {activeTab === 'Database' && <DatabaseSettings></DatabaseSettings>}
         {activeTab === 'Authors' && (
-          <div className={'mt-4'}>
+          <div className={'mt-4 flex-1 min-h-0'}>
             <AuthorManagementView></AuthorManagementView>
           </div>
         )}

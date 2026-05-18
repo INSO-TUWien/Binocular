@@ -133,9 +133,11 @@ function AuthorManagementView() {
   const dataPluginId = useSelector((state: RootState) => state.authors.dataPluginId);
   const dragging = useSelector((state: RootState) => state.authors.dragging);
   const availableDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
+  const accountLists = useSelector((state: RootState) => state.accounts.accountLists);
   const selectedDataPlugin = availableDataPlugins.find((dP: DatabaseSettingsDataPluginType) => dP.id === dataPluginId);
   const [filter, setFilter] = useState<Filter>('all');
   const [otherExpanded, setOtherExpanded] = useState(false);
+  const [unassignedOpen, setUnassignedOpen] = useState(false);
 
   const authors: AuthorType[] = (dataPluginId !== undefined ? authorLists[dataPluginId] : undefined) || [];
 
@@ -162,6 +164,11 @@ function AuthorManagementView() {
 
   const matchedCount = topLevel.filter((a) => a.user.account != null).length;
   const unmatchedCount = topLevel.length - matchedCount;
+
+  const allAccounts: AccountType[] =
+    (dataPluginId !== undefined ? (accountLists[dataPluginId] as unknown as AccountType[]) : undefined) || [];
+  const assignedAccountIds = new Set(authors.filter((a) => a.user.account != null).map((a) => String(a.user.account!.id)));
+  const unassignedAccounts = allAccounts.filter((acc) => !assignedAccountIds.has(String(acc.id)));
 
   const filteredTopLevel = topLevel
     .filter((a) => {
@@ -228,7 +235,7 @@ function AuthorManagementView() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 h-full">
       {/* Data plugin selector */}
       <div className="flex flex-wrap gap-3">
         {availableDataPlugins.map((dP: DatabaseSettingsDataPluginType) => (
@@ -263,9 +270,17 @@ function AuthorManagementView() {
 
       {/* Stats + filter bar */}
       <div className="flex items-center gap-3 text-sm flex-wrap">
-        <span className="text-base-content/50">{topLevel.length} authors</span>
+        <span className="text-base-content/50">{authors.length} authors</span>
         <span className="badge badge-success badge-sm">{matchedCount} matched</span>
         <span className="badge badge-warning badge-sm">{unmatchedCount} unmatched</span>
+        {authors.filter((a) => a.parent > 0).length > 0 && (
+          <span className="badge badge-info badge-sm">{authors.filter((a) => a.parent > 0).length} subauthors</span>
+        )}
+        {allAccounts.length > 0 && (
+          <button className="btn btn-xs btn-outline btn-error" onClick={() => setUnassignedOpen(true)}>
+            {unassignedAccounts.length} unassigned accounts
+          </button>
+        )}
         <div className="join ml-auto">
           <button className={filterBtnClass('all')} onClick={() => setFilter('all')}>
             All
@@ -279,28 +294,31 @@ function AuthorManagementView() {
         </div>
       </div>
 
-      {/* Author grid */}
-      {filteredTopLevel.length > 0 ? (
-        renderGrid(filteredTopLevel)
-      ) : (
-        <div className="text-base-content/40 text-sm px-3 py-6 text-center">No authors match the current filter.</div>
-      )}
+      {/* Scrollable rows */}
+      <div className="overflow-y-auto flex-1 min-h-0 pb-1 flex flex-col gap-3">
+        {/* Author grid */}
+        {filteredTopLevel.length > 0 ? (
+          renderGrid(filteredTopLevel)
+        ) : (
+          <div className="text-base-content/40 text-sm px-3 py-6 text-center">No authors match the current filter.</div>
+        )}
 
-      {/* Other section */}
-      {otherAuthors.length > 0 && (
-        <div className="border-t border-base-300 pt-1">
-          <button
-            className="flex items-center gap-2 text-xs text-base-content/50 hover:text-base-content px-3 py-1 w-full text-left"
-            onClick={() => setOtherExpanded((v) => !v)}>
-            <span>{otherExpanded ? '▼' : '▶'}</span>
-            <span>Other ({otherAuthors.length})</span>
-          </button>
-          {otherExpanded && renderGrid(otherAuthors)}
-        </div>
-      )}
-      {/* Drop zones — sticky to bottom of scroll container while dragging */}
+        {/* Other section */}
+        {otherAuthors.length > 0 && (
+          <div className="border-t border-base-300 pt-1">
+            <button
+              className="flex items-center gap-2 text-xs text-base-content/50 hover:text-base-content px-3 py-1 w-full text-left"
+              onClick={() => setOtherExpanded((v) => !v)}>
+              <span>{otherExpanded ? '▼' : '▶'}</span>
+              <span>Other ({otherAuthors.length})</span>
+            </button>
+            {otherExpanded && renderGrid(otherAuthors)}
+          </div>
+        )}
+      </div>
+      {/* Drop zones — below the scroll area while dragging */}
       {dragging && (
-        <div className="sticky bottom-0 flex gap-3 bg-base-100 border-t border-base-300 pt-3 pb-2 z-10">
+        <div className="flex gap-3 bg-base-100 border-t border-base-300 pt-3 pb-2">
           <div
             className="flex-1 border-2 border-dashed border-error/50 bg-error/10 rounded-lg text-sm font-medium text-error text-center px-4 py-4 transition-colors hover:bg-error/20 hover:border-error cursor-copy"
             onDrop={(e) => handleZoneDrop(e, (id) => dispatch(resetAuthor(id)))}
@@ -314,6 +332,32 @@ function AuthorManagementView() {
             Move to Other
           </div>
         </div>
+      )}
+      {/* Unassigned accounts modal */}
+      {unassignedOpen && (
+        <dialog className="modal modal-open">
+          <div className="modal-box max-w-md">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={() => setUnassignedOpen(false)}>
+              ✕
+            </button>
+            <p className="text-base font-bold mb-1">Unassigned Accounts</p>
+            <p className="text-xs text-base-content/50 mb-3">These accounts are not linked to any author.</p>
+            {unassignedAccounts.length === 0 ? (
+              <p className="text-sm text-base-content/40 text-center py-4">All accounts are assigned.</p>
+            ) : (
+              <ul className="flex flex-col gap-1.5 max-h-80 overflow-y-auto pr-1">
+                {unassignedAccounts.map((acc) => (
+                  <li key={acc.id} className="flex items-center gap-2 px-3 py-1.5 rounded border border-base-300 text-sm">
+                    <span className="badge badge-outline badge-xs capitalize">{acc.platform}</span>
+                    <span className="flex-1 truncate font-medium">{acc.name || acc.login || acc.id}</span>
+                    {acc.login && acc.name && <span className="text-xs text-base-content/40 truncate">@{acc.login}</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="modal-backdrop" onClick={() => setUnassignedOpen(false)} />
+        </dialog>
       )}
     </div>
   );

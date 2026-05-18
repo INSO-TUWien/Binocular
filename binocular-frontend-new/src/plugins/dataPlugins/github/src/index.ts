@@ -16,7 +16,7 @@ import Branches from './collections/branches';
 class Github implements DataPlugin {
   public name = 'Github';
   public description = 'Connect directly to the github API.';
-  public capabilities = ['authors', 'commits'];
+  public capabilities = ['Commits'];
   public experimental = true;
   public requirements = {
     apiKey: true,
