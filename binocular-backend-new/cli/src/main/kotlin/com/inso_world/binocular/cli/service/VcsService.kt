@@ -108,13 +108,27 @@ class VcsService(
 
     /**
      * First removes the paths that do not exist in the folder from the list for lizard
-     * Afterwards runs lizard on the given paths that do exist in the project
+     * Afterwards runs lizard on the given paths that do exist in the project. Creates
+     * CSV files, which after reading their information and storing it in a list are deleted.
+     * A single list is returned containing all information regarding Lizard output. Which is processed
+     * afterwards and then the information is stored in the database.
+     *
+     * @param repoPath The path of which is the root for the lizard pathing
+     * @param lizardInclude The actual path for individual folders relative to the root path
+     * @param lizardThreads the amount of threads used to run lizard
      */
     private fun runLizardWithSettings(repoPath: String?, lizardInclude: String?, lizardThreads: Int) {
 
         val lizardIncludeCleaned = lizardService.removeNonexistendPaths(repoPath,lizardInclude)
 
+        if (lizardIncludeCleaned.isEmpty()) {
+            logger.debug("No valid path for lizard was given. No given path exists. Return to main function.")
+            return
+        }
+
         lizardService.runLizard(repoPath,lizardIncludeCleaned,lizardThreads)
+
+        val lizardFileData = lizardService.readLizardFiles(repoPath,lizardIncludeCleaned)
 
     }
 
