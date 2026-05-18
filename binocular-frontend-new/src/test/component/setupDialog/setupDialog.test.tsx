@@ -13,6 +13,9 @@ vi.mock('../../../components/setupDialog/pages/database/setupDialogDatabasePage.
 vi.mock('../../../components/setupDialog/pages/dashboard/setupDialogDashboardPage.tsx', () => ({
   default: () => <div data-testid="page-dashboard">Dashboard Page</div>,
 }));
+vi.mock('../../../components/setupDialog/pages/authors/setupDialogAuthorsPage.tsx', () => ({
+  default: () => <div data-testid="page-authors">Authors Page</div>,
+}));
 vi.mock('../../../components/setupDialog/pages/summary/setupDialogSummaryPage.tsx', () => ({
   default: () => <div data-testid="page-summary">Summary Page</div>,
 }));
@@ -120,9 +123,10 @@ describe('SetupDialog', () => {
     expect(backButton).toBeUndefined();
   });
 
-  it('C4.5 clicking through all 4 pages reaches the Summary page', () => {
+  it('C4.5 clicking through all 5 pages reaches the Summary page', () => {
     renderWithStore(store);
-    // Page 1 → 2 → 3 → 4
+    // Page 1 → 2 → 3 → 4 → 5
+    fireEvent.click(getDialogButton(/next/i));
     fireEvent.click(getDialogButton(/next/i));
     fireEvent.click(getDialogButton(/next/i));
     fireEvent.click(getDialogButton(/next/i));
@@ -133,6 +137,7 @@ describe('SetupDialog', () => {
     vi.useFakeTimers();
     renderWithStore(store);
     // Navigate to last page
+    fireEvent.click(getDialogButton(/next/i));
     fireEvent.click(getDialogButton(/next/i));
     fireEvent.click(getDialogButton(/next/i));
     fireEvent.click(getDialogButton(/next/i));
@@ -166,12 +171,13 @@ describe('SetupDialog', () => {
     expect(cancelButton).toBeInTheDocument();
   });
 
-  it('C4.8 progress indicator shows step elements for all 4 pages', () => {
+  it('C4.8 progress indicator shows step elements for all 5 pages', () => {
     renderWithStore(store);
-    // All 4 step elements should be present
+    // All 5 step elements should be present
     expect(document.getElementById('setupStep1')).toBeInTheDocument();
     expect(document.getElementById('setupStep2')).toBeInTheDocument();
     expect(document.getElementById('setupStep3')).toBeInTheDocument();
     expect(document.getElementById('setupStep4')).toBeInTheDocument();
+    expect(document.getElementById('setupStep5')).toBeInTheDocument();
   });
 });

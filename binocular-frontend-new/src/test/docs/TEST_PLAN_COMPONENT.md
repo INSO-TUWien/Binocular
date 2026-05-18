@@ -73,7 +73,7 @@ Tab switcher with "General" and "Database" tabs.
 **File**: `src/test/component/setupDialog/setupDialog.test.tsx`
 **Source**: `src/components/setupDialog/setupDialog.tsx`
 
-Multi-step wizard (pages 1–4). Uses local `page` state.
+Multi-step wizard (pages 1–5: Start → Database → Authors → Dashboard → Summary). Uses local `page` state.
 
 | # | Description | Setup | Expected |
 |---|---|---|---|
@@ -81,10 +81,10 @@ Multi-step wizard (pages 1–4). Uses local `page` state.
 | C4.2 | Clicking "Next" advances to page 2 | render, click Next | `page-database` testid present |
 | C4.3 | Clicking "Back" on page 2 returns to page 1 | advance to page 2, click Back | `page-start` testid present |
 | C4.4 | "Back" button is absent on page 1 | render | no button with text `/back/i` |
-| C4.5 | Clicking through all 4 pages reaches the Summary page | click Next 3 times | `page-summary` testid present |
-| C4.6 | Clicking "Save" on last page dispatches `initializeDashboardState` | navigate to page 4, click Save | `store.getState().dashboard.initialized === true` |
+| C4.5 | Clicking through all 5 pages reaches the Summary page | click Next 4 times | `page-summary` testid present |
+| C4.6 | Clicking "Save" on last page dispatches `initializeDashboardState` | navigate to page 5, click Save | `store.getState().dashboard.initialized === true` |
 | C4.7 | "Cancel" button is present | render | button with text `/cancel/i` in DOM |
-| C4.8 | Progress indicator shows step elements for all 4 pages | render | `setupStep1`–`setupStep4` all in DOM |
+| C4.8 | Progress indicator shows step elements for all 5 pages | render | `setupStep1`–`setupStep5` all in DOM |
 
 ---
 
