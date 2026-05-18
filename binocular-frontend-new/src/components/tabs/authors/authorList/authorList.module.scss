@@ -33,7 +33,7 @@ $authorRowHeight :1.5rem;
 }
 
 .authorContainer{
-  height: $authorRowHeight;
+  height: auto;
   width: 100%;
   margin-top: .5rem;
 }
@@ -52,8 +52,7 @@ $authorRowHeight :1.5rem;
 .authorCheckbox{
   height: $authorRowHeight;
   width: $authorRowHeight;
-  margin-right: .5rem;
-  float: left;
+  flex-shrink: 0;
 }
 
 .authorInset{

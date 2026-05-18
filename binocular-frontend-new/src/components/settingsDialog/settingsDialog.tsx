@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DatabaseSettings from './databaseSettings/databaseSettings.tsx';
 import GeneralSettings from './generalSettings/generalSettings.tsx';
 import AuthorManagementView from '../authorManagement/authorManagementView.tsx';
@@ -6,6 +6,15 @@ import LogoIcon from '../../assets/logo_icon.svg';
 
 function SettingsDialog() {
   const [activeTab, setActiveTab] = useState('General');
+
+  useEffect(() => {
+    const handler = (e: CustomEvent<{ tab: string }>) => {
+      setActiveTab(e.detail.tab);
+      (document.getElementById('settingsDialog') as HTMLDialogElement)?.showModal();
+    };
+    window.addEventListener('openSettingsTab', handler as EventListener);
+    return () => window.removeEventListener('openSettingsTab', handler as EventListener);
+  }, []);
 
   return (
     <dialog id={'settingsDialog'} className={'modal'}>

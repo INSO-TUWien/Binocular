@@ -61,7 +61,7 @@ function AuthorGroupCell({
       {/* Parent row */}
       <div
         className="relative flex items-center gap-2 px-2 py-1.5 rounded text-sm cursor-pointer overflow-hidden group hover:opacity-80 transition-opacity"
-        style={{ border: `1px solid ${author.color.main}` }}
+        style={{ border: `1px solid ${author.color.main}`, background: `${author.color.main}06` }}
         draggable={true}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
@@ -113,7 +113,7 @@ function AuthorGroupCell({
             />
             <div
               className="relative flex-1 flex items-center gap-1.5 overflow-hidden rounded px-2 py-0.5 hover:opacity-80 transition-opacity"
-              style={{ border: `1px solid ${child.color.main}` }}>
+              style={{ border: `1px solid ${child.color.main}`, background: `${child.color.main}18` }}>
               <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: child.color.main }} />
               <span className="flex-1 truncate text-base-content/60 ml-1" title={child.displayName || child.user.gitSignature}>
                 {child.displayName || child.user.gitSignature}

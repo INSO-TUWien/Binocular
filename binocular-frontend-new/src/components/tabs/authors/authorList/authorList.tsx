@@ -1,5 +1,4 @@
 import authorListStyles from './authorList.module.scss';
-import authorStyles from '../authors.module.scss';
 import { useSelector } from 'react-redux';
 import { type AppDispatch, type RootState, store as globalStore, useAppDispatch } from '../../../../redux';
 import {
@@ -19,6 +18,7 @@ import { useEffect, useState } from 'react';
 import distinctColors from 'distinct-colors';
 import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
 import addToOtherIcon from '../../../../assets/group_add_gray.svg';
+import settingsIcon from '../../../../assets/settings_gray.svg';
 import editIcon from '../../../../assets/edit_gray.svg';
 import dragIndicatorIcon from '../../../../assets/drag_indicator_gray.svg';
 import removePersonIcon from '../../../../assets/remove_person_gray.svg';
@@ -214,7 +214,7 @@ function AuthorList(props: { orientation?: string }) {
           ' ' +
           (props.orientation === 'horizontal' ? authorListStyles.authorListHorizontal : authorListStyles.authorListVertical)
         }>
-        <div className={'border-b border-base-300 pt-1'}>
+        <div className={'flex items-center justify-between border-b border-base-300 pt-1 pb-1 px-1'}>
           <div className="join">
             <button
               className={'btn btn-xs join-item ' + authorListStyles.checkAllButton}
@@ -229,6 +229,12 @@ function AuthorList(props: { orientation?: string }) {
               onClick={() => dispatch(switchAllAuthorSelection())}
               title="Switch author selection"></button>
           </div>
+          <button
+            className="btn btn-ghost btn-xs p-0.5"
+            title="Author settings"
+            onClick={() => window.dispatchEvent(new CustomEvent('openSettingsTab', { detail: { tab: 'Authors' } }))}>
+            <img src={settingsIcon} alt="settings" className="w-4 h-4 opacity-50 hover:opacity-90" />
+          </button>
         </div>
         <div>
           {authors
@@ -238,11 +244,10 @@ function AuthorList(props: { orientation?: string }) {
                 <div key={'author' + i}>
                   <div
                     className={
+                      'flex items-center gap-2 ' +
                       authorListStyles.authorContainer +
                       ' ' +
-                      (props.orientation === 'horizontal'
-                        ? authorListStyles.authorContainerHorizontal
-                        : authorListStyles.authorContainerVertical)
+                      (props.orientation === 'horizontal' ? authorListStyles.authorContainerHorizontal : '')
                     }>
                     <input
                       type={'checkbox'}
@@ -274,8 +279,8 @@ function AuthorList(props: { orientation?: string }) {
                       }}
                     />
                     <div
-                      style={{ borderColor: parentAuthor.color.main }}
-                      className={authorStyles.authorName}
+                      className="relative flex flex-1 items-center gap-2 px-2 py-1 rounded text-sm cursor-grab overflow-hidden group hover:opacity-80 transition-opacity"
+                      style={{ border: `1px solid ${parentAuthor.color.main}`, background: `${parentAuthor.color.main}0d` }}
                       draggable={true}
                       onDrop={(event) => {
                         event.stopPropagation();
@@ -307,45 +312,46 @@ function AuthorList(props: { orientation?: string }) {
                           },
                         ]);
                       }}>
-                      <div style={{ background: parentAuthor.color.secondary }} className={authorStyles.authorNameBackground}></div>
-                      <div className={authorStyles.authorNameText}>
-                        <img src={dragIndicatorIcon} alt={'drag'} />
-                        <span>{parentAuthor.displayName || parentAuthor.user.gitSignature}</span>
-                        <div
-                          style={{
-                            background: `linear-gradient(to right , ${parentAuthor.color.main}00 , ${parentAuthor.color.secondary})`,
-                          }}></div>
-                      </div>
+                      <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: parentAuthor.color.main }} />
+                      <img
+                        src={dragIndicatorIcon}
+                        alt={'drag'}
+                        className="relative flex-none w-4 opacity-40 group-hover:opacity-80 cursor-grab ml-1"
+                      />
+                      <span
+                        className="relative flex-1 font-semibold truncate text-sm"
+                        title={parentAuthor.displayName || parentAuthor.user.gitSignature}>
+                        {parentAuthor.displayName || parentAuthor.user.gitSignature}
+                      </span>
                     </div>
                   </div>
                   {authors
                     .filter((a: AuthorType) => a.parent === parentAuthor.id)
-                    .map((author: AuthorType, i: number) => {
+                    .map((author: AuthorType, i: number, arr: AuthorType[]) => {
+                      const isLast = i === arr.length - 1;
                       return (
                         <div
                           key={'author' + i}
                           className={
-                            authorListStyles.authorContainer +
-                            ' ' +
-                            (props.orientation === 'horizontal'
-                              ? authorListStyles.authorContainerHorizontal
-                              : authorListStyles.authorContainerVertical)
+                            'flex items-center gap-1.5 text-xs cursor-pointer py-0.5 mt-1 ' +
+                            (props.orientation === 'horizontal' ? authorListStyles.authorContainerHorizontal : '')
                           }>
-                          {props.orientation === 'horizontal' ? (
-                            <div className={authorListStyles.authorInset}></div>
-                          ) : i === authors.filter((a: AuthorType) => a.parent === parentAuthor.id).length - 1 ? (
-                            <div className={authorListStyles.authorInset + ' ' + authorListStyles.authorInsetEnd}></div>
-                          ) : (
-                            <div className={authorListStyles.authorInset + ' ' + authorListStyles.authorInsetMiddle}></div>
-                          )}
-
                           <div
-                            style={{ borderColor: author.color.main }}
-                            className={authorStyles.authorName}
+                            className="flex-none ml-5"
+                            style={{
+                              width: 14,
+                              alignSelf: 'stretch',
+                              borderLeft: '1.5px solid var(--fallback-bc,oklch(var(--bc)/0.15))',
+                              borderBottom: isLast ? '1.5px solid var(--fallback-bc,oklch(var(--bc)/0.15))' : 'none',
+                              borderBottomLeftRadius: isLast ? 4 : 0,
+                            }}
+                          />
+                          <div
+                            className="relative flex-1 flex items-center gap-1.5 overflow-hidden rounded px-2 py-0.5 hover:opacity-80 transition-opacity"
+                            style={{ border: `1px solid ${author.color.main}`, background: `${author.color.main}0d` }}
                             draggable={true}
                             onDragStart={(event) => {
                               setTimeout(() => dispatch(setDragging(true), 1));
-
                               event.dataTransfer.setData('draggingAuthorId', String(author.id));
                             }}
                             onDragEnd={() => dispatch(setDragging(false))}
@@ -370,15 +376,13 @@ function AuthorList(props: { orientation?: string }) {
                                 },
                               ]);
                             }}>
-                            <div style={{ background: author.color.secondary }} className={authorStyles.authorNameBackground}></div>
-                            <div className={authorStyles.authorNameText}>
-                              <img src={dragIndicatorIcon} alt={'drag'} />
-                              <span>{author.displayName || author.user.gitSignature}</span>
-                              <div
-                                style={{
-                                  background: `linear-gradient(to right , ${author.color.main}00 , ${author.color.secondary})`,
-                                }}></div>
-                            </div>
+                            <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: author.color.main }} />
+                            <img src={dragIndicatorIcon} alt={'drag'} className="relative flex-none w-4 opacity-40 cursor-grab ml-1" />
+                            <span
+                              className="flex-1 truncate text-base-content/60 ml-1"
+                              title={author.displayName || author.user.gitSignature}>
+                              {author.displayName || author.user.gitSignature}
+                            </span>
                           </div>
                         </div>
                       );

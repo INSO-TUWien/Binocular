@@ -18,6 +18,7 @@ import {
   showFileTreeElementInfo,
 } from '../../../../redux/reducer/data/filesReducer.ts';
 import { refreshFileList } from '../utils/fileListUtilities';
+import refreshIcon from '../../../../assets/refresh.svg';
 
 function FileList(props: { orientation?: string; search: string }) {
   const dispatch: AppDispatch = useAppDispatch();
@@ -82,7 +83,7 @@ function FileList(props: { orientation?: string; search: string }) {
           ' ' +
           (props.orientation === 'horizontal' ? fileListStyles.fileListHorizontal : fileListStyles.fileListVertical)
         }>
-        <div className={'border-b border-base-300 pt-1'}>
+        <div className={'border-b border-base-300 pt-1 flex items-center justify-between'}>
           <div className="join">
             <button
               className={'btn btn-xs join-item ' + fileListStyles.checkAllButton}
@@ -96,16 +97,16 @@ function FileList(props: { orientation?: string; search: string }) {
               className={'btn btn-xs join-item ' + fileListStyles.flipButton}
               onClick={() => dispatch(switchAllFileSelection())}
               title="Switch file selection"></button>
-            <button
-              className={'btn btn-xs join-item '}
-              onClick={() => {
-                const dataPlugin = currentDataPlugins.filter((p: DatabaseSettingsDataPluginType) => p.id === filesDataPluginId)[0];
-                refreshFileList(dataPlugin, dispatch);
-              }}
-              title="Switch file selection">
-              REFRESH
-            </button>
           </div>
+          <button
+            className="btn btn-ghost btn-xs p-0.5"
+            onClick={() => {
+              const dataPlugin = currentDataPlugins.filter((p: DatabaseSettingsDataPluginType) => p.id === filesDataPluginId)[0];
+              refreshFileList(dataPlugin, dispatch);
+            }}
+            title="Refresh file selection">
+            <img src={refreshIcon} alt="settings" className="w-4 h-4 opacity-50 hover:opacity-90" />
+          </button>
         </div>
         <div>{fileCounts[filesDataPluginId !== undefined ? filesDataPluginId : -1]} Files indexed</div>
         <div>

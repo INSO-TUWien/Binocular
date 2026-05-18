@@ -139,10 +139,10 @@ export default abstract class DatabaseLoaders {
           metadata: metadata,
         }),
       );
+      dispatch(setLocalDatabaseLoadingState(LocalDatabaseLoadingState.none));
       dispatch({ type: 'REFRESH_PLUGIN', payload: { pluginId: existingPlugin?.id ?? 0 } });
     } catch (e) {
       console.error('Failed to load preloaded PouchDB:', e);
-    } finally {
       dispatch(setLocalDatabaseLoadingState(LocalDatabaseLoadingState.none));
     }
   }
