@@ -12,11 +12,12 @@ import CommitByFile from './collections/commitsFiles';
 import AccountsIssues from './collections/accountsIssues';
 import AccountsMergeRequests from './collections/accountsMergeRequests';
 import Branches from './collections/branches';
+import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 class Github implements DataPlugin {
   public name = 'Github';
   public description = 'Connect directly to the github API.';
-  public capabilities = ['Commits'];
+  public capabilities = [VisualizationPluginMetadataCategory.Commits];
   public experimental = true;
   public requirements = {
     apiKey: true,

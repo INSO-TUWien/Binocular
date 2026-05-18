@@ -1,8 +1,62 @@
 import { addDataPlugin } from '../../../redux/reducer/settings/settingsReducer.ts';
 import type { DataPlugin } from '../../../plugins/interfaces/dataPlugin.ts';
-import { createRef, useState } from 'react';
+import { createRef, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { type AppDispatch, useAppDispatch } from '../../../redux';
 import type { MetadataType } from '../../../types/data/MetadataType.ts';
+import { capabilityDescriptions } from '../../../plugins/capabilityDescriptions.ts';
+import type { VisualizationPluginMetadataCategory } from '../../../plugins/interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
+
+function CapabilityBadge({ capability }: { capability: VisualizationPluginMetadataCategory }) {
+  const [visible, setVisible] = useState(false);
+  const [style, setStyle] = useState<React.CSSProperties>({ visibility: 'hidden' });
+  const badgeRef = useRef<HTMLSpanElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const description = capabilityDescriptions[capability];
+
+  useLayoutEffect(() => {
+    if (!visible || !badgeRef.current || !tooltipRef.current) return;
+
+    const badge = badgeRef.current.getBoundingClientRect();
+    const tip = tooltipRef.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+
+    let left = badge.left + badge.width / 2;
+    left = Math.max(tip.width / 2 + 8, Math.min(left, vw - tip.width / 2 - 8));
+
+    const fitsAbove = badge.top - tip.height - 6 >= 8;
+    const top = fitsAbove ? badge.top - 6 : badge.bottom + 6;
+    const translateY = fitsAbove ? '-100%' : '0%';
+
+    setStyle({ left, top, transform: `translate(-50%, ${translateY})`, visibility: 'visible' });
+  }, [visible]);
+
+  return (
+    <>
+      <span
+        ref={badgeRef}
+        className="badge badge-outline cursor-default"
+        onMouseEnter={() => {
+          setStyle({ visibility: 'hidden' });
+          setVisible(true);
+        }}
+        onMouseLeave={() => setVisible(false)}>
+        {capability}
+      </span>
+      {visible &&
+        description &&
+        createPortal(
+          <div
+            ref={tooltipRef}
+            className="fixed z-[9999] px-2 py-1 text-xs bg-neutral text-neutral-content rounded whitespace-nowrap pointer-events-none"
+            style={style}>
+            {description}
+          </div>,
+          document.getElementById('settingsDialog') ?? document.body,
+        )}
+    </>
+  );
+}
 
 enum State {
   unconfigured,
@@ -42,9 +96,7 @@ function AddDataPluginCard(props: { dataPlugin: DataPlugin }) {
         <div className="font-bold ">Capabilities:</div>
         <div className={'flex flex-wrap gap-1'}>
           {props.dataPlugin.capabilities.map((capability) => (
-            <span key={`plugin${props.dataPlugin.name}Capability${capability}`} className="badge badge-outline">
-              {capability}
-            </span>
+            <CapabilityBadge key={`plugin${props.dataPlugin.name}Capability${capability}`} capability={capability} />
           ))}
         </div>
         {props.dataPlugin.requirements.apiKey && (
@@ -140,7 +192,7 @@ function AddDataPluginCard(props: { dataPlugin: DataPlugin }) {
             </label>
             <label className="form-control w-full max-w-xs">
               <div className="label">
-                <span className="font-bold">
+                <span className="font-bold text-wrap">
                   Progress Update Endpoint URL (only necessary if progress update is used, leave empty for default):
                 </span>
               </div>

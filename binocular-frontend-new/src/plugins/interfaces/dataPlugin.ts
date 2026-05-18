@@ -13,6 +13,7 @@ import type { DataPluginAccountsIssues } from './dataPluginInterfaces/dataPlugin
 import type { DataPluginAccountsMergeRequests } from './dataPluginInterfaces/dataPluginAccountsMergeRequests.ts';
 import type { DataPluginCommitsFiles } from './dataPluginInterfaces/dataPluginCommitsFiles.ts';
 import type { MetadataType } from '../../types/data/MetadataType.ts';
+import type { VisualizationPluginMetadataCategory } from './visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 export interface DataPlugin {
   name: string;
@@ -30,7 +31,7 @@ export interface DataPlugin {
   accountsIssues: DataPluginAccountsIssues;
   accountsMergeRequests: DataPluginAccountsMergeRequests;
   branches: DataPluginBranches;
-  capabilities: string[];
+  capabilities: VisualizationPluginMetadataCategory[];
   experimental: boolean;
   requirements: { apiKey: boolean; endpoint: boolean; file: boolean; progressUpdate: boolean };
   init: (

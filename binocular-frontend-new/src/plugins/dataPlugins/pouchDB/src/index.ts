@@ -15,12 +15,20 @@ import MergeRequests from './collections/mergeRequests.ts';
 import AccountsIssues from './collections/accounts-issues';
 import AccountsMergeRequests from './collections/accounts-merge-requests';
 import CommitsFiles from './collections/commitsFiles';
+import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 class PouchDb implements DataPlugin {
   public name = 'PouchDb';
   public description =
     'PouchDB browser based database that is able to import a database exported by Binocular packed as a Zip File. It is also possible to pre compile this database into Binocular through the frontend build process.';
-  public capabilities = ['Commits', 'Issues', 'Branches', 'Ownership', 'Author Behaviour', 'Statistics', 'Expertise'];
+  public capabilities = [
+    VisualizationPluginMetadataCategory.Commits,
+    VisualizationPluginMetadataCategory.Issues,
+    VisualizationPluginMetadataCategory.Ownership,
+    VisualizationPluginMetadataCategory.AuthorBehaviour,
+    VisualizationPluginMetadataCategory.Statistics,
+    VisualizationPluginMetadataCategory.Expertise,
+  ];
   public experimental = false;
   public requirements = {
     apiKey: false,

@@ -14,11 +14,19 @@ import MergeRequests from './collections/mergeRequests.ts';
 import AccountsIssues from './collections/accounts-issues.ts';
 import AccountsMergeRequests from './collections/accounts-merge-requests.ts';
 import CommitsFiles from './collections/commitsFiles.ts';
+import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 class BinocularBackend implements DataPlugin {
   public name = 'Binocular Backend';
   public description = 'Connection to the Binocular GraphQL Backend.';
-  public capabilities = ['Commits', 'Issues', 'Branches', 'Ownership', 'Author Behaviour', 'Statistics', 'Expertise'];
+  public capabilities = [
+    VisualizationPluginMetadataCategory.Commits,
+    VisualizationPluginMetadataCategory.Issues,
+    VisualizationPluginMetadataCategory.Ownership,
+    VisualizationPluginMetadataCategory.AuthorBehaviour,
+    VisualizationPluginMetadataCategory.Statistics,
+    VisualizationPluginMetadataCategory.Expertise,
+  ];
   public experimental = false;
   public requirements = {
     apiKey: false,

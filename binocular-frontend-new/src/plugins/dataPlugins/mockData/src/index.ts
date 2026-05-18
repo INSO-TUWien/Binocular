@@ -12,11 +12,19 @@ import MergeRequests from './collections/mergeRequests.ts';
 import AccountsIssues from './collections/accounts-issues.ts';
 import AccountsMergeRequests from './collections/accounts-merge-requests.ts';
 import CommitsFiles from './collections/commitsFiles.ts';
+import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 class MockData implements DataPlugin {
   public name = 'Mock Data';
   public description = 'Mocked Data for testing purposes.';
-  public capabilities = ['Commits', 'Issues', 'Branches', 'Ownership', 'Author Behaviour', 'Statistics', 'Expertise'];
+  public capabilities = [
+    VisualizationPluginMetadataCategory.Commits,
+    VisualizationPluginMetadataCategory.Issues,
+    VisualizationPluginMetadataCategory.Ownership,
+    VisualizationPluginMetadataCategory.AuthorBehaviour,
+    VisualizationPluginMetadataCategory.Statistics,
+    VisualizationPluginMetadataCategory.Expertise,
+  ];
   public experimental = false;
   public requirements = {
     apiKey: false,
