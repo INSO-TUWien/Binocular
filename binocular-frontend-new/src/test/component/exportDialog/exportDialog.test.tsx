@@ -97,17 +97,38 @@ describe('ExportDialog — extended', () => {
     expect(screen.queryByText('Preview:')).toBeNull();
   });
 
-  it('C26.10 exportType === ExportType.image → "Image Export" heading + preview div + "Export SVG" button all visible', () => {
+  it('C26.10 exportType === ExportType.image → "Image Export" heading + format toggle + "Export SVG" button all visible', () => {
     renderDialog(ExportType.image, '<svg><circle r="5"/></svg>', 'my-chart');
     expect(screen.getByText('Image Export')).toBeInTheDocument();
-    expect(screen.getByText('Preview:')).toBeInTheDocument();
+    expect(screen.getByText('SVG')).toBeInTheDocument();
+    expect(screen.getByText('PNG')).toBeInTheDocument();
     expect(screen.getByText('Export SVG')).toBeInTheDocument();
   });
 
   it('C26.11 clicking "Export SVG" calls URL.createObjectURL', () => {
     renderDialog(ExportType.image, '<svg></svg>', 'test-export');
+    vi.clearAllMocks(); // discard the preview-blob call from mount
     const exportButton = screen.getByText('Export SVG');
     fireEvent.click(exportButton);
     expect(URL.createObjectURL).toHaveBeenCalledOnce();
+  });
+
+  it('C26.12 format toggle buttons "SVG" and "PNG" are present for ExportType.image', () => {
+    renderDialog(ExportType.image);
+    expect(screen.getByText('SVG')).toBeInTheDocument();
+    expect(screen.getByText('PNG')).toBeInTheDocument();
+  });
+
+  it('C26.13 scale and background options are hidden when format is "SVG" (default)', () => {
+    renderDialog(ExportType.image);
+    expect(screen.queryByText('1x')).toBeNull();
+    expect(screen.queryByText('Transparent')).toBeNull();
+  });
+
+  it('C26.14 clicking "PNG" shows scale and background options', () => {
+    renderDialog(ExportType.image);
+    fireEvent.click(screen.getByText('PNG'));
+    expect(screen.getByText('1x')).toBeInTheDocument();
+    expect(screen.getByText('Transparent')).toBeInTheDocument();
   });
 });

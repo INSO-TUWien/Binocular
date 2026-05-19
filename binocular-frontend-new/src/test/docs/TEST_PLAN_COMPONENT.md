@@ -493,8 +493,8 @@ Redux-connected (reads `state.export`). Wrapped in `<Provider>` with a minimal s
 | C26.7 | Always renders a `"Close"` button | any | `'Close'` button present |
 | C26.8 | `ExportType.all` → "Export" heading visible; "Image Export" and "Data Export" absent | `exportType: all` | only "Export" heading |
 | C26.9 | `ExportType.data` → "Data Export" visible; "Export SVG" absent; no preview div | `exportType: data` | heading present; SVG absent |
-| C26.10 | `ExportType.image` → "Image Export" + preview + "Export SVG" all visible | `exportType: image` | all three visible |
-| C26.11 | Clicking "Export SVG" calls `URL.createObjectURL` once | click Export SVG | `URL.createObjectURL` called once |
+| C26.10 | `ExportType.image` → "Image Export" heading + SVG/PNG format toggle + "Export SVG" button all visible | `exportType: image` | all four present |
+| C26.11 | Clicking "Export SVG" calls `URL.createObjectURL` for the download (preview call cleared after render) | stub URL; clear mocks; click Export SVG | `URL.createObjectURL` called once |
 
 ---
 
@@ -750,6 +750,54 @@ All 11 child components mocked with `data-testid` stubs. No Redux required. Test
 
 ---
 
+## C43 — `ImageExportPanel`
+**File**: `src/test/component/exportDialog/imageExportPanel.test.tsx`
+**Source**: `src/components/exportDialog/imageExportPanel/imageExportPanel.tsx`
+
+Shared image export panel used in both `ExportDialog` (image mode) and `PopoutLayout`. Renders format toggle (SVG/PNG), PNG-only options (scale, background), preview, and download button. No Redux.
+
+| # | Description | Setup | Expected |
+|---|---|---|---|
+| C43.1 | Renders format toggle with "SVG" and "PNG" buttons | `svgData='<svg/>'` | both buttons present |
+| C43.2 | "SVG" is active by default; scale/background controls absent | render | SVG btn has `btn-primary`; no "1x" button |
+| C43.3 | Clicking "PNG" shows scale (1×/2×/4×) and background (Transparent/White) controls | click PNG | all scale and background buttons present |
+| C43.4 | Default scale is "1x" after switching to PNG | click PNG | 1x btn has `btn-primary` |
+| C43.5 | Clicking "2x" makes it active and deactivates "1x" | click PNG, click 2x | 2x has `btn-primary`; 1x does not |
+| C43.6 | Default background is "Transparent" after switching to PNG | click PNG | Transparent btn has `btn-primary` |
+| C43.7 | Clicking "White" makes it active | click PNG, click White | White has `btn-primary`; Transparent does not |
+| C43.8 | In SVG mode, clicking export calls `URL.createObjectURL` for the download (preview call cleared after render) | stub URL; clear mocks; click export | `createObjectURL` called once |
+| C43.9 | Export button text is "Export SVG" in SVG mode | SVG mode | button text matches |
+| C43.10 | Export button text contains "Export PNG" in PNG mode | click PNG | button text matches |
+| C43.11 | SVG preview renders an `<img>` and passes `svgData` to `createObjectURL` | `svgData='<svg><rect id="my-rect"/></svg>'` | `img[alt="SVG preview"]` present; blob text contains `my-rect` |
+
+---
+
+## C44 — `PopoutLayout`
+**File**: `src/test/component/dashboard/popoutLayout.test.tsx`
+**Source**: `src/components/dashboard/popoutLayout/popoutLayout.tsx`
+
+Layout wrapper rendered inside the popout window. Adds a compact icon toolbar (export, help, settings), toggleable panels, and wraps the chart. No Redux. `ImageExportPanel` is mocked with `data-testid="image-export-panel"`.
+
+| # | Description | Setup | Expected |
+|---|---|---|---|
+| C44.1 | Plugin name visible in toolbar | `plugin.name='Changes'` | "Changes" in DOM |
+| C44.2 | Children (chart) are rendered | pass `<div testid="chart-content">` | testid present |
+| C44.3 | Export button absent when `capabilities.export=false` | no export | no `title="Export Image"` btn |
+| C44.4 | Export button present when `capabilities.export=true` | export enabled | `title="Export Image"` btn present |
+| C44.5 | All panels hidden by default | render with all capabilities | no help/export/settings panels |
+| C44.6 | Clicking Help shows help panel | click Help | `helpComponent` output present |
+| C44.7 | Clicking Help again hides the help panel | click Help twice | help content absent |
+| C44.8 | Clicking Export calls `getSVGData` and shows `ImageExportPanel` | export enabled; click Export | `getSVGData` called once; export panel present |
+| C44.9 | Clicking Export again hides the export panel | click Export twice | export panel absent |
+| C44.10 | Opening Help closes any previously open panel (mutual exclusion) | open export, then click Help | export panel gone; help panel present |
+| C44.11 | Settings button absent when no `settingsElement` prop | no prop | no `title="Settings"` btn |
+| C44.12 | Settings button present when `settingsElement` prop provided | pass node | `title="Settings"` btn present |
+| C44.13 | Clicking Settings shows the settings panel | pass node; click Settings | settings content present |
+| C44.14 | Clicking Settings again hides the settings panel | click twice | settings content absent |
+| C44.15 | Opening Settings closes any previously open panel (mutual exclusion) | open help, then click Settings | help panel gone; settings panel present |
+
+---
+
 ## Component test file locations
 
 ```
@@ -762,11 +810,13 @@ src/test/component/
 │   ├── dashboardItemPopout.test.tsx                               (C29)
 │   ├── dashboardItemSettings.test.tsx                             (C35)
 │   ├── dashboardPreview.test.tsx                                  (C23)
-│   └── popoutController.test.tsx                                  (C34)
+│   ├── popoutController.test.tsx                                  (C34)
+│   └── popoutLayout.test.tsx                                      (C44)
 ├── dataPluginQuickSelect/
 │   └── dataPluginQuickSelect.test.tsx                             (C1)
 ├── exportDialog/
-│   └── exportDialog.test.tsx                                      (C26)
+│   ├── exportDialog.test.tsx                                      (C26)
+│   └── imageExportPanel.test.tsx                                  (C43)
 ├── informationDialog/
 │   └── informationDialog.test.tsx                                 (C13)
 ├── infoTooltip/

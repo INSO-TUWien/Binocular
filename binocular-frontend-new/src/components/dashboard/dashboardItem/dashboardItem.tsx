@@ -13,6 +13,7 @@ import { parametersInitialState } from '../../../redux/reducer/parameters/parame
 import type { DashboardItemType } from '../../../types/general/dashboardItemType.ts';
 import { ExportType, setExportName, setExportSVGData, setExportType } from '../../../redux/reducer/export/exportReducer.ts';
 import ReduxSubAppStoreWrapper from '../reduxSubAppStoreWrapper/reduxSubAppStoreWrapper.tsx';
+import PopoutLayout from '../popoutLayout/popoutLayout.tsx';
 import { combineReducers, configureStore, type Store } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
 import { createLogger } from 'redux-logger';
@@ -248,28 +249,60 @@ const DashboardItem = memo(function DashboardItem(props: {
                   name={plugin.name}
                   onClosing={() => setPoppedOut(false)}
                   onResize={() => store?.dispatch({ type: 'RESIZE' })}>
-                  <ReduxSubAppStoreWrapper store={store}>
-                    {plugin.chartComponent !== undefined ? (
-                      <plugin.chartComponent
-                        key={plugin.name}
-                        settings={settings}
-                        authorList={authors}
-                        fileList={files}
-                        sprintList={sprintList}
-                        parameters={{
-                          parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
-                          parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
+                  <PopoutLayout
+                    plugin={plugin}
+                    chartContainerRef={chartContainerRef}
+                    settingsElement={
+                      <DashboardItemSettings
+                        selectedDataPlugin={selectedDataPlugin ? selectedDataPlugin : undefined}
+                        onSelectDataPlugin={(dP: DatabaseSettingsDataPluginType) => {
+                          const newItem = _.clone(props.item);
+                          newItem.dataPluginId = dP.id;
+                          dispatch(updateDashboardItem(newItem));
                         }}
-                        dataConnection={dataPlugin}
-                        dataConverter={plugin.dataConverter}
-                        chartContainerRef={chartContainerRef}
-                        store={store}
-                        dependencies={plugin.dependencies}
-                        dataName={plugin.name.toLowerCase()}></plugin.chartComponent>
-                    ) : (
-                      <div>No Chart Component Found!</div>
-                    )}
-                  </ReduxSubAppStoreWrapper>
+                        item={props.item}
+                        settingsComponent={
+                          <plugin.settingsComponent
+                            key={plugin.name}
+                            settings={settings}
+                            setSettings={setSettings}
+                            store={store}></plugin.settingsComponent>
+                        }
+                        onClickDelete={() => props.deleteItem(props.item.id)}
+                        onClickRefresh={() => store?.dispatch({ type: 'REFRESH' })}
+                        ignoreGlobalParameters={ignoreGlobalParameters}
+                        setIgnoreGlobalParameters={setIgnoreGlobalParameters}
+                        doAutomaticUpdate={doAutomaticUpdate}
+                        setDoAutomaticUpdate={setDoAutomaticUpdate}
+                        parametersGeneral={parametersGeneralLocal}
+                        setParametersGeneral={setParametersGeneralLocal}
+                        parametersDateRange={parametersDateRangeLocal}
+                        setParametersDateRange={setParametersDateRangeLocal}
+                      />
+                    }>
+                    <ReduxSubAppStoreWrapper store={store}>
+                      {plugin.chartComponent !== undefined ? (
+                        <plugin.chartComponent
+                          key={plugin.name}
+                          settings={settings}
+                          authorList={authors}
+                          fileList={files}
+                          sprintList={sprintList}
+                          parameters={{
+                            parametersGeneral: ignoreGlobalParameters ? parametersGeneralLocal : parametersGeneralGlobal,
+                            parametersDateRange: ignoreGlobalParameters ? parametersDateRangeLocal : parametersDateRangeGlobal,
+                          }}
+                          dataConnection={dataPlugin}
+                          dataConverter={plugin.dataConverter}
+                          chartContainerRef={chartContainerRef}
+                          store={store}
+                          dependencies={plugin.dependencies}
+                          dataName={plugin.name.toLowerCase()}></plugin.chartComponent>
+                      ) : (
+                        <div>No Chart Component Found!</div>
+                      )}
+                    </ReduxSubAppStoreWrapper>
+                  </PopoutLayout>
                 </DashboardItemPopout>
               ) : (
                 <div>No Data Plugin Selected</div>

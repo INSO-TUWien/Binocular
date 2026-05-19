@@ -1,0 +1,26 @@
+@reference "../../../index.scss";
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.controls {
+  flex-shrink: 0;
+  margin-bottom: 0.75rem;
+}
+
+.previewWrapper {
+  flex: 1;
+  min-height: 20rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  @apply border border-base-300;
+
+  img {
+    display: block;
+    max-height: 100%;
+    width: auto;
+  }
+}
