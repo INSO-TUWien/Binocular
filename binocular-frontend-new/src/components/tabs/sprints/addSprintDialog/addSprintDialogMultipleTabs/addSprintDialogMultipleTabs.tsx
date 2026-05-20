@@ -160,8 +160,7 @@ function AddSprintDialogMultipleTabs() {
                 endDate.setDate(endDate.getDate() + sprintLength);
               }
 
-              const notificationText =
-                amount === 1 ? `Added Sprint: ${firstSprintName}` : `Added ${amount} sprints`;
+              const notificationText = amount === 1 ? `Added Sprint: ${firstSprintName}` : `Added ${amount} sprints`;
               dispatch(addNotification({ text: notificationText, type: AlertType.success }));
               (document.getElementById('addSprintDialog') as HTMLDialogElement).close();
             } else {
