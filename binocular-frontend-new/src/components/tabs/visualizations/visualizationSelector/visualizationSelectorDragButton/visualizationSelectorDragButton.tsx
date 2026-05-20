@@ -72,18 +72,54 @@ function VisualizationSelectorDragButton(props: { plugin: VisualizationPlugin<un
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
                         <span className="font-semibold col-span-2">Datatypes</span>
                         <span>GitHub</span>
-                        <span>{props.plugin.metadata.compatibility.github ? <span className="text-success text-lg">●</span> : <span className="text-base-content/30 text-lg">●</span>}</span>
+                        <span>
+                          {props.plugin.metadata.compatibility.github ? (
+                            <span className="text-success text-lg">●</span>
+                          ) : (
+                            <span className="text-base-content/30 text-lg">●</span>
+                          )}
+                        </span>
                         <span>GitLab</span>
-                        <span>{props.plugin.metadata.compatibility.gitlab ? <span className="text-success text-lg">●</span> : <span className="text-base-content/30 text-lg">●</span>}</span>
+                        <span>
+                          {props.plugin.metadata.compatibility.gitlab ? (
+                            <span className="text-success text-lg">●</span>
+                          ) : (
+                            <span className="text-base-content/30 text-lg">●</span>
+                          )}
+                        </span>
                         <span className="font-semibold col-span-2 mt-1">Databases</span>
                         <span>Binocular Backend</span>
-                        <span>{props.plugin.metadata.compatibility.binocularBackend ? <span className="text-success text-lg">●</span> : <span className="text-base-content/30 text-lg">●</span>}</span>
+                        <span>
+                          {props.plugin.metadata.compatibility.binocularBackend ? (
+                            <span className="text-success text-lg">●</span>
+                          ) : (
+                            <span className="text-base-content/30 text-lg">●</span>
+                          )}
+                        </span>
                         <span>PouchDB</span>
-                        <span>{props.plugin.metadata.compatibility.pouchDB ? <span className="text-success text-lg">●</span> : <span className="text-base-content/30 text-lg">●</span>}</span>
+                        <span>
+                          {props.plugin.metadata.compatibility.pouchDB ? (
+                            <span className="text-success text-lg">●</span>
+                          ) : (
+                            <span className="text-base-content/30 text-lg">●</span>
+                          )}
+                        </span>
                         <span>Mock Data</span>
-                        <span>{props.plugin.metadata.compatibility.mockData ? <span className="text-success text-lg">●</span> : <span className="text-base-content/30 text-lg">●</span>}</span>
+                        <span>
+                          {props.plugin.metadata.compatibility.mockData ? (
+                            <span className="text-success text-lg">●</span>
+                          ) : (
+                            <span className="text-base-content/30 text-lg">●</span>
+                          )}
+                        </span>
                         <span>GitHub API</span>
-                        <span>{props.plugin.metadata.compatibility.githubAPI ? <span className="text-success text-lg">●</span> : <span className="text-base-content/30 text-lg">●</span>}</span>
+                        <span>
+                          {props.plugin.metadata.compatibility.githubAPI ? (
+                            <span className="text-success text-lg">●</span>
+                          ) : (
+                            <span className="text-base-content/30 text-lg">●</span>
+                          )}
+                        </span>
                       </div>
                     </>
                   ),
