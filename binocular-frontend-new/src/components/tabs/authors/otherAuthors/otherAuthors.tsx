@@ -1,5 +1,4 @@
 import otherAuthorsStyles from './otherAuthors.module.scss';
-import authorStyles from '../authors.module.scss';
 import { useSelector } from 'react-redux';
 import { type AppDispatch, type RootState, useAppDispatch } from '../../../../redux';
 import { editAuthor, moveAuthorToOther, resetAuthor, setDragging } from '../../../../redux/reducer/data/authorsReducer.ts';
@@ -31,10 +30,14 @@ function OtherAuthors(props: { orientation?: string }) {
             .map((parentAuthor: AuthorType, i: number) => {
               return (
                 <div key={'author' + i}>
-                  <div className={otherAuthorsStyles.authorContainer}>
+                  <div
+                    className={
+                      'flex items-center gap-2 h-auto w-full mt-1 ' +
+                      (props.orientation === 'horizontal' ? otherAuthorsStyles.authorContainerHorizontal : '')
+                    }>
                     <div
-                      style={{ borderColor: parentAuthor.color.main }}
-                      className={authorStyles.authorName}
+                      className="relative flex flex-1 items-center gap-2 px-2 py-px rounded text-sm cursor-grab overflow-hidden group hover:opacity-80 transition-opacity"
+                      style={{ border: `1px solid ${parentAuthor.color.main}`, background: `${parentAuthor.color.main}0d` }}
                       draggable={true}
                       onDragStart={(event) => {
                         setTimeout(() => dispatch(setDragging(true), 1));
@@ -57,15 +60,17 @@ function OtherAuthors(props: { orientation?: string }) {
                           },
                         ]);
                       }}>
-                      <div style={{ background: parentAuthor.color.secondary }} className={authorStyles.authorNameBackground}></div>
-                      <div className={authorStyles.authorNameText}>
-                        <img src={dragIndicatorIcon} alt={'drag'} />
-                        <span>{parentAuthor.displayName || parentAuthor.user.gitSignature}</span>
-                        <div
-                          style={{
-                            background: `linear-gradient(to right , ${parentAuthor.color.main}00 , ${parentAuthor.color.secondary})`,
-                          }}></div>
-                      </div>
+                      <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: parentAuthor.color.main }} />
+                      <img
+                        src={dragIndicatorIcon}
+                        alt={'drag'}
+                        className="relative flex-none w-4 opacity-40 group-hover:opacity-80 cursor-grab ml-1"
+                      />
+                      <span
+                        className="relative flex-1 font-semibold truncate text-sm"
+                        title={parentAuthor.displayName || parentAuthor.user.gitSignature}>
+                        {parentAuthor.displayName || parentAuthor.user.gitSignature}
+                      </span>
                     </div>
                   </div>
                 </div>

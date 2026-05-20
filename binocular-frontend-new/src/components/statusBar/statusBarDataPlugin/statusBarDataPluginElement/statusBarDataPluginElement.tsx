@@ -12,6 +12,9 @@ import { store as globalStore } from '../../../../redux';
 import { updateDashboardItem } from '../../../../redux/reducer/general/dashboardReducer.ts';
 import type { DashboardItemType } from '../../../../types/general/dashboardItemType.ts';
 import { showConfirmationDialog } from '../../../confirmationDialog/confirmationDialog.tsx';
+import { setDataPluginAsDefault } from '../../../../redux/reducer/settings/settingsReducer.ts';
+import { addNotification } from '../../../../redux/reducer/general/notificationsReducer.ts';
+import { AlertType } from '../../../../types/general/alertType.ts';
 function StatusBarDataPlugin(props: {
   dataPluginConfig: DatabaseSettingsDataPluginType;
   dataPlugin: DataPlugin | undefined;
@@ -170,7 +173,20 @@ function StatusBarDataPlugin(props: {
         ) : (
           <div>
             <div>{props.dataPlugin?.description}</div>
-            <div className={'flex justify-end pr-1 pt-1'}>
+            <div className={'flex justify-end gap-1 pr-1 pt-1'}>
+              <button
+                className={'btn btn-xs btn-outline'}
+                title={'Set as default data plugin for new visualizations'}
+                onClick={() => {
+                  if (props.dataPluginConfig.id !== undefined) {
+                    globalStore.dispatch(setDataPluginAsDefault(props.dataPluginConfig.id));
+                    globalStore.dispatch(
+                      addNotification({ text: `"${props.dataPluginConfig.name}" set as default`, type: AlertType.success }),
+                    );
+                  }
+                }}>
+                Make default
+              </button>
               <button className={'btn btn-xs btn-primary'} title={'Use this data plugin for all visualizations'} onClick={handleUseForAll}>
                 Set for all
               </button>

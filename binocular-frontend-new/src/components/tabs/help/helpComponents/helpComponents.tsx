@@ -11,35 +11,37 @@ function HelpComponents() {
         Every Component can be customized with which previously defined database connection is used and if it respects the globally defined
         parameters. Every other aspect is component specific and can be looked up in the specific help
       </p>
-      {selectedComponent
-        ? selectedVisualisationPlugin && (
-            <>
-              <button className={'btn btn-xs mb-1 btn-outline'} onClick={() => setSelectedComponent(undefined)}>
-                <svg
-                  xmlns={'http://www.w3.org/2000/svg'}
-                  className={'h-4 w-4'}
-                  fill={'currentColor'}
-                  viewBox={'0 -960 960 960'}
-                  stroke={'currentColor'}>
-                  <path
-                    strokeLinecap={'round'}
-                    strokeLinejoin={'round'}
-                    strokeWidth={'2'}
-                    d={'M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z'}
-                  />
-                </svg>
-                back
-              </button>
-              <selectedVisualisationPlugin.helpComponent></selectedVisualisationPlugin.helpComponent>
-            </>
-          )
-        : visualizationPlugins.map((p) => (
-            <div key={`helpVisualization${p.name}`}>
-              <button className={'btn btn-xs mb-1 btn-outline'} onClick={() => setSelectedComponent(p.name)}>
-                {p.name}
-              </button>
-            </div>
+      {selectedComponent ? (
+        selectedVisualisationPlugin && (
+          <>
+            <button className={'btn btn-xs mb-1 btn-outline'} onClick={() => setSelectedComponent(undefined)}>
+              <svg
+                xmlns={'http://www.w3.org/2000/svg'}
+                className={'h-4 w-4'}
+                fill={'currentColor'}
+                viewBox={'0 -960 960 960'}
+                stroke={'currentColor'}>
+                <path
+                  strokeLinecap={'round'}
+                  strokeLinejoin={'round'}
+                  strokeWidth={'2'}
+                  d={'M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z'}
+                />
+              </svg>
+              back
+            </button>
+            <selectedVisualisationPlugin.helpComponent></selectedVisualisationPlugin.helpComponent>
+          </>
+        )
+      ) : (
+        <div className={'flex flex-wrap gap-2'}>
+          {visualizationPlugins.map((p) => (
+            <button key={`helpVisualization${p.name}`} className={'btn btn-sm btn-outline'} onClick={() => setSelectedComponent(p.name)}>
+              {p.name}
+            </button>
           ))}
+        </div>
+      )}
     </div>
   );
 }

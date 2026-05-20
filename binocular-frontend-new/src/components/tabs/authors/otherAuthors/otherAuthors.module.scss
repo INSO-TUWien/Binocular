@@ -58,6 +58,12 @@ $authorRowHeight :1.5rem;
   pointer-events: none;
 }
 
+.authorContainerHorizontal{
+  display: inline-block;
+  float: left;
+  width: 15rem;
+}
+
 .authorDropOther{
   border: 2px dashed;
   @apply border-accent;

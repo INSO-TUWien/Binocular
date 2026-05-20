@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { type AppDispatch, type RootState, useAppDispatch } from '../../../../../redux';
 import { addSprint } from '../../../../../redux/reducer/data/sprintsReducer.ts';
 import { addNotification } from '../../../../../redux/reducer/general/notificationsReducer.ts';
@@ -10,10 +10,33 @@ function AddSprintDialogMultipleTabs() {
 
   const sprintList = useSelector((state: RootState) => state.sprints.sprintList);
 
+  const lastSprintEnd = sprintList.length > 0 ? sprintList[sprintList.length - 1].endDate : new Date().toISOString().split('.')[0];
+
   const [name, setName] = useState('S [Nr]');
-  const [from, setFrom] = useState(new Date().toISOString().split('.')[0]);
+  const [from, setFrom] = useState(lastSprintEnd);
   const [sprintLength, setSprintLength] = useState(7);
   const [amount, setAmount] = useState(1);
+
+  const previewSprints = useMemo(() => {
+    if (!from || sprintLength <= 0 || amount <= 0) return [];
+    const startCheck = new Date(from);
+    if (isNaN(startCheck.getTime())) return [];
+    const result = [];
+    const startDate = new Date(from);
+    const cap = Math.min(amount, 10);
+    for (let i = 0; i < cap; i++) {
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + sprintLength);
+      const currName = name
+        .replace('[Nr]', `${i + 1}`)
+        .replace('[GlobalNr]', `${sprintList.length + i + 1}`)
+        .replace('[StartDate]', startDate.toLocaleDateString())
+        .replace('[EndDate]', endDate.toLocaleDateString());
+      result.push({ name: currName, start: startDate.toLocaleDateString(), end: endDate.toLocaleDateString() });
+      startDate.setDate(startDate.getDate() + sprintLength);
+    }
+    return result;
+  }, [from, sprintLength, amount, name, sprintList.length]);
 
   return (
     <>
@@ -30,22 +53,22 @@ function AddSprintDialogMultipleTabs() {
         />
         <div className="label">
           <span className="label-text-alt">
-            <div className={'underline'}>Name Modifier:</div>
+            <div className={'underline'}>Name Modifiers:</div>
             <div>
               <span className={'font-bold'}>[Nr]</span>
-              <span> - Number of Sprint added</span>
+              <span> - Sprint number (starting at 1)</span>
             </div>
             <div>
-              <span className={'font-bold'}>[GlobalNR]</span>
-              <span> - Global Sprint counter</span>
+              <span className={'font-bold'}>[GlobalNr]</span>
+              <span> - Global sprint counter</span>
             </div>
             <div>
               <span className={'font-bold'}>[StartDate]</span>
-              <span> - StartDate of Sprint</span>
+              <span> - Start date of sprint</span>
             </div>
             <div>
               <span className={'font-bold'}>[EndDate]</span>
-              <span> - EndDate ofSprint</span>
+              <span> - End date of sprint</span>
             </div>
           </span>
         </div>
@@ -91,6 +114,24 @@ function AddSprintDialogMultipleTabs() {
           }}
         />
       </label>
+      {previewSprints.length > 0 && (
+        <div className="mt-2">
+          <div className="label">
+            <span className="label-text font-bold">Preview:</span>
+          </div>
+          <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
+            {previewSprints.map((p, i) => (
+              <div key={i} className="flex justify-between items-center text-xs px-2 py-1 bg-base-200 rounded">
+                <span className="font-medium">{p.name}</span>
+                <span className="text-base-content/60 ml-2 whitespace-nowrap">
+                  {p.start} → {p.end}
+                </span>
+              </div>
+            ))}
+            {amount > 10 && <div className="text-xs text-base-content/50 text-center py-1">… and {amount - 10} more</div>}
+          </div>
+        </div>
+      )}
       <div></div>
       <div className={'modal-action'}>
         <button
@@ -101,23 +142,27 @@ function AddSprintDialogMultipleTabs() {
               const endDate = new Date(from);
               endDate.setDate(startDate.getDate() + sprintLength);
 
+              let firstSprintName = '';
               for (let i = 0; i < amount; i++) {
                 const startDateString = startDate.toISOString().split('.')[0];
                 const endDateString = endDate.toISOString().split('.')[0];
 
-                //Generate Sprint name
                 let currName = name;
-                currName = currName.replace('[Nr]', `${i}`);
-                currName = currName.replace('[GlobalNr]', `${sprintList.length + i}`);
+                currName = currName.replace('[Nr]', `${i + 1}`);
+                currName = currName.replace('[GlobalNr]', `${sprintList.length + i + 1}`);
                 currName = currName.replace('[StartDate]', `${startDateString}`);
                 currName = currName.replace('[EndDate]', `${endDateString}`);
 
-                dispatch(addNotification({ text: `Added Sprint: ${currName}`, type: AlertType.success }));
+                if (i === 0) firstSprintName = currName;
                 dispatch(addSprint({ name: currName, startDate: startDateString, endDate: endDateString }));
 
                 startDate.setDate(startDate.getDate() + sprintLength);
                 endDate.setDate(endDate.getDate() + sprintLength);
               }
+
+              const notificationText =
+                amount === 1 ? `Added Sprint: ${firstSprintName}` : `Added ${amount} sprints`;
+              dispatch(addNotification({ text: notificationText, type: AlertType.success }));
               (document.getElementById('addSprintDialog') as HTMLDialogElement).close();
             } else {
               dispatch(addNotification({ text: `Error adding Sprint, no name given`, type: AlertType.error }));

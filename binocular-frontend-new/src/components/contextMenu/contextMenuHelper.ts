@@ -21,7 +21,10 @@ export function showContextMenu(x: number, y: number, options: ContextMenuOption
     (document.getElementById('contextMenuPositionController') as HTMLDivElement).style.right = `auto`;
   }
 
-  (document.getElementById('contextMenuContent') as HTMLDivElement).innerHTML = '';
+  const content = document.getElementById('contextMenuContent') as HTMLDivElement;
+  content.innerHTML = '';
+  content.style.padding = '';
+  content.style.width = '';
   options.forEach((o) => {
     const optionIcon = document.createElement('img');
     if (o.icon) {
@@ -39,6 +42,6 @@ export function showContextMenu(x: number, y: number, options: ContextMenuOption
     const option = document.createElement('li');
     option.appendChild(optionButton);
 
-    (document.getElementById('contextMenuContent') as HTMLDivElement).appendChild(option);
+    content.appendChild(option);
   });
 }

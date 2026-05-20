@@ -19,7 +19,7 @@ function SprintView(props: { orientation?: string }) {
           return (
             <div
               key={`sprint${s.name}${new Date(s.startDate).toISOString()}${new Date(s.endDate).toISOString()}`}
-              className={sprintViewStyles.sprint}
+              className={`${sprintViewStyles.sprint} group`}
               onContextMenu={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -36,9 +36,35 @@ function SprintView(props: { orientation?: string }) {
                   },
                 ]);
               }}>
-              <div className={sprintViewStyles.startDate}>{new Date(s.startDate).toDateString()}</div>
-              <div>{s.name}</div>
-              <div className={sprintViewStyles.endDate}>{new Date(s.endDate).toDateString()}</div>
+              <div className={sprintViewStyles.startDate}>
+                {new Date(s.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+              </div>
+              <div className={'flex items-center justify-between'}>
+                <span>{s.name}</span>
+                <div className={'flex gap-0.5 opacity-0 group-hover:opacity-100'}>
+                  <button
+                    className={'hover:opacity-70'}
+                    title={'Edit sprint'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch(sprintToEdit(s));
+                    }}>
+                    <img src={editIcon} className={'h-3'} alt={'edit'} />
+                  </button>
+                  <button
+                    className={'hover:opacity-70'}
+                    title={'Delete sprint'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch(deleteSprint(s));
+                    }}>
+                    <img src={deleteIcon} className={'h-3'} alt={'delete'} />
+                  </button>
+                </div>
+              </div>
+              <div className={sprintViewStyles.endDate}>
+                {new Date(s.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+              </div>
             </div>
           );
         })}

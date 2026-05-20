@@ -33,6 +33,7 @@ export function showConfirmationDialog(x: number, y: number, width: number, text
 
   // window with
   content.style.width = `${width}px`;
+  content.style.padding = '0.75rem 1rem';
 
   const message = document.createElement('div');
   message.textContent = text;

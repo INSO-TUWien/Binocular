@@ -279,7 +279,7 @@ function AuthorList(props: { orientation?: string }) {
                       }}
                     />
                     <div
-                      className="relative flex flex-1 items-center gap-2 px-2 py-1 rounded text-sm cursor-grab overflow-hidden group hover:opacity-80 transition-opacity"
+                      className="relative flex flex-1 items-center gap-2 px-2 py-px rounded text-sm cursor-grab overflow-hidden group hover:opacity-80 transition-opacity"
                       style={{ border: `1px solid ${parentAuthor.color.main}`, background: `${parentAuthor.color.main}0d` }}
                       draggable={true}
                       onDrop={(event) => {
@@ -333,7 +333,7 @@ function AuthorList(props: { orientation?: string }) {
                         <div
                           key={'author' + i}
                           className={
-                            'flex items-center gap-1.5 text-xs cursor-pointer py-0.5 mt-1 ' +
+                            'flex items-center gap-1.5 text-xs cursor-pointer py-0 mt-px ' +
                             (props.orientation === 'horizontal' ? authorListStyles.authorContainerHorizontal : '')
                           }>
                           <div
@@ -347,7 +347,7 @@ function AuthorList(props: { orientation?: string }) {
                             }}
                           />
                           <div
-                            className="relative flex-1 flex items-center gap-1.5 overflow-hidden rounded px-2 py-0.5 hover:opacity-80 transition-opacity"
+                            className="relative flex-1 flex items-center gap-1.5 overflow-hidden rounded px-2 py-px hover:opacity-80 transition-opacity"
                             style={{ border: `1px solid ${author.color.main}`, background: `${author.color.main}0d` }}
                             draggable={true}
                             onDragStart={(event) => {
