@@ -39,7 +39,7 @@ function LayoutOverview() {
           (document.getElementById('layoutOverview') as HTMLDialogElement).close();
         }}>
         <div className={layoutOverviewStyles.layoutOverviewContent}>
-          <div className='ml-2'>
+          <div>
             <h1>Dashboard Layouts:</h1>
             <label className="input input-bordered flex items-center gap-2 mt-2">
               <input type="text" className="grow" placeholder="Search" onChange={(e) => setSearch(e.target.value)} />
