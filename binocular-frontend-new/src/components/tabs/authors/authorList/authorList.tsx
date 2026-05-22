@@ -18,10 +18,9 @@ import { useEffect, useState } from 'react';
 import distinctColors from 'distinct-colors';
 import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
 import addToOtherIcon from '../../../../assets/group_add_gray.svg';
-import settingsIcon from '../../../../assets/settings_gray.svg';
 import editIcon from '../../../../assets/edit_gray.svg';
-import dragIndicatorIcon from '../../../../assets/drag_indicator_gray.svg';
 import removePersonIcon from '../../../../assets/remove_person_gray.svg';
+import { Icon } from '../../../icon';
 import checkBoxIconGray from '../../../../assets/check_box_gray.svg';
 import checkBoxOutlineIconGray from '../../../../assets/check_box_outline_gray.svg';
 import flipIconGray from '../../../../assets/flip_gray.svg';
@@ -233,7 +232,7 @@ function AuthorList(props: { orientation?: string }) {
             className="btn btn-ghost btn-xs p-0.5"
             title="Author settings"
             onClick={() => window.dispatchEvent(new CustomEvent('openSettingsTab', { detail: { tab: 'Authors' } }))}>
-            <img src={settingsIcon} alt="settings" className="w-4 h-4 opacity-50 hover:opacity-90" />
+            <Icon name="settings" className="opacity-50 hover:opacity-90" />
           </button>
         </div>
         <div>
@@ -313,11 +312,7 @@ function AuthorList(props: { orientation?: string }) {
                         ]);
                       }}>
                       <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: parentAuthor.color.main }} />
-                      <img
-                        src={dragIndicatorIcon}
-                        alt={'drag'}
-                        className="relative flex-none w-4 opacity-40 group-hover:opacity-80 cursor-grab ml-1"
-                      />
+                      <Icon name="drag_indicator" className="relative flex-none opacity-40 group-hover:opacity-80 cursor-grab ml-1" />
                       <span
                         className="relative flex-1 font-semibold truncate text-sm"
                         title={parentAuthor.displayName || parentAuthor.user.gitSignature}>
@@ -377,7 +372,7 @@ function AuthorList(props: { orientation?: string }) {
                               ]);
                             }}>
                             <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: author.color.main }} />
-                            <img src={dragIndicatorIcon} alt={'drag'} className="relative flex-none w-4 opacity-40 cursor-grab ml-1" />
+                            <Icon name="drag_indicator" className="relative flex-none opacity-40 cursor-grab ml-1" />
                             <span
                               className="flex-1 truncate text-base-content/60 ml-1"
                               title={author.displayName || author.user.gitSignature}>

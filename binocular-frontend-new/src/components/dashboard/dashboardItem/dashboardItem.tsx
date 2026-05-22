@@ -5,8 +5,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import DashboardItemPopout from '../dashboardItemPopout/dashboardItemPopout.tsx';
 import { increasePopupCount, updateDashboardItem } from '../../../redux/reducer/general/dashboardReducer.ts';
 import { type AppDispatch, type RootState, useAppDispatch } from '../../../redux';
-import openInNewGray from '../../../assets/open_in_new_white.svg';
-import openInNewBlack from '../../../assets/open_in_new_black.svg';
+import { Icon } from '../../icon';
 import { useSelector } from 'react-redux';
 import DashboardItemSettings from '../dashboardItemSettings/dashboardItemSettings.tsx';
 import { parametersInitialState } from '../../../redux/reducer/parameters/parametersReducer.ts';
@@ -232,7 +231,7 @@ const DashboardItem = memo(function DashboardItem(props: {
             <div className={dashboardItemStyles.dashboardItemContent}>
               <div className={dashboardItemStyles.popoutTextContainer}>
                 <div>
-                  <img src={openInNewBlack} alt="Open Visualization" style={{ width: '2rem', height: '2rem' }} />
+                  <Icon name="open_in_new" size="w-8 h-8" />
                   <div className={'font-bold text-2xl'}>Popped Out!</div>
                 </div>
                 <button
@@ -322,7 +321,7 @@ const DashboardItem = memo(function DashboardItem(props: {
                       setPoppedOut(true);
                     }}>
                     <div>Open Visualization in new Window</div>
-                    <img src={openInNewGray} alt="Open Visualization" />
+                    <Icon name="open_in_new" colorClass="primary-content" />
                   </button>
                 </div>
               ) : dataPlugin && store && authors ? (

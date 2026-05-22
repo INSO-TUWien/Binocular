@@ -18,7 +18,7 @@ import {
   showFileTreeElementInfo,
 } from '../../../../redux/reducer/data/filesReducer.ts';
 import { refreshFileList } from '../utils/fileListUtilities';
-import refreshIcon from '../../../../assets/refresh.svg';
+import { Icon } from '../../../icon';
 
 function FileList(props: { orientation?: string; search: string }) {
   const dispatch: AppDispatch = useAppDispatch();
@@ -105,7 +105,7 @@ function FileList(props: { orientation?: string; search: string }) {
               refreshFileList(dataPlugin, dispatch);
             }}
             title="Refresh file selection">
-            <img src={refreshIcon} alt="settings" className="w-4 h-4 opacity-50 hover:opacity-90" />
+            <Icon name="refresh" className="opacity-50 hover:opacity-90" />
           </button>
         </div>
         <div>{fileCounts[filesDataPluginId !== undefined ? filesDataPluginId : -1]} Files indexed</div>

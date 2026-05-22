@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import DownloadIcon from '../../../assets/download.svg?react';
+import { Icon } from '../../icon';
 import styles from './imageExportPanel.module.scss';
 
 type ImageFormat = 'svg' | 'png';
@@ -152,7 +152,7 @@ function ImageExportPanel({ svgData, exportName }: ImageExportPanelProps) {
         )}
 
         <button className="btn btn-primary btn-sm" onClick={handleDownload}>
-          <DownloadIcon fill="currentColor" width="1.4em" height="1.4em" />
+          <Icon name="download" colorClass="primary-content" size="w-5 h-5" />
           {format === 'svg' ? 'Export SVG' : `Export PNG (${scale}x${background === 'white' ? ', white bg' : ''})`}
         </button>
       </div>

@@ -12,8 +12,7 @@ import {
 import type { AuthorType } from '../../types/data/authorType.ts';
 import type { AccountType } from '../../types/data/accountType.ts';
 import type { DatabaseSettingsDataPluginType } from '../../types/settings/databaseSettingsType.ts';
-import dragIndicatorIcon from '../../assets/drag_indicator_gray.svg';
-import groupRemoveIcon from '../../assets/group_remove_gray.svg';
+import { Icon } from '../icon';
 import ColorCodedPanel from '../colorCodedPanel/colorCodedPanel.tsx';
 
 type Filter = 'all' | 'matched' | 'unmatched';
@@ -72,7 +71,7 @@ function AuthorGroupCell({
         onDragOver={(e) => e.preventDefault()}
         onClick={onClick}>
         <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: author.color.main }} />
-        <img src={dragIndicatorIcon} alt="drag" className="relative flex-none w-4 opacity-40 group-hover:opacity-80 cursor-grab ml-1" />
+        <Icon name="drag_indicator" className="relative flex-none opacity-40 group-hover:opacity-80 cursor-grab ml-1" />
         <span className="relative flex-1 font-semibold truncate text-sm" title={author.displayName || author.user.gitSignature}>
           {author.displayName || author.user.gitSignature}
         </span>
@@ -85,7 +84,7 @@ function AuthorGroupCell({
               e.stopPropagation();
               onUngroup();
             }}>
-            <img src={groupRemoveIcon} alt="ungroup" className="w-4 h-4" />
+            <Icon name="group_remove" />
           </button>
         )}
       </div>

@@ -6,7 +6,7 @@ import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
 import removeFromOtherIcon from '../../../../assets/group_remove_gray.svg';
 import editIcon from '../../../../assets/edit_gray.svg';
 import type { AuthorType } from '../../../../types/data/authorType.ts';
-import dragIndicatorIcon from '../../../../assets/drag_indicator_gray.svg';
+import { Icon } from '../../../icon';
 
 function OtherAuthors(props: { orientation?: string }) {
   const dispatch: AppDispatch = useAppDispatch();
@@ -61,11 +61,7 @@ function OtherAuthors(props: { orientation?: string }) {
                         ]);
                       }}>
                       <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: parentAuthor.color.main }} />
-                      <img
-                        src={dragIndicatorIcon}
-                        alt={'drag'}
-                        className="relative flex-none w-4 opacity-40 group-hover:opacity-80 cursor-grab ml-1"
-                      />
+                      <Icon name="drag_indicator" className="relative flex-none opacity-40 group-hover:opacity-80 cursor-grab ml-1" />
                       <span
                         className="relative flex-1 font-semibold truncate text-sm"
                         title={parentAuthor.displayName || parentAuthor.user.gitSignature}>
