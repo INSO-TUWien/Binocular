@@ -45,22 +45,20 @@ class LizardService()
         repoPath: String?,
         lizardInclude: String?,
     ): List<String> {
-        val listOfPaths  = lizardInclude?.split(",")?.map{it.trim()}?.filter{it.isNotEmpty()}?:listOf("backend/src", "frontend/src")
+        val listOfPaths  = lizardInclude?.split(",")?.map{it.trim()}?.filter{it.isNotEmpty()}?.distinct()?:listOf("backend/src", "frontend/src")
 
         val includeListOfPathsCleaned = mutableListOf<String>()
 
         listOfPaths.forEach { includePath ->
 
-            val normalizedIncludePath = includePath.replace("\\", "/")
-
-            val includePathCleaned = Path.of(repoPath, normalizedIncludePath).normalize().toAbsolutePath()
+            val includePathCleaned = Path.of(repoPath, includePath).normalize().toAbsolutePath()
 
             if (!includePathCleaned.toFile().isDirectory) {
                 logger.warn("Skipping Lizard path because it is not a directory: {}", includePathCleaned)
                 return@forEach
             }
 
-            includeListOfPathsCleaned.add(normalizedIncludePath)
+            includeListOfPathsCleaned.add(includePath)
 
         }
 
@@ -82,7 +80,7 @@ class LizardService()
         lizardInclude: List<String>,
         threads: Int,
     ){
-        val normalizedRepoPath = Path.of(repoPath).toRealPath().toString().replace("\\", "/")
+        val normalizedRepoPath = Path.of(repoPath).toRealPath().toString()
 
         lizardInclude.forEach { includePath->
 
@@ -345,9 +343,6 @@ class LizardService()
             val maxScore = columns[12].toDouble()
             val avgScore = columns[13].toDouble()
 
-            logger.debug("List: {}",maxScore)
-            logger.debug("List: {}",globalMaxScore)
-
             val normalizedMaxScore =
                 if (globalMaxScore == 0.0){
                     0.0
@@ -369,7 +364,6 @@ class LizardService()
         }
 
         logger.debug("Successfully processed data and added lizard score")
-        logger.debug("List: {}",processedData)
 
         return processedData
     }
