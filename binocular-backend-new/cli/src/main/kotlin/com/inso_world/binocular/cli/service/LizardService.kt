@@ -4,6 +4,7 @@ import java.nio.file.Path
 import com.inso_world.binocular.core.delegates.logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.Locale
 
 /**
  * Service for running Lizard on chosen paths *
@@ -184,7 +185,7 @@ class LizardService()
 
         deleteLizardCsvFiles(repoPath, lizardInclude)
 
-        return allResultsLines
+        return summarizedResult
     }
 
     /**
@@ -228,11 +229,11 @@ class LizardService()
                 parameterValues.max().toString(),
                 lengthValues.max().toString(),
 
-                "%.2f".format(nlocValues.average()),
-                "%.2f".format(ccnValues.average()),
-                "%.2f".format(tokenValues.average()),
-                "%.2f".format(parameterValues.average()),
-                "%.2f".format(lengthValues.average()),
+                "%.2f".format(Locale.US, nlocValues.average()),
+                "%.2f".format(Locale.US, ccnValues.average()),
+                "%.2f".format(Locale.US, tokenValues.average()),
+                "%.2f".format(Locale.US, parameterValues.average()),
+                "%.2f".format(Locale.US, lengthValues.average()),
                 entries.size.toString(),
 
             ).joinToString(",")
@@ -276,6 +277,103 @@ class LizardService()
         }
 
     }
+
+
+    /**
+     * Processes the information from the lizard file. Evaluating the parameters created
+     * by lizard. Giving each a score. Returns a list containing the scores for each of the files
+     *
+     * @param lizardData A list containing all relevant data, created and summarized information from lizard.
+     */
+    fun evaluateLizardData(
+        lizardData: List<String>,
+    ): List<String>{
+
+        val evaluatedRows = mutableListOf<MutableList<String>>()
+
+        var globalMaxScore = 0.0
+        var globalAverageScore = 0.0
+
+        lizardData.forEach{ file ->
+
+            val columns = file.split(Regex(""",(?=(?:[^"]*"[^"]*")*[^"]*$)""")).map{it.trim().removeSurrounding("\"")}.toMutableList()
+
+            val maxNloc = columns[1].toDouble()
+            val maxCcn = columns[2].toDouble()
+            val maxTokens = columns[3].toDouble()
+            val maxParameters = columns[4].toDouble()
+            val maxLength = columns[5].toDouble()
+
+            val avgNloc = columns[6].toDouble()
+            val avgCcn = columns[7].toDouble()
+            val avgTokens = columns[8].toDouble()
+            val avgParameters = columns[9].toDouble()
+            val avgLength = columns[10].toDouble()
+
+            val maxScore =
+                (maxCcn * 5.0) +
+                (maxLength * 3.0) +
+                (maxNloc * 1.5) +
+                (maxTokens * 0.5) +
+                (maxParameters * 0.5)
+
+            val avgScore =
+                (avgCcn * 3.0) +
+                (avgLength * 3.0) +
+                (avgNloc * 2.5) +
+                (avgTokens * 0.5) +
+                (avgParameters * 0.5)
+
+            if (maxScore > globalMaxScore) {
+                globalMaxScore = maxScore
+            }
+
+            if (avgScore > globalAverageScore) {
+                globalAverageScore = avgScore
+            }
+
+            columns.add("%.2f".format(Locale.US, maxScore))
+            columns.add("%.2f".format(Locale.US, avgScore))
+
+            evaluatedRows.add(columns)
+        }
+
+        val processedData = mutableListOf<String>()
+
+        evaluatedRows.forEach { columns ->
+
+            val maxScore = columns[12].toDouble()
+            val avgScore = columns[13].toDouble()
+
+            logger.debug("List: {}",maxScore)
+            logger.debug("List: {}",globalMaxScore)
+
+            val normalizedMaxScore =
+                if (globalMaxScore == 0.0){
+                    0.0
+                } else {
+                    maxScore / globalMaxScore
+                }
+
+            val normalizedAvgScore =
+                if (globalAverageScore == 0.0){
+                    0.0
+                } else {
+                    avgScore / globalAverageScore
+                }
+
+            columns.add("%.4f".format(Locale.US, normalizedMaxScore))
+            columns.add("%.4f".format(Locale.US, normalizedAvgScore))
+
+            processedData.add(columns.joinToString(","))
+        }
+
+        logger.debug("Successfully processed data and added lizard score")
+        logger.debug("List: {}",processedData)
+
+        return processedData
+    }
+
 
 
 }
