@@ -62,8 +62,40 @@ class LizardService()
 
         }
 
-        return includeListOfPathsCleaned
+        return removeSubPaths(includeListOfPathsCleaned)
 
+    }
+
+    /**
+     * Removes any child path, to ensure that each file is only looked at once and not multiple times
+     *
+     * @param paths the paths given after removing duplicates or non existent paths
+     *
+     */
+    private fun removeSubPaths(
+        paths: List<String>
+    ): List<String> {
+        val sortedPaths = paths.map{it.trim().replace("\\", "/").trimEnd('/')}.sortedBy{it.length}
+
+        val result = mutableListOf<String>()
+
+        sortedPaths.forEach { currentPath ->
+
+            val isSubPath = result.any {existingPath ->
+                currentPath == existingPath || currentPath.startsWith("$existingPath/")
+            }
+
+            if (!isSubPath) {
+                result.add(currentPath)
+            } else {
+                logger.debug("Skipping Lizard path because this: {} is a child path of another path", currentPath)
+            }
+
+        }
+
+        logger.debug("Successfully removed any sub path")
+
+        return result
     }
 
     /**
