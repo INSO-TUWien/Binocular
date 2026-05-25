@@ -40,7 +40,8 @@
 }
 
 .placeholderText {
-  color: gray;
+  color: var(--color-base-content);
+  opacity: 0.5;
 }
 
 .dropdownArrow {

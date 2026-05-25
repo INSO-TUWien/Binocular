@@ -25,6 +25,10 @@ function* fetchChangesData<DataType>(dataConnection: DataPlugin, name: string, d
       return currentDataConnection.getAll(state.plugin.dateRange.from, state.plugin.dateRange.to);
     }
   });
-  yield put(setData(data));
-  yield put(setDataState(DataState.COMPLETE));
+  if (data !== undefined) {
+    yield put(setData(data));
+    yield put(setDataState(DataState.COMPLETE));
+  } else {
+    yield put(setDataState(DataState.EMPTY));
+  }
 }

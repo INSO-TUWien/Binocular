@@ -78,6 +78,10 @@
   /* effects */
   --depth: 1;
   --noise: 0;
+
+  /* custom shadows */
+  --shadow-default: 0 0 3px oklch(0 0 0 / 0.2);
+  --shadow-default-inset: 0 0 3px oklch(0 0 0 / 0.2) inset;
 }
 
 @plugin "daisyui/theme" {
@@ -118,4 +122,8 @@
   /* effects */
   --depth: 0;
   --noise: 0;
+
+  /* custom shadows */
+  --shadow-default: 0 0 4px oklch(1 0 0 / 0.12);
+  --shadow-default-inset: 0 0 4px oklch(1 0 0 / 0.12) inset;
 }

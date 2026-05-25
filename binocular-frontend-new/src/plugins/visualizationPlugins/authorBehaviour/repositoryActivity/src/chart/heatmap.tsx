@@ -108,12 +108,12 @@ function Heatmap({
       .attr('rx', 2)
       .attr('ry', 2)
       .attr('opacity', (d) => (d.value === 0 ? 0.1 : 1))
-      .attr('stroke', (d) => (d.value === 0 ? '#333' : 'none'))
-      .attr('stroke-width', (d) => (d.value === 0 ? 1 : 0))
+      .style('stroke', (d) => (d.value === 0 ? 'var(--color-base-content)' : 'none'))
+      .style('stroke-width', (d) => (d.value === 0 ? '1px' : '0'))
       .style('cursor', onCellClick ? 'pointer' : 'default')
       .on('mouseover', function (event, d) {
         if (d.tooltip) {
-          d3.select(this).attr('stroke', '#333').attr('stroke-width', 2);
+          d3.select(this).style('stroke', 'var(--color-base-content)').style('stroke-width', '2px');
 
           tooltip
             .style('opacity', 1)
@@ -128,8 +128,8 @@ function Heatmap({
       .on('mouseout', function (_event, d) {
         // Restore the original stroke based on value
         d3.select(this)
-          .attr('stroke', d.value === 0 ? '#333' : 'none')
-          .attr('stroke-width', d.value === 0 ? 1 : 0);
+          .style('stroke', d.value === 0 ? 'var(--color-base-content)' : 'none')
+          .style('stroke-width', d.value === 0 ? '1px' : '0');
         tooltip.style('opacity', 0);
       })
       .on('click', function (_event, d) {
@@ -146,7 +146,7 @@ function Heatmap({
       .attr('text-anchor', 'end')
       .attr('dominant-baseline', 'middle')
       .style('font-size', '10px')
-      .style('fill', '#666')
+      .style('fill', 'var(--color-base-content)')
       .text((d) => d);
 
     svg
@@ -158,7 +158,7 @@ function Heatmap({
       .attr('y', -8)
       .attr('text-anchor', 'middle')
       .style('font-size', '10px')
-      .style('fill', '#666')
+      .style('fill', 'var(--color-base-content)')
       .text((d) => d);
 
     return () => {
@@ -204,7 +204,7 @@ function Heatmap({
       .attr('x', 0)
       .attr('y', 0)
       .style('font-size', '11px')
-      .style('fill', '#666')
+      .style('fill', 'var(--color-base-content)')
       .style('font-weight', '500')
       .text(legendTitle);
 
@@ -213,7 +213,7 @@ function Heatmap({
       .attr('x', 0)
       .attr('y', legendHeight + 11)
       .style('font-size', '10px')
-      .style('fill', '#666')
+      .style('fill', 'var(--color-base-content)')
       .text(minValue);
 
     svg
@@ -222,7 +222,7 @@ function Heatmap({
       .attr('y', legendHeight + 11)
       .attr('text-anchor', 'end')
       .style('font-size', '10px')
-      .style('fill', '#666')
+      .style('fill', 'var(--color-base-content)')
       .text(maxValue);
   }, [data, color, shouldShowLegend, legendTitle, minValue, maxValue]);
 

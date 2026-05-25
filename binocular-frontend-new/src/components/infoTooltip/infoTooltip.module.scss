@@ -28,16 +28,16 @@
 }
 
 .infoTooltip>div>div{
-  @apply menu;
   @apply bg-base-100;
   @apply rounded;
-  @apply text-neutral-content;
-  box-shadow: $shadow-default;
+  @apply text-base-content;
+  border: 2px solid var(--color-base-300);
   overflow-y: auto;
   max-height: 30rem;
   max-width: 30rem;
   word-break: break-word;
-  padding: 0.75rem;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
 }
 
 

@@ -51,36 +51,38 @@ function SetupDialog() {
         {page === 4 && <SetupDialogDashboardPage></SetupDialogDashboardPage>}
         {page === 5 && <SetupDialogSummaryPage></SetupDialogSummaryPage>}
 
-        <div className={'modal-action'}>
-          {page > 1 && page <= pageCount && (
-            <button className={'btn btn-sm btn-accent'} onClick={() => setPage(page - 1)}>
-              Back
-            </button>
-          )}
-          {page >= pageCount ? (
-            <button
-              className="btn btn-sm btn-primary"
-              onClick={() => {
-                // initialize settings and dashboard state
-                dispatch(initializeSettingsState());
-                dispatch(initializeDashboardState());
-                // timeout needed to get to next event loop tick
-                setTimeout(() => {
-                  location.reload();
-                });
-              }}>
-              Save
-            </button>
-          ) : (
-            <button className={'btn btn-sm btn-primary'} onClick={() => setPage(page + 1)}>
-              Next
-            </button>
-          )}
-          <form method={'dialog'}>
-            <button className={'btn btn-sm btn-error'} style={{ color: '#fff' }}>
-              Cancel
-            </button>
-          </form>
+        <div className={'modal-action justify-between'}>
+          <div className={'flex gap-2'}>
+            <form method={'dialog'}>
+              <button className={'btn btn-sm btn-error'}>Cancel</button>
+            </form>
+            {page > 1 && page <= pageCount && (
+              <button className={'btn btn-sm btn-accent'} onClick={() => setPage(page - 1)}>
+                Back
+              </button>
+            )}
+          </div>
+          <div className={'flex gap-2'}>
+            {page >= pageCount ? (
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={() => {
+                  // initialize settings and dashboard state
+                  dispatch(initializeSettingsState());
+                  dispatch(initializeDashboardState());
+                  // timeout needed to get to next event loop tick
+                  setTimeout(() => {
+                    location.reload();
+                  });
+                }}>
+                Save
+              </button>
+            ) : (
+              <button className={'btn btn-sm btn-primary'} onClick={() => setPage(page + 1)}>
+                Next
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <form method="dialog" className="modal-backdrop">

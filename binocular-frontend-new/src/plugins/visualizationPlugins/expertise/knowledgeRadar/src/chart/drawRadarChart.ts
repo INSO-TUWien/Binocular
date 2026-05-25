@@ -498,7 +498,7 @@ const drawRadarChart = (
       })
       .attr('r', 5)
       .style('fill', chroma(devData.developer.color.main).saturate(5).hex())
-      .style('stroke', 'white')
+      .style('stroke', 'var(--color-base-100)')
       .style('stroke-width', '2px')
       .style('opacity', 0);
 
@@ -548,7 +548,7 @@ const drawRadarChart = (
       .text('Back')
       .style('font-size', '14px')
       .style('font-weight', 'bold')
-      .style('fill', 'white');
+      .style('fill', 'var(--color-base-100)');
   } else {
     centerGroup
       .append('text')

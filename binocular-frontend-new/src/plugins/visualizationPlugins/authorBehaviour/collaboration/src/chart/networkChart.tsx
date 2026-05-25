@@ -114,7 +114,7 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
     const linkSelection = container
       .append('g')
       .attr('class', 'links')
-      .attr('stroke', '#000')
+      .style('stroke', 'var(--color-base-content)')
       .attr('stroke-opacity', 0.6)
       .selectAll('line')
       .data(data.links)
@@ -342,7 +342,11 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
       </div>
     );
 
-    showInfoTooltip(tooltipRef, tooltipVisibleFlagRef, x, y, { headline: '', reactContent: content });
+    showInfoTooltip(tooltipRef, tooltipVisibleFlagRef, x, y, {
+      headline: '',
+      reactContent: content,
+      borderColor: colorScale((link.source as NodeType).group),
+    });
   }
 
   function showNodeTooltip(node: NodeType, x: number, y: number) {
@@ -351,7 +355,11 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
         <div style={{ fontSize: '13px', fontWeight: 500 }}>{node.name || node.url}</div>
       </div>
     );
-    showInfoTooltip(tooltipRef, tooltipVisibleFlagRef, x + 20, y + 20, { headline: '', reactContent: content });
+    showInfoTooltip(tooltipRef, tooltipVisibleFlagRef, x + 20, y + 20, {
+      headline: '',
+      reactContent: content,
+      borderColor: colorScale(node.group),
+    });
   }
 
   function hideTooltip() {
@@ -369,7 +377,7 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
             left: 0,
             width: width,
             height: height,
-            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            backgroundColor: 'var(--color-base-100)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

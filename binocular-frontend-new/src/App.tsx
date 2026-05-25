@@ -1,3 +1,4 @@
+import { Icon } from './components/icon';
 import TabController from './components/tabMenu/tabController/tabController.tsx';
 import Tab from './components/tabMenu/tab/tab.tsx';
 import appStyles from './app.module.scss';
@@ -11,8 +12,6 @@ import VisualizationSelector from './components/tabs/visualizations/visualizatio
 import AuthorList from './components/tabs/authors/authorList/authorList.tsx';
 import OtherAuthors from './components/tabs/authors/otherAuthors/otherAuthors.tsx';
 import TabControllerButton from './components/tabMenu/tabControllerButton/tabControllerButton.tsx';
-import SettingsGray from './assets/settings_gray.svg';
-import ExportGray from './assets/export_gray.svg';
 import { type AppDispatch, type RootState, useAppDispatch } from './redux';
 import { useSelector } from 'react-redux';
 import { setParametersDateRange, setParametersGeneral } from './redux/reducer/parameters/parametersReducer.ts';
@@ -67,8 +66,9 @@ function App() {
       : undefined;
   const [fileSearch, setFileSearch] = useState('');
 
-  const storedTheme = localStorage.getItem('theme');
-  const [theme, setTheme] = useState(storedTheme || 'binocularLight');
+  const storedTheme =
+    localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'binocularDark' : 'binocularLight');
+  const [theme, setTheme] = useState(storedTheme);
 
   useEffect(() => {
     // #v-ifdef PRE_CONFIGURE_DB=='pouchdb'
@@ -82,6 +82,10 @@ function App() {
       });
     // #v-endif
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     const setupDialog: HTMLDialogElement = document.getElementById('setupDialog') as HTMLDialogElement;
@@ -98,7 +102,7 @@ function App() {
 
   return (
     <>
-      <div data-theme={theme} className={appStyles.mainView}>
+      <div className={appStyles.mainView}>
         <TabController appName={'Binocular'}>
           <TabControllerButtonThemeSwitch
             theme={theme}
@@ -112,14 +116,14 @@ function App() {
               dispatch(setExportType(ExportType.all));
               (document.getElementById('exportDialog') as HTMLDialogElement).showModal();
             }}
-            icon={ExportGray}
+            icon={<Icon name="export" size="w-full h-full" />}
             name={'Export'}
             animation={'jump'}></TabControllerButton>
           <TabControllerButton
             onClick={() => {
               (document.getElementById('settingsDialog') as HTMLDialogElement).showModal();
             }}
-            icon={SettingsGray}
+            icon={<Icon name="settings" size="w-full h-full" />}
             name={'Settings'}
             animation={'rotate'}></TabControllerButton>
           <Tab displayName={'Parameters'} alignment={TabAlignment.top}>
@@ -201,10 +205,10 @@ function App() {
           </TabMenuContent>
         </TabController>
       </div>
-      <div data-theme={theme} className={appStyles.statusBar}>
+      <div className={appStyles.statusBar}>
         <StatusBar></StatusBar>
       </div>
-      <div data-theme={theme}>
+      <div>
         <OverlayController></OverlayController>
       </div>
     </>

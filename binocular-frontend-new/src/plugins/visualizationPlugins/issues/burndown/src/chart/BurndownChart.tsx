@@ -116,7 +116,7 @@ export const BurndownChart: React.FC<
             />
 
             <BurndownChartXAxisLegend height={height} width={width} xScale={xScale} />
-            <BurndownChartYAxisLegend height={height} yScale={yScale} />
+            <BurndownChartYAxisLegend height={height} yScale={yScale} maxValue={maxNumberOfIssuesPerGranularity} />
 
             {showSprints && <SprintAreas sprints={sprints} xScale={xScale} height={height} bottomMargin={margin} />}
           </>

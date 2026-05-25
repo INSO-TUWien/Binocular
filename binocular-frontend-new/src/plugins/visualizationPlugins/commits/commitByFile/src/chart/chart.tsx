@@ -65,6 +65,18 @@ function Chart(props: Readonly<VisualizationPluginProperties<SettingsType, DataP
           onChange={handleCommitSelect}
           placeholder="Select a commit..."
           isSearchable
+          styles={{
+            control: (base) => ({ ...base, background: 'var(--color-base-100)', borderColor: 'var(--color-base-300)' }),
+            menu: (base) => ({ ...base, background: 'var(--color-base-100)', zIndex: 2 }),
+            option: (base, state) => ({
+              ...base,
+              background: state.isFocused ? 'var(--color-base-200)' : 'var(--color-base-100)',
+              color: 'var(--color-base-content)',
+            }),
+            singleValue: (base) => ({ ...base, color: 'var(--color-base-content)' }),
+            input: (base) => ({ ...base, color: 'var(--color-base-content)' }),
+            placeholder: (base) => ({ ...base, color: 'var(--color-base-content)', opacity: 0.5 }),
+          }}
         />
       )}
       {dataState !== DataState.FETCHING && commits.length === 0 && <div>No Commits Found</div>}

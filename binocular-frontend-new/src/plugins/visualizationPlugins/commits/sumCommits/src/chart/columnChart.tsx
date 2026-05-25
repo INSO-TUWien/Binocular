@@ -348,11 +348,7 @@ export const ColumnChart = ({ width, height, data, scale, palette, settings }: C
 };
 
 function styleTooltipText(tooltip: d3.Selection<null, unknown, null, undefined>) {
-  return tooltip
-    .style('color', '#ffffff')
-    .style('font-weight', '700')
-    .style('-webkit-text-stroke', '1px #000')
-    .style('paint-order', 'stroke fill');
+  return tooltip.style('background', 'var(--color-base-100)').style('color', 'var(--color-base-content)');
 }
 
 function generateBars(
@@ -392,8 +388,7 @@ function generateBars(
         .select(tooltipRef.current)
         .style('top', 20 + e.pageY + 'px')
         .style('left', e.pageX + 'px')
-        .style('background', palette[d.gitSignature]?.main ?? '#ffffff')
-        .style('border-color', palette[d.gitSignature]?.main ?? '#000000')
+        .style('border-color', palette[d.gitSignature]?.main ?? 'var(--color-base-content)')
         .text(`${d.gitSignature}: ${d.value} Commits`);
 
       styleTooltipText(tooltip);
@@ -440,8 +435,7 @@ function generateBars(
               .select(tooltipRef.current)
               .style('top', 20 + e.pageY + 'px')
               .style('left', e.pageX + 'px')
-              .style('background', palette[seg.gitSignature]?.main ?? '#ffffff')
-              .style('border-color', palette[seg.gitSignature]?.main ?? '#000000')
+              .style('border-color', palette[seg.gitSignature]?.main ?? 'var(--color-base-content)')
               .text(`${seg.label}: ${seg.value} Commits`);
 
             styleTooltipText(tooltip);
@@ -519,8 +513,7 @@ function updateBars(
         .select(tooltipRef.current)
         .style('top', 20 + e.pageY + 'px')
         .style('left', e.pageX + 'px')
-        .style('background', palette[d.gitSignature]?.main ?? '#ffffff')
-        .style('border-color', palette[d.gitSignature]?.main ?? '#000000')
+        .style('border-color', palette[d.gitSignature]?.main ?? 'var(--color-base-content)')
         .text(`${d.user}: ${d.value} Commits`);
 
       styleTooltipText(tooltip);
@@ -552,7 +545,7 @@ function generateMeanLine(
     .attr('class', 'meanLine')
     .attr('x1', 0)
     .attr('x2', boundsWidth)
-    .attr('stroke', '#ff3b30')
+    .style('stroke', 'var(--color-error)')
     .attr('stroke-width', 2)
     .attr('stroke-dasharray', '5,5')
     .attr('y1', y(mean))

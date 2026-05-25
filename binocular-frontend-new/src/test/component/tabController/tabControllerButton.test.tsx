@@ -4,7 +4,7 @@ import TabControllerButton from '../../../components/tabMenu/tabControllerButton
 
 const defaultProps = {
   onClick: vi.fn(),
-  icon: 'test-icon.svg',
+  icon: <span data-testid="test-icon" />,
   name: 'Export',
   animation: 'jump',
 };
@@ -32,10 +32,10 @@ describe('TabControllerButton', () => {
     expect(button).not.toBeDisabled();
   });
 
-  it('C11.4 renders the passed icon/label (name as alt text)', () => {
+  it('C11.4 renders the passed icon and exposes name as aria-label', () => {
     render(<TabControllerButton {...defaultProps} name="Export" />);
-    const img = screen.getByAltText('Export');
-    expect(img).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument();
+    expect(screen.getByTestId('test-icon')).toBeInTheDocument();
   });
 
   it('C11.5 does not call onClick when disabled (component has no disabled prop — onClick always fires)', () => {

@@ -78,14 +78,14 @@
   @apply btn;
   height: 2rem;
   width: 3rem;
-  background: white;
+  background: var(--color-base-100);
 }
 
 .disabledVisualizationButton>div{
   height: 100%;
   display: flex;
   align-items: center;
-  background: grey;
+  background: var(--color-base-300);
   justify-content: start;
 }
 

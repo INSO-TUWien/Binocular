@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react';
 import tabControllerButtonStyles from './tabControllerButton.module.scss';
 
-function TabControllerButton(props: { onClick: () => void; icon: string; name: string; animation: string }) {
+function TabControllerButton(props: { onClick: () => void; icon: ReactNode; name: string; animation: string }) {
   return (
     <>
       <button
+        aria-label={props.name}
         className={tabControllerButtonStyles.tabControllerButton}
         onClick={(e) => {
           (e.target as HTMLButtonElement).classList.remove(
@@ -15,7 +17,7 @@ function TabControllerButton(props: { onClick: () => void; icon: string; name: s
           );
           props.onClick();
         }}>
-        <img src={props.icon} alt={props.name} style={{ pointerEvents: 'none' }} />
+        <span style={{ pointerEvents: 'none' }}>{props.icon}</span>
       </button>
     </>
   );

@@ -33,7 +33,7 @@
 .endDate{
   position: absolute;
   width: max-content;
-  background: #ff3b3055;
+  background: color-mix(in srgb, var(--color-error) 33%, transparent);
   right: 0;
   bottom: -.8rem;
   font-size: .6rem;
@@ -65,7 +65,7 @@
 .startDate{
   position: absolute;
   width: max-content;
-  background: #4cd96455;
+  background: color-mix(in srgb, var(--color-success) 33%, transparent);
   left: 0;
   top: -.8rem;
   font-size: .6rem;

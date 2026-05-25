@@ -30,7 +30,7 @@
   border-radius: 1rem;
   top:0;
   left:0;
-  background: white;
+  background: var(--color-base-content);
   opacity: 0.2;
   animation: linear 10s timeBarFrames;
 }

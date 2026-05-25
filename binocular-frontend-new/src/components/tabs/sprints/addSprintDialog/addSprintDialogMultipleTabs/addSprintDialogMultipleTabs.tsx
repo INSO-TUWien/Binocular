@@ -51,26 +51,20 @@ function AddSprintDialogMultipleTabs() {
           className="input input-xs input-bordered w-full"
           onChange={(e) => setName(e.target.value)}
         />
-        <div className="label">
-          <span className="label-text-alt">
-            <div className={'underline'}>Name Modifiers:</div>
-            <div>
-              <span className={'font-bold'}>[Nr]</span>
-              <span> - Sprint number (starting at 1)</span>
-            </div>
-            <div>
-              <span className={'font-bold'}>[GlobalNr]</span>
-              <span> - Global sprint counter</span>
-            </div>
-            <div>
-              <span className={'font-bold'}>[StartDate]</span>
-              <span> - Start date of sprint</span>
-            </div>
-            <div>
-              <span className={'font-bold'}>[EndDate]</span>
-              <span> - End date of sprint</span>
-            </div>
-          </span>
+        <div className="text-xs mt-1 text-base-content/60 space-y-0.5">
+          <div className={'underline'}>Name Modifiers:</div>
+          <div>
+            <span className={'font-bold'}>[Nr]</span> - Sprint number (starting at 1)
+          </div>
+          <div>
+            <span className={'font-bold'}>[GlobalNr]</span> - Global sprint counter
+          </div>
+          <div>
+            <span className={'font-bold'}>[StartDate]</span> - Start date of sprint
+          </div>
+          <div>
+            <span className={'font-bold'}>[EndDate]</span> - End date of sprint
+          </div>
         </div>
       </label>
       <label className="form-control w-full max-w-xs">
@@ -114,25 +108,21 @@ function AddSprintDialogMultipleTabs() {
           }}
         />
       </label>
-      {previewSprints.length > 0 && (
-        <div className="mt-2">
-          <div className="label">
-            <span className="label-text font-bold">Preview:</span>
-          </div>
-          <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
-            {previewSprints.map((p, i) => (
-              <div key={i} className="flex justify-between items-center text-xs px-2 py-1 bg-base-200 rounded">
-                <span className="font-medium">{p.name}</span>
-                <span className="text-base-content/60 ml-2 whitespace-nowrap">
-                  {p.start} → {p.end}
-                </span>
-              </div>
-            ))}
-            {amount > 10 && <div className="text-xs text-base-content/50 text-center py-1">… and {amount - 10} more</div>}
-          </div>
+      <div className="mt-2">
+        <span className="text-xs font-bold">Preview:</span>
+        <div className="flex flex-col gap-1 max-h-24 overflow-y-auto mt-1">
+          {previewSprints.length === 0 && <div className="text-xs text-base-content/40 text-center py-1">No preview yet</div>}
+          {previewSprints.map((p, i) => (
+            <div key={i} className="flex justify-between items-center text-xs px-2 py-1 bg-base-200 rounded">
+              <span className="font-medium">{p.name}</span>
+              <span className="text-base-content/60 ml-2 whitespace-nowrap">
+                {p.start} → {p.end}
+              </span>
+            </div>
+          ))}
+          {amount > 10 && <div className="text-xs text-base-content/50 text-center py-1">… and {amount - 10} more</div>}
         </div>
-      )}
-      <div></div>
+      </div>
       <div className={'modal-action'}>
         <button
           className={'btn btn-sm btn-primary text-base-100 mr-4'}

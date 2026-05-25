@@ -5,6 +5,7 @@ export interface infoTooltipContent {
   headline: string;
   textContent?: string;
   reactContent?: React.ReactNode;
+  borderColor?: string;
 }
 
 export function showInfoTooltip(
@@ -52,6 +53,7 @@ export function showInfoTooltip(
   }
 
   contentElement.appendChild(tooltipContent);
+  contentElement.style.borderColor = content.borderColor ?? '';
 
   ref.current.style.display = 'block';
   const controllerElement = ref.current.querySelector('#infoTooltipPositionController') as HTMLDivElement;

@@ -55,7 +55,7 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, isVertical, boun
               style={{
                 ...style,
                 backgroundColor: getFileColour(childNode.stats.additions, childNode.stats.deletions),
-                border: '2px solid #3182ce',
+                border: '2px solid var(--color-primary)',
                 borderRadius: '10px',
                 padding: '4px',
                 position: 'relative',
@@ -68,7 +68,11 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, isVertical, boun
               }}
               title={`Folder ${childName}  — +${childNode.stats.additions} / -${childNode.stats.deletions}`}
               onClick={() => onNavigate(childName)}>
-              <img src={folderIcon} alt="Folder Icon" style={{ width: '1.4rem', height: '1.4rem', color: '#3182ce', marginRight: '5px' }} />{' '}
+              <img
+                src={folderIcon}
+                alt="Folder Icon"
+                style={{ width: '1.4rem', height: '1.4rem', color: 'var(--color-primary)', marginRight: '5px' }}
+              />{' '}
               {childName}
             </div>
           );

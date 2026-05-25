@@ -22,7 +22,7 @@ export const IssuesTimelineChartMergeRequest: React.FC<{
         : coloringMode === 'assignee'
           ? head.assignee?.user?.gitSignature
           : undefined) ?? '',
-    )?.main ?? 'lightgrey';
+    )?.main ?? 'var(--color-base-300)';
 
   return (
     <circle
@@ -31,8 +31,8 @@ export const IssuesTimelineChartMergeRequest: React.FC<{
       cx={x}
       cy={height - margin / 2}
       r={6}
-      fill={tail.length === 0 ? color : 'lightgrey'}
-      stroke={'darkgray'}
+      fill={tail.length === 0 ? color : 'var(--color-base-300)'}
+      stroke={'var(--color-base-content)'}
       onClick={onClick}
     />
   );

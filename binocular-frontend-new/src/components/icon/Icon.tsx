@@ -2,6 +2,10 @@ import { ArrowDownIcon } from './icons/ArrowDownIcon';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { ArrowRightIcon } from './icons/ArrowRightIcon';
 import { ArrowUpIcon } from './icons/ArrowUpIcon';
+import { CalendarIcon } from './icons/CalendarIcon';
+import { ChevronBackIcon } from './icons/ChevronBackIcon';
+import { ChevronLeftIcon } from './icons/ChevronLeftIcon';
+import { ChevronRightIcon } from './icons/ChevronRightIcon';
 import { DeleteIcon } from './icons/DeleteIcon';
 import { DownloadIcon } from './icons/DownloadIcon';
 import { DragIndicatorIcon } from './icons/DragIndicatorIcon';
@@ -12,6 +16,7 @@ import { HideIcon } from './icons/HideIcon';
 import { InfoIcon } from './icons/InfoIcon';
 import { OpenInNewIcon } from './icons/OpenInNewIcon';
 import { RefreshIcon } from './icons/RefreshIcon';
+import { ExportIcon } from './icons/ExportIcon';
 import { SettingsIcon } from './icons/SettingsIcon';
 import { ShowIcon } from './icons/ShowIcon';
 
@@ -20,10 +25,15 @@ const ICONS = {
   arrow_left: ArrowLeftIcon,
   arrow_right: ArrowRightIcon,
   arrow_up: ArrowUpIcon,
+  calendar: CalendarIcon,
+  chevron_back: ChevronBackIcon,
+  chevron_left: ChevronLeftIcon,
+  chevron_right: ChevronRightIcon,
   delete: DeleteIcon,
   download: DownloadIcon,
   drag_indicator: DragIndicatorIcon,
   edit: EditIcon,
+  export: ExportIcon,
   group_add: GroupAddIcon,
   group_remove: GroupRemoveIcon,
   hide: HideIcon,

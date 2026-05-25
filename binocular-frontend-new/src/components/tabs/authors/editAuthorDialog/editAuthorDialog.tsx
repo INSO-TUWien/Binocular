@@ -222,7 +222,9 @@ function EditAuthorDialog() {
             <div className={editAuthorDialogStyles.authorList}>
               {assignedAccount !== undefined && assignedAccount !== null ? (
                 <div className={editAuthorDialogStyles.authorListItem} key={assignedAccount.id}>
-                  <span style={{ borderColor: 'green', background: 'lightgreen' }} className={editAuthorDialogStyles.authorName}>
+                  <span
+                    style={{ borderColor: 'var(--color-success)', background: 'color-mix(in srgb, var(--color-success) 20%, transparent)' }}
+                    className={editAuthorDialogStyles.authorName}>
                     {assignedAccount.name || assignedAccount.login}
                   </span>
                   <button className={editAuthorDialogStyles.removeButton} onClick={() => dispatch(resetAccount(assignedAccount.id))}>

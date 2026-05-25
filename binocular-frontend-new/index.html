@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Binocular</title>
     <link rel="icon" type="image/svg+xml" href="/src/assets/logo_icon.svg" />
+    <script>
+      const t = localStorage.getItem('theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'binocularDark' : 'binocularLight');
+      document.documentElement.setAttribute('data-theme', t);
+    </script>
   </head>
   <body>
     <div id="root"></div>

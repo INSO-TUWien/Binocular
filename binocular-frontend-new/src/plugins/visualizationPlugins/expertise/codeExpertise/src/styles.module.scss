@@ -1,3 +1,5 @@
+@reference "../../../../../index.scss";
+
 // Custom variables to replace Bulma variables
 $monospace-font: 'Courier New', Courier, monospace;
 
@@ -6,7 +8,7 @@ $monospace-font: 'Courier New', Courier, monospace;
   position: absolute;
   top: 5px;
   left: 5px;
-  background: rgba(255, 255, 255, 0.67);
+  background: var(--color-base-100);
 }
 
 // Overall container for the chart and the details sideboard
@@ -36,8 +38,7 @@ $monospace-font: 'Courier New', Courier, monospace;
     overflow: hidden;
 
     .expandButton {
-      background-color: gray;
-      color: white;
+      @apply bg-base-300 text-base-content;
       font-size: 120%;
       font-weight: bold;
       padding: 2px;
@@ -55,11 +56,11 @@ $monospace-font: 'Courier New', Courier, monospace;
       overflow: auto;
 
       .field {
-        border-color: #bebebe;
         margin-bottom: 20px;
         padding: 0.5rem;
-        border: 1px solid #dbdbdb;
+        border: 1px solid;
         border-radius: 4px;
+        @apply border-base-300;
       }
 
       .generalDetails {
@@ -77,21 +78,21 @@ $monospace-font: 'Courier New', Courier, monospace;
           margin-right: 5px;
           margin-bottom: 5px;
           border-bottom: dotted;
-          border-color: #606060;
+          border-color: var(--color-base-content);
+          opacity: 0.4;
         }
 
         .issueButton {
           width: fit-content;
           margin-top: 15px;
           padding: 0.375rem 0.75rem;
-          background-color: #4882e0;
-          color: white;
           border: none;
           border-radius: 4px;
           cursor: pointer;
-          
+          @apply bg-primary text-primary-content;
+
           &:hover {
-            background-color: #3a6fc0;
+            @apply bg-primary/80;
           }
         }
       }
@@ -118,29 +119,24 @@ $monospace-font: 'Courier New', Courier, monospace;
     }
 
     .commitDetailsGood {
-      background-color: #4cb13a;
-      border-color: darkgreen;
-      color: white;
       border: solid;
       border-width: 1px;
       border-radius: 5px;
+      @apply bg-success text-success-content border-success;
     }
 
     .commitDetailsBad {
-      background-color: #ff5a36;
-      border-color: darkred;
-      color: white;
       border: solid;
       border-width: 1px;
       border-radius: 5px;
+      @apply bg-error text-error-content border-error;
     }
 
     .commitDetailsNeutral {
-      background-color: #f8f8f8;
-      border-color: #dbdbdb;
       border: solid;
       border-width: 1px;
       border-radius: 5px;
+      @apply bg-base-200 border-base-300;
     }
 
     .commitDetails {
@@ -231,23 +227,22 @@ $monospace-font: 'Courier New', Courier, monospace;
     #select {
       width: 100%;
       padding: 0.5rem;
-      border: 1px solid #dbdbdb;
+      border: 1px solid;
       border-radius: 4px;
-      background-color: white;
       font-size: 1rem;
       line-height: 1.5;
+      @apply border-base-300 bg-base-100;
     }
 
     .filepicker {
       .moduleLine {
-        border: 1px solid #4882e0;
         display: flex;
         flex-direction: row;
         margin: 4px;
         cursor: default;
-        background-color: #4882e0;
-        color: whitesmoke;
         font-weight: bold;
+        border: 1px solid;
+        @apply border-primary bg-primary text-primary-content;
       }
       
       .fileLine {
@@ -255,7 +250,7 @@ $monospace-font: 'Courier New', Courier, monospace;
         flex-direction: row;
         margin: 4px;
         cursor: default;
-        background-color: #F8F8F8;
+        @apply bg-base-100;
       }
       
       .moduleName {
@@ -280,8 +275,8 @@ $monospace-font: 'Courier New', Courier, monospace;
       .childContainer {
         margin-left: 10px;
         border-left: solid;
-        border-color: #bebebe;
         padding-left: 10px;
+        @apply border-base-300;
       }
     }
   }

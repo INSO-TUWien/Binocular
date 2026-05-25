@@ -1,8 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import ChevronLeftIcon from '../../assets/chevronLeft.svg';
-import ChevronRightIcon from '../../assets/chevronRight.svg';
-import ChevronBackIcon from '../../assets/chevronBack.svg';
-import CalendarIcon from '../../assets/calendar.svg';
+import { Icon } from '../../../../../../components/icon';
 
 interface WeekPickerProps {
   onChange?: (weekStart: Date) => void;
@@ -139,49 +136,49 @@ export default function WeekPicker({ onChange, onBack, initialWeek }: WeekPicker
   return (
     <div className="mb-2 flex items-center gap-2">
       {onBack && (
-        <button onClick={onBack} className="p-1 hover:bg-gray-100 rounded transition-colors" aria-label="Back to activity timeline">
-          <img src={ChevronBackIcon} className="w-5 h-5 text-gray-600" />
+        <button onClick={onBack} className="p-1 hover:bg-base-200 rounded transition-colors" aria-label="Back to activity timeline">
+          <Icon name="chevron_back" size="w-5 h-5" />
         </button>
       )}
 
-      <div className="bg-white rounded shadow p-1 flex-1 relative">
+      <div className="bg-base-100 rounded shadow p-1 flex-1 relative">
         <div className="flex items-center justify-between gap-2">
           <button
             onClick={previousWeek}
-            className="p-1 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+            className="p-1 hover:bg-base-200 rounded transition-colors flex-shrink-0"
             aria-label="Previous week">
-            <img src={ChevronLeftIcon} alt="Previous" className="w-4 h-4 text-gray-600" />
+            <Icon name="chevron_left" size="w-4 h-4" />
           </button>
 
           <button
             onClick={() => setIsPopupOpen(!isPopupOpen)}
-            className="flex-1 text-center hover:bg-gray-50 rounded px-2 py-1 transition-colors relative">
-            <div className="text-xs font-medium text-gray-800 flex items-center justify-center gap-1">
-              <img src={CalendarIcon} alt="Calendar" className="w-4 h-4 text-gray-500" />
+            className="flex-1 text-center hover:bg-base-200 rounded px-2 py-1 transition-colors relative">
+            <div className="text-xs font-medium text-base-content flex items-center justify-center gap-1">
+              <Icon name="calendar" size="w-4 h-4" />
               <span>{formatWeekShort(selectedWeek)}</span>
             </div>
           </button>
 
-          <button onClick={nextWeek} className="p-1 hover:bg-gray-100 rounded transition-colors flex-shrink-0" aria-label="Next week">
-            <img src={ChevronRightIcon} alt="Next" className="w-4 h-4 text-gray-600" />
+          <button onClick={nextWeek} className="p-1 hover:bg-base-200 rounded transition-colors flex-shrink-0" aria-label="Next week">
+            <Icon name="chevron_right" size="w-4 h-4" />
           </button>
         </div>
         {/* Popup Calendar */}
         {isPopupOpen && (
           <div className="absolute z-50 mt-1 left-0 w-full max-w-sm" ref={popupRef}>
-            <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-4 max-h-80 overflow-auto">
+            <div className="bg-base-100 rounded-lg shadow-xl border border-base-300 p-4 max-h-80 overflow-auto">
               <div className="flex items-center justify-between mb-4">
                 <button
                   onClick={previousMonth}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-base-200 rounded-lg transition-colors"
                   aria-label="Previous 3 months">
-                  <img src={ChevronLeftIcon} alt="Previous" className="w-5 h-5" />
+                  <Icon name="chevron_left" size="w-5 h-5" />
                 </button>
 
-                <h3 className="text-lg font-semibold text-gray-800">{monthRangeLabel}</h3>
+                <h3 className="text-lg font-semibold text-base-content">{monthRangeLabel}</h3>
 
-                <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Next 3 months">
-                  <img src={ChevronRightIcon} alt="Next" className="w-5 h-5" />
+                <button onClick={nextMonth} className="p-2 hover:bg-base-200 rounded-lg transition-colors" aria-label="Next 3 months">
+                  <Icon name="chevron_right" size="w-5 h-5" />
                 </button>
               </div>
 
@@ -193,8 +190,8 @@ export default function WeekPicker({ onChange, onBack, initialWeek }: WeekPicker
                       onClick={() => selectWeek(week.start)}
                       className={`px-2 py-1.5 rounded text-center transition-all text-xs ${
                         isSameWeek(week.start, selectedWeek)
-                          ? 'bg-blue-500 text-white shadow-md'
-                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                          ? 'bg-primary text-primary-content shadow-md'
+                          : 'bg-base-200 text-base-content hover:bg-base-300'
                       }`}>
                       <div className="font-medium leading-tight">{formatWeek(week)}</div>
                     </button>

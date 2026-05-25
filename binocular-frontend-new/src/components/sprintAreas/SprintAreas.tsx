@@ -32,7 +32,7 @@ export const SprintAreas: React.FC<{
     <>
       <defs>
         <pattern id={patternId} patternUnits={'userSpaceOnUse'} width={8} height={8}>
-          <path d={'M-1,1 l2,-2 M0,8 l8,-8 M3,5 l2,-2'} stroke={'#FF3B30'} strokeWidth={1} />
+          <path d={'M-1,1 l2,-2 M0,8 l8,-8 M3,5 l2,-2'} stroke={'var(--color-error)'} strokeWidth={1} />
         </pattern>
       </defs>
 
@@ -46,21 +46,21 @@ export const SprintAreas: React.FC<{
         return (
           <g key={s.id}>
             <g>
-              <line x1={xStart} y1={yStart} x2={xStart} y2={height - bottomMargin * 2} width={1} stroke={'#4CD964'} />
+              <line x1={xStart} y1={yStart} x2={xStart} y2={height - bottomMargin * 2} width={1} stroke={'var(--color-success)'} />
               <path
                 d={trianglePath}
                 width={triangleDimensions}
                 height={triangleDimensions}
-                fill={'#4CD964'}
+                fill={'var(--color-success)'}
                 // sub offset for the x direction, otherwise the triangle doesn't connect with the line.
                 transform={`translate(${xStart + triangleDimensions / 2 - 2}, ${yStart + triangleDimensions / 2}) rotate(90)`}
               />
-              <line x1={xEnd} y1={yEnd} x2={xEnd} y2={height - bottomMargin * 2} width={1} stroke={'#FF3B30'} />
+              <line x1={xEnd} y1={yEnd} x2={xEnd} y2={height - bottomMargin * 2} width={1} stroke={'var(--color-error)'} />
               <path
                 d={trianglePath}
                 width={triangleDimensions}
                 height={triangleDimensions}
-                fill={'#FF3B30'}
+                fill={'var(--color-error)'}
                 // add offset for the x direction, otherwise the triangle doesn't connect with the line.
                 transform={`translate(${xEnd - triangleDimensions / 2 + 2}, ${yEnd + triangleDimensions / 2}) rotate(-90)`}
               />
@@ -72,7 +72,7 @@ export const SprintAreas: React.FC<{
                 y={Math.max(0, height - bottomMargin * 2 - rectHeight)}
                 height={rectHeight}
                 width={xEnd - xStart}
-                fill={'white'}
+                fill={'var(--color-base-100)'}
               />
               <rect
                 x={xStart}
@@ -80,7 +80,7 @@ export const SprintAreas: React.FC<{
                 height={rectHeight}
                 width={xEnd - xStart}
                 fill={`url(#${patternId})`}
-                stroke={'#FF3B30'}
+                stroke={'var(--color-error)'}
               />
               <text
                 x={xStart + 4}
@@ -88,7 +88,8 @@ export const SprintAreas: React.FC<{
                 y={Math.max(0, height - bottomMargin * 2 - 3)}
                 fontSize={'0.75rem'}
                 paintOrder={'stroke'}
-                stroke={'white'}
+                fill={'var(--color-base-content)'}
+                stroke={'var(--color-base-100)'}
                 strokeWidth={2}>
                 {s.name}
               </text>

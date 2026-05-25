@@ -26,11 +26,13 @@ export function showContextMenu(x: number, y: number, options: ContextMenuOption
   content.style.padding = '';
   content.style.width = '';
   options.forEach((o) => {
-    const optionIcon = document.createElement('span');
+    const optionIcon = document.createElement('img');
     if (o.icon) {
-      optionIcon.style.cssText = `display:inline-block;width:1rem;height:1rem;flex-shrink:0;background-color:currentColor;-webkit-mask-image:url(${o.icon});mask-image:url(${o.icon});mask-size:contain;mask-repeat:no-repeat;mask-position:center;`;
+      optionIcon.src = o.icon;
+      const isDark = document.documentElement.getAttribute('data-theme') === 'binocularDark';
+      optionIcon.style.cssText = `width:1rem;height:1rem;flex-shrink:0;object-fit:contain;${isDark ? 'filter:invert(1);' : ''}`;
     } else {
-      optionIcon.style.cssText = 'display:inline-block;width:1rem;height:1rem;flex-shrink:0;';
+      optionIcon.style.cssText = 'width:1rem;height:1rem;flex-shrink:0;';
     }
 
     const optionLabel = document.createElement('span');

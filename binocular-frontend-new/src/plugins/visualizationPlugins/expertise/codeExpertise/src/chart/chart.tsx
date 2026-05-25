@@ -149,7 +149,7 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
           preserveAspectRatio="xMidYMid meet">
           <g transform={`translate(${center.x}, ${center.y})`}>
             {segments}
-            <circle cx="0" cy="0" r={radius / 3} stroke={'#666666'} fill={'var(--color-base-100)'} />
+            <circle cx="0" cy="0" r={radius / 3} stroke={'var(--color-base-content)'} fill={'var(--color-base-100)'} />
           </g>
         </svg>
       );
