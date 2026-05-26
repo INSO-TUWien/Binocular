@@ -15,18 +15,21 @@ export const BurndownChartYAxisLegend: React.FC<{ height: number; yScale: d3.Sca
     <g>
       <rect x={margin * 2} y={topY} height={bottomY - topY} width={1} fill={'var(--color-base-content)'} />
       <rect x={0} y={0} width={margin * 2} height={height} fill={'var(--color-base-100)'} />
-      {yScale.ticks().map((t) => {
-        const y = yScale(t);
+      {yScale
+        .ticks()
+        .filter((t) => t >= 0 && t <= maxValue)
+        .map((t) => {
+          const y = yScale(t);
 
-        return (
-          <g key={t}>
-            <rect x={margin * 2 - 8} y={y} width={8} height={1} fill={'var(--color-base-content)'} />
-            <text x={margin} y={y} fontSize={10} textAnchor={'middle'} alignmentBaseline={'central'} fill={'var(--color-base-content)'}>
-              {t}
-            </text>
-          </g>
-        );
-      })}
+          return (
+            <g key={t}>
+              <rect x={margin * 2 - 8} y={y} width={8} height={1} fill={'var(--color-base-content)'} />
+              <text x={margin} y={y} fontSize={10} textAnchor={'middle'} alignmentBaseline={'central'} fill={'var(--color-base-content)'}>
+                {t}
+              </text>
+            </g>
+          );
+        })}
     </g>
   );
 };

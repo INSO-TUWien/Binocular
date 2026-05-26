@@ -313,7 +313,7 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={item}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(128,128,128,0.2)')}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-base-200)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
                 <span>{issue.title}</span>
               </a>
@@ -332,7 +332,7 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={item}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(128,128,128,0.2)')}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-base-200)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
                 <span>{mr.title}</span>
               </a>
