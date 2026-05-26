@@ -12,17 +12,17 @@ import { setTabList } from '../../../redux/reducer/general/tabsReducer.ts';
 import _ from 'lodash';
 import TabControllerButtonThemeSwitch from '../tabControllerButtonThemeSwitch/tabControllerButtonThemeSwitch.tsx';
 import { type ContextMenuOption, showContextMenu } from '../../contextMenu/contextMenuHelper.ts';
-import showIcon from '../../../assets/show_gray.svg';
-import hideIcon from '../../../assets/hide_gray.svg';
-import arrowUpIcon from '../../../assets/arrow_up_gray.svg';
-import arrowRightIcon from '../../../assets/arrow_right_gray.svg';
-import arrowDownIcon from '../../../assets/arrow_down_gray.svg';
-import arrowLeftIcon from '../../../assets/arrow_left_gray.svg';
+import { ShowIcon } from '../../icon/icons/ShowIcon';
+import { HideIcon } from '../../icon/icons/HideIcon';
+import { ArrowUpIcon } from '../../icon/icons/ArrowUpIcon';
+import { ArrowRightIcon } from '../../icon/icons/ArrowRightIcon';
+import { ArrowDownIcon } from '../../icon/icons/ArrowDownIcon';
+import { ArrowLeftIcon } from '../../icon/icons/ArrowLeftIcon';
 import { DragDropElementType } from '../../../types/general/dragDropElementType.ts';
 import { addNotification } from '../../../redux/reducer/general/notificationsReducer.ts';
 import { AlertType } from '../../../types/general/alertType.ts';
 import { placeDashboardItem } from '../../../redux/reducer/general/dashboardReducer.ts';
-import LogoIconText from '../../../assets/logo_icon_text.svg';
+import { Icon } from '../../icon';
 
 interface TabContents {
   [id: number]: ReactElement;
@@ -130,7 +130,7 @@ function TabController(props: {
             }
           }}>
           <div className={tabControllerStyles.appName}>
-            <img src={LogoIconText} alt={props.appName} className={'h-full'} />
+            <Icon name="logo_text" className={'h-full w-auto'} />
           </div>
 
           {tabList
@@ -412,38 +412,38 @@ function generateHandle(
         if (tab.selected) {
           contextMenuOptions.push({
             label: 'hide',
-            icon: hideIcon,
+            icon: HideIcon,
             function: () => setTabList(tabList.map((listTab) => changeTabVisibility(listTab, tab, false))),
           });
         } else {
           contextMenuOptions.push({
             label: 'show',
-            icon: showIcon,
+            icon: ShowIcon,
             function: () => setTabList(tabList.map((listTab) => changeTabVisibility(listTab, tab, true))),
           });
         }
 
         const contextMenuOptionMoveTop: ContextMenuOption = {
           label: 'move to top',
-          icon: arrowUpIcon,
+          icon: ArrowUpIcon,
           function: () => moveTab(tab.displayName, TabAlignment.top, tabList, setTabList, setDragState),
         };
 
         const contextMenuOptionMoveRight: ContextMenuOption = {
           label: 'move to right',
-          icon: arrowRightIcon,
+          icon: ArrowRightIcon,
           function: () => moveTab(tab.displayName, TabAlignment.right, tabList, setTabList, setDragState),
         };
 
         const contextMenuOptionMoveBottom: ContextMenuOption = {
           label: 'move to bottom',
-          icon: arrowDownIcon,
+          icon: ArrowDownIcon,
           function: () => moveTab(tab.displayName, TabAlignment.bottom, tabList, setTabList, setDragState),
         };
 
         const contextMenuOptionMoveLeft: ContextMenuOption = {
           label: 'move to left',
-          icon: arrowLeftIcon,
+          icon: ArrowLeftIcon,
           function: () => moveTab(tab.displayName, TabAlignment.left, tabList, setTabList, setDragState),
         };
 

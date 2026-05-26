@@ -1,5 +1,5 @@
 import layoutSelectorStyles from './layoutSelector.module.scss';
-import VisualizationsIcon from '../../../../assets/visualizations_white.svg';
+import { Icon } from '../../../icon';
 import { showLayoutOverview } from '../layoutOverview/layoutOverviewHelper';
 import { recommendLayouts } from '../../../dashboard/recommendedDashboards/dashboardRegistry';
 import { DashboardLayoutCategory } from '../../../../types/general/dashboardLayoutType';
@@ -92,7 +92,7 @@ function LayoutSelector(props: { orientation?: string }) {
             ))}
         </div>
         <button className="btn btn-square btn-primary btn-sm" onClick={(e) => showLayoutOverview(e.clientX, e.clientY)}>
-          <img src={VisualizationsIcon} />
+          <Icon name="visualizations" size="w-6 h-6" />
         </button>
       </div>
       <button className="btn btn-primary w-fit m-auto" onClick={() => setShowModal(true)}>

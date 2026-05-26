@@ -1,10 +1,10 @@
-import LogoIcon from '../../../../assets/logo_icon.svg';
+import { Icon } from '../../../icon';
 
 function SetupDialogStartPage() {
   return (
     <>
       <div className={'flex items-center gap-3'}>
-        <img src={LogoIcon} alt={'Binocular'} className={'h-12'} />
+        <Icon name="logo" className={'h-12 w-auto'} />
         <h1>Welcome to Binocular</h1>
       </div>
       <p>

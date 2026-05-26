@@ -1,6 +1,6 @@
 import { visualizationPlugins } from '../../../../plugins/pluginRegistry.ts';
 import visualizationSelectorStyles from './visualizationSelector.module.scss';
-import VisualizationsIcon from '../../../../assets/visualizations_white.svg';
+import { Icon } from '../../../icon';
 import { showVisualizationOverview } from './visualizationOverview/visualizationOverviewHelper.ts';
 import VisualizationSelectorDragButton from './visualizationSelectorDragButton/visualizationSelectorDragButton.tsx';
 function VisualizationSelector(props: { orientation?: string }) {
@@ -28,7 +28,7 @@ function VisualizationSelector(props: { orientation?: string }) {
             })}
         </div>
         <button className="btn btn-square btn-primary btn-sm" onClick={(e) => showVisualizationOverview(e.clientX, e.clientY)}>
-          <img src={VisualizationsIcon} />
+          <Icon name="visualizations" size="w-6 h-6" />
         </button>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import fileListElementsStyles from '../fileTreeElements.module.scss';
-import FileIcon from '../../../../assets/file_gray.svg';
+import { Icon } from '../../../icon';
 import { formatName } from '../../utils/fileTreeUtilities';
 import type { FileTreeElementType } from '../../../../types/data/fileListType';
 
@@ -38,7 +38,7 @@ function FileTreeFile(props: {
               props.onShowContextMenu(e, props.file);
             }
           }}>
-          <img src={FileIcon} alt={`folder ${props.file.name}`} />
+          <Icon name="file" size="w-4 h-4" />
           <span>{formatName(props.file.searchTerm, props.file.name)}</span>
         </div>
       </div>

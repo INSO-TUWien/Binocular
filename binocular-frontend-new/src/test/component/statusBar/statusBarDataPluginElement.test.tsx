@@ -95,7 +95,7 @@ describe('StatusBarDataPluginElement', () => {
   it('C33.3: socket status Idle → idle icon is present', () => {
     // Initial state is already Idle
     renderElement(basePluginConfig, store);
-    const idleImgs = screen.getAllByAltText('idle');
+    const idleImgs = screen.getAllByRole('img', { name: 'idle' });
     expect(idleImgs.length).toBeGreaterThan(0);
   });
 
@@ -104,8 +104,7 @@ describe('StatusBarDataPluginElement', () => {
       store.dispatch(setConnectionStatus({ status: SocketConnectionStatusType.Connected }));
     });
     renderElement(basePluginConfig, store);
-    // Connected image has alt="idle" per the component source
-    const imgs = screen.getAllByAltText('idle');
+    const imgs = screen.getAllByRole('img', { name: 'connected_to_api' });
     expect(imgs.length).toBeGreaterThan(0);
     // Confirm the connected state is actually in the store
     expect(store.getState().socketConnection.status).toBe(SocketConnectionStatusType.Connected);
@@ -116,7 +115,7 @@ describe('StatusBarDataPluginElement', () => {
       store.dispatch(setConnectionStatus({ status: SocketConnectionStatusType.Disconnected }));
     });
     renderElement(basePluginConfig, store);
-    const imgs = screen.getAllByAltText('idle');
+    const imgs = screen.getAllByRole('img', { name: 'connected_to_api_failed' });
     expect(imgs.length).toBeGreaterThan(0);
     // Confirm the disconnected state is actually in the store
     expect(store.getState().socketConnection.status).toBe(SocketConnectionStatusType.Disconnected);

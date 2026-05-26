@@ -3,8 +3,8 @@ import { useSelector } from 'react-redux';
 import { type AppDispatch, type RootState, useAppDispatch } from '../../../../redux';
 import { editAuthor, moveAuthorToOther, resetAuthor, setDragging } from '../../../../redux/reducer/data/authorsReducer.ts';
 import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
-import removeFromOtherIcon from '../../../../assets/group_remove_gray.svg';
-import editIcon from '../../../../assets/edit_gray.svg';
+import { GroupRemoveIcon } from '../../../icon/icons/GroupRemoveIcon';
+import { EditIcon } from '../../../icon/icons/EditIcon';
 import type { AuthorType } from '../../../../types/data/authorType.ts';
 import { Icon } from '../../../icon';
 
@@ -50,12 +50,12 @@ function OtherAuthors(props: { orientation?: string }) {
                         showContextMenu(e.clientX, e.clientY, [
                           {
                             label: 'edit author',
-                            icon: editIcon,
+                            icon: EditIcon,
                             function: () => dispatch(editAuthor(parentAuthor.id)),
                           },
                           {
                             label: 'remove from other',
-                            icon: removeFromOtherIcon,
+                            icon: GroupRemoveIcon,
                             function: () => dispatch(resetAuthor(parentAuthor.id)),
                           },
                         ]);

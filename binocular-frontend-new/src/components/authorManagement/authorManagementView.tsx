@@ -140,24 +140,6 @@ function AuthorManagementView() {
 
   const authors: AuthorType[] = (dataPluginId !== undefined ? authorLists[dataPluginId] : undefined) || [];
 
-  if (authors.length === 0) {
-    return (
-      <div role="alert" className="alert alert-info mt-2">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-6 w-6 shrink-0 stroke-current">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        <span>
-          No authors loaded. Make sure a data source is connected in <strong>Settings → Database</strong>.
-        </span>
-      </div>
-    );
-  }
-
   const topLevel = authors.filter((a) => a.parent === -1);
   const otherAuthors = authors.filter((a) => a.parent === 0);
 
@@ -268,35 +250,49 @@ function AuthorManagementView() {
       </div>
 
       {/* Stats + filter bar */}
-      <div className="flex items-center gap-3 text-sm flex-wrap">
-        <span className="text-base-content/50">{authors.length} authors</span>
-        <span className="badge badge-success badge-sm">{matchedCount} matched</span>
-        <span className="badge badge-warning badge-sm">{unmatchedCount} unmatched</span>
-        {authors.filter((a) => a.parent > 0).length > 0 && (
-          <span className="badge badge-info badge-sm">{authors.filter((a) => a.parent > 0).length} subauthors</span>
-        )}
-        {allAccounts.length > 0 && (
-          <button className="btn btn-xs btn-outline btn-error" onClick={() => setUnassignedOpen(true)}>
-            {unassignedAccounts.length} unassigned accounts
-          </button>
-        )}
-        <div className="join ml-auto">
-          <button className={filterBtnClass('all')} onClick={() => setFilter('all')}>
-            All
-          </button>
-          <button className={filterBtnClass('matched')} onClick={() => setFilter('matched')}>
-            Matched
-          </button>
-          <button className={filterBtnClass('unmatched')} onClick={() => setFilter('unmatched')}>
-            Unmatched
-          </button>
+      {authors.length > 0 && (
+        <div className="flex items-center gap-3 text-sm flex-wrap">
+          <span className="text-base-content/50">{authors.length} authors</span>
+          <span className="badge badge-success badge-sm">{matchedCount} matched</span>
+          <span className="badge badge-warning badge-sm">{unmatchedCount} unmatched</span>
+          {authors.filter((a) => a.parent > 0).length > 0 && (
+            <span className="badge badge-info badge-sm">{authors.filter((a) => a.parent > 0).length} subauthors</span>
+          )}
+          {allAccounts.length > 0 && (
+            <button className="btn btn-xs btn-outline btn-error" onClick={() => setUnassignedOpen(true)}>
+              {unassignedAccounts.length} unassigned accounts
+            </button>
+          )}
+          <div className="join ml-auto">
+            <button className={filterBtnClass('all')} onClick={() => setFilter('all')}>
+              All
+            </button>
+            <button className={filterBtnClass('matched')} onClick={() => setFilter('matched')}>
+              Matched
+            </button>
+            <button className={filterBtnClass('unmatched')} onClick={() => setFilter('unmatched')}>
+              Unmatched
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Scrollable rows */}
       <div className="overflow-y-auto flex-1 min-h-0 pb-1 flex flex-col gap-3">
         {/* Author grid */}
-        {filteredTopLevel.length > 0 ? (
+        {authors.length === 0 ? (
+          <div role="alert" className="alert alert-info">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-6 w-6 shrink-0 stroke-current">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>No authors loaded for this data source.</span>
+          </div>
+        ) : filteredTopLevel.length > 0 ? (
           renderGrid(filteredTopLevel)
         ) : (
           <div className="text-base-content/40 text-sm px-3 py-6 text-center">No authors match the current filter.</div>

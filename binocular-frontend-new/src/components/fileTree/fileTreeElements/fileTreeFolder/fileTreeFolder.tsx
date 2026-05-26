@@ -1,6 +1,5 @@
 import fileListElementsStyles from '../fileTreeElements.module.scss';
-import FolderIcon from '../../../../assets/folder_gray.svg';
-import FolderOpenIcon from '../../../../assets/folder_open_gray.svg';
+import { Icon } from '../../../icon';
 import FileTreeFile from '../fileTreeFile/fileTreeFile';
 import { type FileTreeElementType, FileTreeElementTypeType } from '../../../../types/data/fileListType';
 import { formatName } from '../../utils/fileTreeUtilities';
@@ -44,7 +43,7 @@ function FileTreeFolder(props: {
                   props.onShowContextMenu(e, props.folder);
                 }
               }}>
-              <img src={FolderOpenIcon} alt={`folder open ${props.folder.name}`} />
+              <Icon name="folder_open" size="w-4 h-4" />
               <span>{formatName(props.folder.searchTerm, props.folder.name)}</span>
             </div>
           </div>
@@ -116,7 +115,7 @@ function FileTreeFolder(props: {
               }
             }}
             className={fileListElementsStyles.element}>
-            <img src={FolderIcon} alt={`folder ${props.folder.name}`} />
+            <Icon name="folder" size="w-4 h-4" />
             <span>{formatName(props.folder.searchTerm, props.folder.name)}</span>
           </div>
         </div>

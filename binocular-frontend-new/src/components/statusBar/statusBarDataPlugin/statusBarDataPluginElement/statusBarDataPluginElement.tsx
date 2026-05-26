@@ -5,9 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { Store } from '@reduxjs/toolkit';
 import { useEffect } from 'react';
 import { SocketConnectionStatusType } from '../../../../types/general/socketConnectionType.ts';
-import ConnectedToApi from '../../../../assets/connected_to_api_blue.svg';
-import ConnectedToApiFailed from '../../../../assets/connected_to_api_failed_red.svg';
-import Idle from '../../../../assets/idle_blue.svg';
+import { Icon } from '../../../icon';
 import { store as globalStore } from '../../../../redux';
 import { updateDashboardItem } from '../../../../redux/reducer/general/dashboardReducer.ts';
 import type { DashboardItemType } from '../../../../types/general/dashboardItemType.ts';
@@ -72,12 +70,12 @@ function StatusBarDataPlugin(props: {
               {props.dataPluginConfig.name} #{props.dataPluginConfig.id}
             </span>
           )}
-          {socketConnection.status === SocketConnectionStatusType.Idle && <img className={'inline h-4 ml-2'} src={Idle} alt={'idle'} />}
+          {socketConnection.status === SocketConnectionStatusType.Idle && <Icon name="idle" className={'inline h-4 ml-2'} />}
           {socketConnection.status === SocketConnectionStatusType.Connected && (
-            <img className={'inline h-4 ml-2'} src={ConnectedToApi} alt={'idle'} />
+            <Icon name="connected_to_api" className={'inline h-4 ml-2'} />
           )}
           {socketConnection.status === SocketConnectionStatusType.Disconnected && (
-            <img className={'inline h-4 ml-2'} src={ConnectedToApiFailed} alt={'idle'} />
+            <Icon name="connected_to_api_failed" className={'inline h-4 ml-2'} />
           )}
         </div>
         {props.dataPluginConfig.parameters.progressUpdate?.useAutomaticUpdate ? (
@@ -87,19 +85,19 @@ function StatusBarDataPlugin(props: {
               <div>
                 {socketConnection.status === SocketConnectionStatusType.Idle && (
                   <span className={statusBarDataPluginElementStyles.connectionStatus}>
-                    <img className={'inline h-4 mr-2'} src={Idle} alt={'idle'} />
+                    <Icon name="idle" className={'inline h-4 mr-2'} />
                     Idle
                   </span>
                 )}
                 {socketConnection.status === SocketConnectionStatusType.Connected && (
                   <span className={statusBarDataPluginElementStyles.connectionStatus}>
-                    <img className={'inline h-4 mr-2'} src={ConnectedToApi} alt={'idle'} />
+                    <Icon name="connected_to_api" className={'inline h-4 mr-2'} />
                     Connected
                   </span>
                 )}
                 {socketConnection.status === SocketConnectionStatusType.Disconnected && (
                   <span className={statusBarDataPluginElementStyles.connectionStatus}>
-                    <img className={'inline h-4 mr-2'} src={ConnectedToApiFailed} alt={'idle'} />
+                    <Icon name="connected_to_api_failed" className={'inline h-4 mr-2'} />
                     Disconnected
                   </span>
                 )}

@@ -1,6 +1,9 @@
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+
 export interface ContextMenuOption {
   label: string;
-  icon: string | null;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
   function: () => void;
 }
 
@@ -26,21 +29,17 @@ export function showContextMenu(x: number, y: number, options: ContextMenuOption
   content.style.padding = '';
   content.style.width = '';
   options.forEach((o) => {
-    const optionIcon = document.createElement('img');
-    if (o.icon) {
-      optionIcon.src = o.icon;
-      const isDark = document.documentElement.getAttribute('data-theme') === 'binocularDark';
-      optionIcon.style.cssText = `width:1rem;height:1rem;flex-shrink:0;object-fit:contain;${isDark ? 'filter:invert(1);' : ''}`;
-    } else {
-      optionIcon.style.cssText = 'width:1rem;height:1rem;flex-shrink:0;';
-    }
-
     const optionLabel = document.createElement('span');
     optionLabel.textContent = o.label;
 
     const optionButton = document.createElement('span');
     optionButton.addEventListener('click', o.function);
-    optionButton.appendChild(optionIcon);
+    if (o.icon) {
+      const iconWrapper = document.createElement('span');
+      iconWrapper.style.cssText = 'width:1rem;height:1rem;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;';
+      iconWrapper.innerHTML = renderToStaticMarkup(React.createElement(o.icon, { style: { width: '1rem', height: '1rem' } }));
+      optionButton.appendChild(iconWrapper);
+    }
     optionButton.appendChild(optionLabel);
 
     const option = document.createElement('li');

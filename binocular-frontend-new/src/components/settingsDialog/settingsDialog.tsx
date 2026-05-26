@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import DatabaseSettings from './databaseSettings/databaseSettings.tsx';
 import GeneralSettings from './generalSettings/generalSettings.tsx';
 import AuthorManagementView from '../authorManagement/authorManagementView.tsx';
-import LogoIcon from '../../assets/logo_icon.svg';
+import { Icon } from '../icon';
 
 function SettingsDialog() {
   const [activeTab, setActiveTab] = useState('General');
@@ -23,7 +23,7 @@ function SettingsDialog() {
           <button className="btn btn-sm btn-circle absolute right-2 top-2 btn-ghost">✕</button>
         </form>
         <h3 id={'informationDialogHeadline'} className={'font-bold text-lg underline flex items-center gap-2'}>
-          <img src={LogoIcon} alt={'Binocular'} className={'h-6'} />
+          <Icon name="logo" className={'h-6 w-auto'} />
           Settings
         </h3>
         <div>

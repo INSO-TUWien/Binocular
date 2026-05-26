@@ -17,13 +17,13 @@ import {
 import { useEffect, useState } from 'react';
 import distinctColors from 'distinct-colors';
 import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
-import addToOtherIcon from '../../../../assets/group_add_gray.svg';
-import editIcon from '../../../../assets/edit_gray.svg';
-import removePersonIcon from '../../../../assets/remove_person_gray.svg';
 import { Icon } from '../../../icon';
-import checkBoxIconGray from '../../../../assets/check_box_gray.svg';
-import checkBoxOutlineIconGray from '../../../../assets/check_box_outline_gray.svg';
-import flipIconGray from '../../../../assets/flip_gray.svg';
+import { GroupAddIcon } from '../../../icon/icons/GroupAddIcon';
+import { EditIcon } from '../../../icon/icons/EditIcon';
+import { RemovePersonIcon } from '../../../icon/icons/RemovePersonIcon';
+import { CheckBoxIcon } from '../../../icon/icons/CheckBoxIcon';
+import { CheckBoxOutlineIcon } from '../../../icon/icons/CheckBoxOutlineIcon';
+import { FlipIcon } from '../../../icon/icons/FlipIcon';
 import type { AuthorType } from '../../../../types/data/authorType.ts';
 import type { DatabaseSettingsDataPluginType } from '../../../../types/settings/databaseSettingsType.ts';
 import DataPluginStorage from '../../../../utils/dataPluginStorage.ts';
@@ -215,176 +215,177 @@ function AuthorList(props: { orientation?: string }) {
         }>
         <div className={'flex items-center justify-between border-b border-base-300 pt-1 pb-1 px-1'}>
           <div className="join">
-            <button
-              className={'btn btn-xs join-item ' + authorListStyles.checkAllButton}
-              onClick={() => dispatch(checkAllAuthors())}
-              title="Check all authors"></button>
-            <button
-              className={`btn btn-xs join-item '+ ${authorListStyles.uncheckAllButton}`}
-              onClick={() => dispatch(uncheckAllAuthors())}
-              title="Uncheck all authors"></button>
-            <button
-              className={'btn btn-xs join-item ' + authorListStyles.flipButton}
-              onClick={() => dispatch(switchAllAuthorSelection())}
-              title="Switch author selection"></button>
+            <button className={'btn btn-xs join-item'} onClick={() => dispatch(checkAllAuthors())} title="Check all authors">
+              <Icon name="check_box" size="w-4 h-4" />
+            </button>
+            <button className={'btn btn-xs join-item'} onClick={() => dispatch(uncheckAllAuthors())} title="Uncheck all authors">
+              <Icon name="check_box_outline" size="w-4 h-4" />
+            </button>
+            <button className={'btn btn-xs join-item'} onClick={() => dispatch(switchAllAuthorSelection())} title="Switch author selection">
+              <Icon name="flip" size="w-4 h-4" />
+            </button>
           </div>
           <button
             className="btn btn-ghost btn-xs p-0.5"
             title="Author settings"
             onClick={() => window.dispatchEvent(new CustomEvent('openSettingsTab', { detail: { tab: 'Authors' } }))}>
-            <Icon name="settings" className="opacity-50 hover:opacity-90" />
+            <Icon name="settings" size="w-4 h-4" />
           </button>
         </div>
         <div>
-          {authors
-            .filter((a: AuthorType) => a.parent === -1)
-            .map((parentAuthor: AuthorType, i: number) => {
-              return (
-                <div key={'author' + i}>
-                  <div
-                    className={
-                      'flex items-center gap-2 ' +
-                      authorListStyles.authorContainer +
-                      ' ' +
-                      (props.orientation === 'horizontal' ? authorListStyles.authorContainerHorizontal : '')
-                    }>
-                    <input
-                      type={'checkbox'}
-                      className={'checkbox checkbox-accent ' + authorListStyles.authorCheckbox}
-                      checked={parentAuthor.selected}
-                      onChange={() => {
-                        dispatch(switchAuthorSelection(parentAuthor.id));
-                      }}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        showContextMenu(e.clientX, e.clientY, [
-                          {
-                            label: 'check all',
-                            icon: checkBoxIconGray,
-                            function: () => dispatch(checkAllAuthors()),
-                          },
-                          {
-                            label: 'uncheck all',
-                            icon: checkBoxOutlineIconGray,
-                            function: () => dispatch(uncheckAllAuthors()),
-                          },
-                          {
-                            label: 'flip',
-                            icon: flipIconGray,
-                            function: () => dispatch(switchAllAuthorSelection()),
-                          },
-                        ]);
-                      }}
-                    />
+          {authors.length === 0 ? (
+            <p className="text-xs text-base-content/40 text-center py-4">No authors loaded.</p>
+          ) : (
+            authors
+              .filter((a: AuthorType) => a.parent === -1)
+              .map((parentAuthor: AuthorType, i: number) => {
+                return (
+                  <div key={'author' + i}>
                     <div
-                      className="relative flex flex-1 items-center gap-2 px-2 py-px rounded text-sm cursor-grab overflow-hidden group hover:opacity-80 transition-opacity"
-                      style={{ border: `1px solid ${parentAuthor.color.main}`, background: `${parentAuthor.color.main}0d` }}
-                      draggable={true}
-                      onDrop={(event) => {
-                        event.stopPropagation();
-                        dispatch(setDragging(false));
+                      className={
+                        'flex items-center gap-2 ' +
+                        authorListStyles.authorContainer +
+                        ' ' +
+                        (props.orientation === 'horizontal' ? authorListStyles.authorContainerHorizontal : '')
+                      }>
+                      <input
+                        type={'checkbox'}
+                        className={'checkbox checkbox-accent ' + authorListStyles.authorCheckbox}
+                        checked={parentAuthor.selected}
+                        onChange={() => {
+                          dispatch(switchAuthorSelection(parentAuthor.id));
+                        }}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          showContextMenu(e.clientX, e.clientY, [
+                            {
+                              label: 'check all',
+                              icon: CheckBoxIcon,
+                              function: () => dispatch(checkAllAuthors()),
+                            },
+                            {
+                              label: 'uncheck all',
+                              icon: CheckBoxOutlineIcon,
+                              function: () => dispatch(uncheckAllAuthors()),
+                            },
+                            {
+                              label: 'flip',
+                              icon: FlipIcon,
+                              function: () => dispatch(switchAllAuthorSelection()),
+                            },
+                          ]);
+                        }}
+                      />
+                      <div
+                        className="relative flex flex-1 items-center gap-2 px-2 py-px rounded text-sm cursor-grab overflow-hidden group hover:opacity-80 transition-opacity"
+                        style={{ border: `1px solid ${parentAuthor.color.main}`, background: `${parentAuthor.color.main}0d` }}
+                        draggable={true}
+                        onDrop={(event) => {
+                          event.stopPropagation();
+                          dispatch(setDragging(false));
 
-                        dispatch(
-                          setParentAuthor({ author: Number(event.dataTransfer.getData('draggingAuthorId')), parent: parentAuthor.id }),
-                        );
-                      }}
-                      onDragOver={(event) => event.preventDefault()}
-                      onDragStart={(event) => {
-                        setTimeout(() => dispatch(setDragging(true), 1));
-                        event.dataTransfer.setData('draggingAuthorId', String(parentAuthor.id));
-                      }}
-                      onDragEnd={() => dispatch(setDragging(false))}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        showContextMenu(e.clientX, e.clientY, [
-                          {
-                            label: 'edit author',
-                            icon: editIcon,
-                            function: () => dispatch(editAuthor(parentAuthor.id)),
-                          },
-                          {
-                            label: 'move to other',
-                            icon: addToOtherIcon,
-                            function: () => dispatch(moveAuthorToOther(parentAuthor.id)),
-                          },
-                        ]);
-                      }}>
-                      <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: parentAuthor.color.main }} />
-                      <Icon name="drag_indicator" className="relative flex-none opacity-40 group-hover:opacity-80 cursor-grab ml-1" />
-                      <span
-                        className="relative flex-1 font-semibold truncate text-sm"
-                        title={parentAuthor.displayName || parentAuthor.user.gitSignature}>
-                        {parentAuthor.displayName || parentAuthor.user.gitSignature}
-                      </span>
+                          dispatch(
+                            setParentAuthor({ author: Number(event.dataTransfer.getData('draggingAuthorId')), parent: parentAuthor.id }),
+                          );
+                        }}
+                        onDragOver={(event) => event.preventDefault()}
+                        onDragStart={(event) => {
+                          setTimeout(() => dispatch(setDragging(true), 1));
+                          event.dataTransfer.setData('draggingAuthorId', String(parentAuthor.id));
+                        }}
+                        onDragEnd={() => dispatch(setDragging(false))}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          showContextMenu(e.clientX, e.clientY, [
+                            {
+                              label: 'edit author',
+                              icon: EditIcon,
+                              function: () => dispatch(editAuthor(parentAuthor.id)),
+                            },
+                            {
+                              label: 'move to other',
+                              icon: GroupAddIcon,
+                              function: () => dispatch(moveAuthorToOther(parentAuthor.id)),
+                            },
+                          ]);
+                        }}>
+                        <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: parentAuthor.color.main }} />
+                        <Icon name="drag_indicator" className="relative flex-none opacity-40 group-hover:opacity-80 cursor-grab ml-1" />
+                        <span
+                          className="relative flex-1 font-semibold truncate text-sm"
+                          title={parentAuthor.displayName || parentAuthor.user.gitSignature}>
+                          {parentAuthor.displayName || parentAuthor.user.gitSignature}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  {authors
-                    .filter((a: AuthorType) => a.parent === parentAuthor.id)
-                    .map((author: AuthorType, i: number, arr: AuthorType[]) => {
-                      const isLast = i === arr.length - 1;
-                      return (
-                        <div
-                          key={'author' + i}
-                          className={
-                            'flex items-center gap-1.5 text-xs cursor-pointer py-0 mt-px ' +
-                            (props.orientation === 'horizontal' ? authorListStyles.authorContainerHorizontal : '')
-                          }>
+                    {authors
+                      .filter((a: AuthorType) => a.parent === parentAuthor.id)
+                      .map((author: AuthorType, i: number, arr: AuthorType[]) => {
+                        const isLast = i === arr.length - 1;
+                        return (
                           <div
-                            className="flex-none ml-5"
-                            style={{
-                              width: 14,
-                              alignSelf: 'stretch',
-                              borderLeft: '1.5px solid var(--fallback-bc,oklch(var(--bc)/0.15))',
-                              borderBottom: isLast ? '1.5px solid var(--fallback-bc,oklch(var(--bc)/0.15))' : 'none',
-                              borderBottomLeftRadius: isLast ? 4 : 0,
-                            }}
-                          />
-                          <div
-                            className="relative flex-1 flex items-center gap-1.5 overflow-hidden rounded px-2 py-px hover:opacity-80 transition-opacity"
-                            style={{ border: `1px solid ${author.color.main}`, background: `${author.color.main}0d` }}
-                            draggable={true}
-                            onDragStart={(event) => {
-                              setTimeout(() => dispatch(setDragging(true), 1));
-                              event.dataTransfer.setData('draggingAuthorId', String(author.id));
-                            }}
-                            onDragEnd={() => dispatch(setDragging(false))}
-                            onContextMenu={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              showContextMenu(e.clientX, e.clientY, [
-                                {
-                                  label: 'edit author',
-                                  icon: editIcon,
-                                  function: () => dispatch(editAuthor(author.id)),
-                                },
-                                {
-                                  label: 'remove from parent',
-                                  icon: removePersonIcon,
-                                  function: () => dispatch(resetAuthor(author.id)),
-                                },
-                                {
-                                  label: 'move to other',
-                                  icon: addToOtherIcon,
-                                  function: () => dispatch(moveAuthorToOther(author.id)),
-                                },
-                              ]);
-                            }}>
-                            <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: author.color.main }} />
-                            <Icon name="drag_indicator" className="relative flex-none opacity-40 cursor-grab ml-1" />
-                            <span
-                              className="flex-1 truncate text-base-content/60 ml-1"
-                              title={author.displayName || author.user.gitSignature}>
-                              {author.displayName || author.user.gitSignature}
-                            </span>
+                            key={'author' + i}
+                            className={
+                              'flex items-center gap-1.5 text-xs cursor-pointer py-0 mt-px ' +
+                              (props.orientation === 'horizontal' ? authorListStyles.authorContainerHorizontal : '')
+                            }>
+                            <div
+                              className="flex-none ml-5"
+                              style={{
+                                width: 14,
+                                alignSelf: 'stretch',
+                                borderLeft: '1.5px solid var(--fallback-bc,oklch(var(--bc)/0.15))',
+                                borderBottom: isLast ? '1.5px solid var(--fallback-bc,oklch(var(--bc)/0.15))' : 'none',
+                                borderBottomLeftRadius: isLast ? 4 : 0,
+                              }}
+                            />
+                            <div
+                              className="relative flex-1 flex items-center gap-1.5 overflow-hidden rounded px-2 py-px hover:opacity-80 transition-opacity"
+                              style={{ border: `1px solid ${author.color.main}`, background: `${author.color.main}0d` }}
+                              draggable={true}
+                              onDragStart={(event) => {
+                                setTimeout(() => dispatch(setDragging(true), 1));
+                                event.dataTransfer.setData('draggingAuthorId', String(author.id));
+                              }}
+                              onDragEnd={() => dispatch(setDragging(false))}
+                              onContextMenu={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                showContextMenu(e.clientX, e.clientY, [
+                                  {
+                                    label: 'edit author',
+                                    icon: EditIcon,
+                                    function: () => dispatch(editAuthor(author.id)),
+                                  },
+                                  {
+                                    label: 'remove from parent',
+                                    icon: RemovePersonIcon,
+                                    function: () => dispatch(resetAuthor(author.id)),
+                                  },
+                                  {
+                                    label: 'move to other',
+                                    icon: GroupAddIcon,
+                                    function: () => dispatch(moveAuthorToOther(author.id)),
+                                  },
+                                ]);
+                              }}>
+                              <div className="absolute left-0 inset-y-0 w-1 flex-none" style={{ background: author.color.main }} />
+                              <Icon name="drag_indicator" className="relative flex-none opacity-40 cursor-grab ml-1" />
+                              <span
+                                className="flex-1 truncate text-base-content/60 ml-1"
+                                title={author.displayName || author.user.gitSignature}>
+                                {author.displayName || author.user.gitSignature}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              );
-            })}
+                        );
+                      })}
+                  </div>
+                );
+              })
+          )}
         </div>
       </div>
       {(dragging || props.orientation === 'horizontal') && (

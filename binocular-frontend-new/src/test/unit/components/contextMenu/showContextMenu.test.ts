@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { showContextMenu } from '../../../../components/contextMenu/contextMenuHelper';
 import type { ContextMenuOption } from '../../../../components/contextMenu/contextMenuHelper';
@@ -76,19 +77,17 @@ describe('showContextMenu – menu item rendering', () => {
     expect(spans[0].textContent).toBe('Delete');
   });
 
-  it('U31.7 sets icon src when icon is provided', () => {
-    const options: ContextMenuOption[] = [{ label: 'Delete', icon: 'trash.svg', function: vi.fn() }];
+  it('U31.7 renders icon SVG when icon component is provided', () => {
+    const TrashIcon = () => React.createElement('svg', { 'data-icon': 'trash' });
+    const options: ContextMenuOption[] = [{ label: 'Delete', icon: TrashIcon, function: vi.fn() }];
     showContextMenu(100, 100, options);
-    const img = getContent().querySelector('img') as HTMLImageElement;
-    expect(img.src).toContain('trash.svg');
+    expect(getContent().querySelector('svg')).not.toBeNull();
   });
 
-  it('U31.8 does not set src when icon is null', () => {
+  it('U31.8 does not render an icon when icon is null', () => {
     const options: ContextMenuOption[] = [{ label: 'Delete', icon: null, function: vi.fn() }];
     showContextMenu(100, 100, options);
-    const img = getContent().querySelector('img') as HTMLImageElement;
-    // src is not set so it stays empty or resolves to the base URL
-    expect(img.getAttribute('src')).toBeNull();
+    expect(getContent().querySelector('svg')).toBeNull();
   });
 
   it('U31.9 clicking option span invokes the option function', () => {

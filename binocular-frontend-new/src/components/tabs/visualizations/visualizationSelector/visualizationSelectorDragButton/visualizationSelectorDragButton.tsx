@@ -5,7 +5,7 @@ import type { VisualizationPlugin } from '../../../../../plugins/interfaces/visu
 import { type AppDispatch, type RootState, useAppDispatch } from '../../../../../redux';
 import { useSelector } from 'react-redux';
 import type { DatabaseSettingsDataPluginType } from '../../../../../types/settings/databaseSettingsType.ts';
-import HelpIcon from '../../../../../assets/help_blue.svg';
+import { Icon } from '../../../../icon';
 import { showInfoTooltip } from '../../../../infoTooltip/infoTooltipHelper';
 import InfoTooltip from '../../../../infoTooltip/infoTooltip';
 import { useRef } from 'react';
@@ -125,7 +125,7 @@ function VisualizationSelectorDragButton(props: { plugin: VisualizationPlugin<un
                   ),
                 });
               }}>
-              <img draggable={'false'} src={HelpIcon} alt={props.plugin.name} />
+              <Icon name="help" colorClass="primary" />
             </div>
           )}
         </div>

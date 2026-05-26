@@ -1,5 +1,5 @@
 import React from 'react';
-import folderIcon from '../../assets/folder-open-regular-full.svg';
+import FolderOpenFA from '../../assets/folder-open-regular-full.svg?react';
 import type { FolderWithRatio } from './commitByFileViz.tsx';
 
 type FolderViewProps = {
@@ -68,10 +68,8 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, isVertical, boun
               }}
               title={`Folder ${childName}  — +${childNode.stats.additions} / -${childNode.stats.deletions}`}
               onClick={() => onNavigate(childName)}>
-              <img
-                src={folderIcon}
-                alt="Folder Icon"
-                style={{ width: '1.4rem', height: '1.4rem', color: 'var(--color-primary)', marginRight: '5px' }}
+              <FolderOpenFA
+                style={{ width: '1.4rem', height: '1.4rem', fill: 'var(--color-primary)', marginRight: '5px', flexShrink: 0 }}
               />{' '}
               {childName}
             </div>

@@ -3,8 +3,8 @@ import { useSelector } from 'react-redux';
 import { type AppDispatch, type RootState, useAppDispatch } from '../../../../redux';
 import type { SprintType } from '../../../../types/data/sprintType.ts';
 import { showContextMenu } from '../../../contextMenu/contextMenuHelper.ts';
-import editIcon from '../../../../assets/edit_gray.svg';
-import deleteIcon from '../../../../assets/delete_red.svg';
+import { EditIcon } from '../../../icon/icons/EditIcon';
+import { DeleteIcon } from '../../../icon/icons/DeleteIcon';
 import { deleteSprint, sprintToEdit } from '../../../../redux/reducer/data/sprintsReducer.ts';
 import { Icon } from '../../../icon';
 
@@ -27,12 +27,12 @@ function SprintView(props: { orientation?: string }) {
                 showContextMenu(e.clientX, e.clientY, [
                   {
                     label: 'edit',
-                    icon: editIcon,
+                    icon: EditIcon,
                     function: () => dispatch(sprintToEdit(s)),
                   },
                   {
                     label: 'delete',
-                    icon: deleteIcon,
+                    icon: DeleteIcon,
                     function: () => dispatch(deleteSprint(s)),
                   },
                 ]);

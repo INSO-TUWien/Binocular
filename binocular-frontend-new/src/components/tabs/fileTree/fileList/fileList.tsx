@@ -5,9 +5,9 @@ import { useEffect } from 'react';
 import { filterFileTree } from '../../../fileTree/utils/fileTreeUtilities';
 import type { DatabaseSettingsDataPluginType } from '../../../../types/settings/databaseSettingsType.ts';
 import { type ContextMenuOption, showContextMenu } from '../../../contextMenu/contextMenuHelper';
-import infoIcon from '../../../../assets/info_gray.svg';
 import { FileTreeElementTypeType } from '../../../../types/data/fileListType';
-import openInNewIcon from '../../../../assets/open_in_new_gray.svg';
+import { InfoIcon } from '../../../icon/icons/InfoIcon';
+import { OpenInNewIcon } from '../../../icon/icons/OpenInNewIcon';
 import FileTreeFolder from '../../../fileTree/fileTreeElements/fileTreeFolder/fileTreeFolder';
 import {
   setFilesDataPluginId,
@@ -130,7 +130,7 @@ function FileList(props: { orientation?: string; search: string }) {
                   showContextMenu(e.clientX, e.clientY, [
                     {
                       label: 'info',
-                      icon: infoIcon,
+                      icon: InfoIcon,
                       function: () => dispatch(showFileTreeElementInfo(element)),
                     },
                   ]);
@@ -139,7 +139,7 @@ function FileList(props: { orientation?: string; search: string }) {
                   const contextMenuOptions: ContextMenuOption[] = [
                     {
                       label: 'info',
-                      icon: infoIcon,
+                      icon: InfoIcon,
                       function: () => dispatch(showFileTreeElementInfo(element)),
                     },
                   ];
@@ -147,7 +147,7 @@ function FileList(props: { orientation?: string; search: string }) {
                   if (element.element?.webUrl) {
                     contextMenuOptions.push({
                       label: 'open in browser',
-                      icon: openInNewIcon,
+                      icon: OpenInNewIcon,
                       function: () => window.open(element.element?.webUrl, '_blank'),
                     });
                   }
