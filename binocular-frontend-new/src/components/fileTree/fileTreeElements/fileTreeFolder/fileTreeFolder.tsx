@@ -17,7 +17,7 @@ function FileTreeFolder(props: {
     <>
       {props.listOnly === true || props.folder.foldedOut ? (
         <>
-          <div className={'flex items-center'}>
+          <div className={'flex items-center gap-1'}>
             {props.showSelect && (props.listOnly === undefined || !props.listOnly) && props.folder.id !== undefined && (
               <input
                 type={'checkbox'}
@@ -43,7 +43,7 @@ function FileTreeFolder(props: {
                   props.onShowContextMenu(e, props.folder);
                 }
               }}>
-              <Icon name="folder_open" size="w-4 h-4" />
+              <Icon name="folder_open" size="w-5 h-5" />
               <span>{formatName(props.folder.searchTerm, props.folder.name)}</span>
             </div>
           </div>
@@ -90,7 +90,7 @@ function FileTreeFolder(props: {
           </div>
         </>
       ) : (
-        <div className={'flex items-center'}>
+        <div className={'flex items-center gap-1'}>
           {props.showSelect && (
             <input
               type={'checkbox'}
@@ -115,7 +115,7 @@ function FileTreeFolder(props: {
               }
             }}
             className={fileListElementsStyles.element}>
-            <Icon name="folder" size="w-4 h-4" />
+            <Icon name="folder" size="w-5 h-5" />
             <span>{formatName(props.folder.searchTerm, props.folder.name)}</span>
           </div>
         </div>

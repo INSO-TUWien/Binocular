@@ -14,19 +14,19 @@ export const Help = () => (
       assigned labels. If the labels coloring mode is selected, the issues are colored based on their assigned labels. All labels are
       grouped based on their similarity to one another. The levenshtein distance and dbscan are used. There are three possible states a
       issue can have:
-      <ol>
-        <li>
-          <em>No assigned labels:</em> The issue has no background color.
-        </li>
-        <li>
-          <em>One assigned label:</em> The issue has only the color of the assigned label.
-        </li>
-        <li>
-          <em>More than one assigned label:</em> The issue has a striped background that repeats. Each stripe has the color of one of the
-          assigend issues.
-        </li>
-      </ol>
     </p>
+    <ol>
+      <li>
+        <em>No assigned labels:</em> The issue has no background color.
+      </li>
+      <li>
+        <em>One assigned label:</em> The issue has only the color of the assigned label.
+      </li>
+      <li>
+        <em>More than one assigned label:</em> The issue has a striped background that repeats. Each stripe has the color of one of the
+        assigend issues.
+      </li>
+    </ol>
 
     <h3>Parameters</h3>
     <div>

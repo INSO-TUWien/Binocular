@@ -19,6 +19,7 @@ export const getHistoryForCommit = (commit: DataPluginCommit, allCommits: DataPl
   });
 
   const history: (DataPluginCommit | DataPluginOwnership)[] = [commit];
+  const visited = new Set<DataPluginOwnership | DataPluginCommit>([commit]);
 
   // recursively add parents to history
   const addParentsToHistory = (c: { parents: (string | number)[] }) => {
@@ -27,7 +28,8 @@ export const getHistoryForCommit = (commit: DataPluginCommit, allCommits: DataPl
     // add each parent to the history (if it is not already there
     c.parents.forEach((p: string | number) => {
       const parent = commitsForSha[p];
-      if (!history.includes(parent)) {
+      if (!visited.has(parent)) {
+        visited.add(parent);
         history.push(parent);
         // continue with parents of parent
         addParentsToHistory(parent);

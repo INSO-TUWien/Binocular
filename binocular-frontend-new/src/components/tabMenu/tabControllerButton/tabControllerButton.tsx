@@ -6,7 +6,7 @@ function TabControllerButton(props: { onClick: () => void; icon: ReactNode; name
     <>
       <button
         aria-label={props.name}
-        className={tabControllerButtonStyles.tabControllerButton}
+        className={tabControllerButtonStyles.tabControllerButton + ' opacity-50 hover:opacity-90'}
         onClick={(e) => {
           (e.target as HTMLButtonElement).classList.remove(
             props.animation === 'rotate' ? tabControllerButtonStyles.animationRotate : tabControllerButtonStyles.animationJump,

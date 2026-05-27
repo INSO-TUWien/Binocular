@@ -3,7 +3,7 @@ import tabControllerButtonThemeSwitchStyles from './tabControllerButtonThemeSwit
 function TabControllerButtonThemeSwitch(props: { onChange: (theme: string) => void; theme: string }) {
   return (
     <>
-      <label className={'swap swap-rotate ' + tabControllerButtonThemeSwitchStyles.tabControllerButton}>
+      <label className={'swap swap-rotate opacity-50 hover:opacity-90 ' + tabControllerButtonThemeSwitchStyles.tabControllerButton}>
         {/* this hidden checkbox controls the state */}
         <input
           type="checkbox"

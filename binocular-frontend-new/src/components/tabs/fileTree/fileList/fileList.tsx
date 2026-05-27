@@ -83,20 +83,17 @@ function FileList(props: { orientation?: string; search: string }) {
           ' ' +
           (props.orientation === 'horizontal' ? fileListStyles.fileListHorizontal : fileListStyles.fileListVertical)
         }>
-        <div className={'border-b border-base-300 pt-1 flex items-center justify-between'}>
+        <div className={'flex items-center justify-between border-b border-base-300 pt-1 pb-1 px-1'}>
           <div className="join">
-            <button
-              className={'btn btn-xs join-item ' + fileListStyles.checkAllButton}
-              onClick={() => dispatch(checkAllFiles())}
-              title="Check all files"></button>
-            <button
-              className={`btn btn-xs join-item '+ ${fileListStyles.uncheckAllButton}`}
-              onClick={() => dispatch(uncheckAllFiles())}
-              title="Uncheck all files"></button>
-            <button
-              className={'btn btn-xs join-item ' + fileListStyles.flipButton}
-              onClick={() => dispatch(switchAllFileSelection())}
-              title="Switch file selection"></button>
+            <button className={'btn btn-xs join-item'} onClick={() => dispatch(checkAllFiles())} title="Check all files">
+              <Icon name="check_box" size="w-4 h-4" />
+            </button>
+            <button className={'btn btn-xs join-item'} onClick={() => dispatch(uncheckAllFiles())} title="Uncheck all files">
+              <Icon name="check_box_outline" size="w-4 h-4" />
+            </button>
+            <button className={'btn btn-xs join-item'} onClick={() => dispatch(switchAllFileSelection())} title="Switch file selection">
+              <Icon name="flip" size="w-4 h-4" />
+            </button>
           </div>
           <button
             className="btn btn-ghost btn-xs p-0.5"

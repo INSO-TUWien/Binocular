@@ -16,16 +16,32 @@ export const BurndownChartXAxisLegend: React.FC<{
   return (
     <g>
       <rect x={leftX} y={height - legendBarHeight} height={1} width={rightX - leftX} fill={'var(--color-base-content)'} />
-      <rect x={margin * 2} y={height + 1 - legendBarHeight} width={width - margin * 4} height={40} fill={'var(--color-base-100)'} />
+      <rect
+        x={margin * 2}
+        y={height + 1 - legendBarHeight}
+        width={width - margin * 4}
+        height={legendBarHeight}
+        fill={'var(--color-base-100)'}
+      />
       {ticks.map((t) => {
         const x = xScale(t);
+        const axisY = height - legendBarHeight;
 
         return (
           <g key={t.toISOString()}>
-            <rect x={x} y={height - legendBarHeight} width={1} height={8} fill={'var(--color-base-content)'} />
-            <text x={x} y={height - legendBarHeight / 2} fontSize={10} textAnchor={'middle'} fill={'var(--color-base-content)'}>
-              {format(t)}
-            </text>
+            <rect x={x} y={axisY} width={1} height={8} fill={'var(--color-base-content)'} />
+            <g transform={`translate(${x}, ${axisY})`}>
+              <text
+                y={9}
+                dy={'0.6em'}
+                dx={'-0.4em'}
+                fontSize={10}
+                textAnchor={'end'}
+                fill={'var(--color-base-content)'}
+                transform={'rotate(-35)'}>
+                {format(t)}
+              </text>
+            </g>
           </g>
         );
       })}

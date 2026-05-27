@@ -48,7 +48,12 @@ export const AreaChart = ({ width, height, data, color }: AreaChartProps) => {
     svgElement
       .append('g')
       .attr('transform', 'translate(0,' + boundsHeight + ')')
-      .call(xAxisGenerator);
+      .call(xAxisGenerator)
+      .selectAll('text')
+      .style('text-anchor', 'end')
+      .attr('transform', 'rotate(-35)')
+      .attr('dx', '-0.4em')
+      .attr('dy', '0.6em');
 
     const yAxisGenerator = d3.axisLeft(yScale);
     svgElement.append('g').call(yAxisGenerator);

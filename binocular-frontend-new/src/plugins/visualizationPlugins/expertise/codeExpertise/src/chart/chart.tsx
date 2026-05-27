@@ -115,11 +115,12 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
 
     drawChart({
       data: rawData,
-      props,
+      fileList: props.fileList,
+      authorList: props.authorList,
       radius,
       setSegments,
     });
-  }, [dimensions, radius, rawData, props]);
+  }, [dimensions, radius, rawData, props.fileList, props.authorList]);
 
   /**
    * Renders the appropriate content based on current data state.
@@ -171,16 +172,13 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
  */
 function drawChart(options: {
   data: ExpertiseData;
-  props: VisualizationPluginProperties<BranchSettings, ExpertiseData>;
+  fileList: VisualizationPluginProperties<BranchSettings, ExpertiseData>['fileList'];
+  authorList: VisualizationPluginProperties<BranchSettings, ExpertiseData>['authorList'];
   radius: number;
   setSegments: React.Dispatch<React.SetStateAction<React.JSX.Element[]>>;
 }): void {
-  const { data, props, radius, setSegments } = options;
-  const { currentOwnership, totalLinesAdded } = calculateOwnershipMetrics(
-    data.ownershipData.rawData || [],
-    data.buildsData,
-    props.fileList,
-  );
+  const { data, fileList, authorList, radius, setSegments } = options;
+  const { currentOwnership, totalLinesAdded } = calculateOwnershipMetrics(data.ownershipData.rawData || [], data.buildsData, fileList);
   const devDataMap: Record<string, DevData> = {};
   let maxCommitsPerDev = 0;
 
@@ -205,11 +203,14 @@ function drawChart(options: {
     }
   });
 
+  // Pre-build a Map from author id for faster lookup
+  const authorById = new Map(authorList.map((a) => [a.id, a]));
+
   // Merge child authors into their parents according to parent-child relation
-  props.authorList
+  authorList
     .filter((a) => a.parent > 0)
     .forEach((child) => {
-      const parent = props.authorList.find((a) => a.id === child.parent);
+      const parent = authorById.get(child.parent);
       if (!parent) return;
       const childSig = child.user.gitSignature;
       const parentSig = parent.user.gitSignature;
@@ -234,6 +235,10 @@ function drawChart(options: {
   const totalAdditions = Object.values(devDataMap).reduce((total, dev) => total + (dev.additions || 0), 0);
   const sortedDevs = Object.entries(devDataMap).sort((a, b) => (b[1].additions || 0) - (a[1].additions || 0));
 
+  // Compute palette and label map once
+  const palette = generatePalette(authorList);
+  const authorBySignature = new Map(authorList.map((a) => [a.user.gitSignature, a]));
+
   sortedDevs.forEach(([devName, devData]) => {
     if (!devData.additions || devData.additions === 0) return;
 
@@ -241,9 +246,8 @@ function drawChart(options: {
     const startPercent = totalPercent;
     const endPercent = totalPercent + segmentSize;
     totalPercent = endPercent;
-    const palette = generatePalette(props.authorList);
     const devColor = palette[devName]?.main || '#cccccc';
-    const author = props.authorList.find((a) => a.user.gitSignature === devName);
+    const author = authorBySignature.get(devName);
     const devLabel = author?.displayName || devName;
     newSegments.push(
       <Segment
@@ -271,7 +275,7 @@ function drawChart(options: {
  * @param fileList - List of files with selection status to filter relevant files (optional)
  * @returns Object containing current ownership totals and total lines added per developer
  */
-function calculateOwnershipMetrics(
+export function calculateOwnershipMetrics(
   ownershipData: DataPluginOwnership[],
   commitsWithBuilds: DataPluginCommitBuild[],
   fileList?: FileListElementType[],
@@ -297,6 +301,9 @@ function calculateOwnershipMetrics(
   // Stores the current ownership distribution for each file
   const fileCache: { [filePath: string]: { [developer: string]: number } } = {};
 
+  // Pre-build a Map from path for faster lookup
+  const fileListMap = fileList ? new Map(fileList.map((item) => [item.element.path, item.checked])) : null;
+
   // Step through the commits sequentially, starting with the oldest one
   for (const commit of ownershipData) {
     for (const file of commit.files) {
@@ -304,7 +311,7 @@ function calculateOwnershipMetrics(
         delete fileCache[file.path];
       } else {
         // If fileList is not defined, include all files; otherwise check if file is selected
-        const relevant = !fileList || fileList.find((item) => item.element.path === file.path)?.checked;
+        const relevant = !fileListMap || fileListMap.get(file.path);
         if (relevant) {
           const fileOwnership: { [developer: string]: number } = {};
           for (const ownership of file.ownership) {

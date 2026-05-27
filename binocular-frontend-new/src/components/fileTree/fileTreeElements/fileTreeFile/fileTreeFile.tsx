@@ -13,7 +13,7 @@ function FileTreeFile(props: {
 }) {
   return (
     <>
-      <div className={'flex items-center'}>
+      <div className={'flex items-center gap-1'}>
         {props.showSelect && (props.listOnly === undefined || !props.listOnly) && (
           <input
             type={'checkbox'}
@@ -38,7 +38,7 @@ function FileTreeFile(props: {
               props.onShowContextMenu(e, props.file);
             }
           }}>
-          <Icon name="file" size="w-4 h-4" />
+          <Icon name="file" size="w-5 h-5" />
           <span>{formatName(props.file.searchTerm, props.file.name)}</span>
         </div>
       </div>

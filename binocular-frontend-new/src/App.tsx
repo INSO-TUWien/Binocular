@@ -109,7 +109,7 @@ function App() {
             onChange={(theme: string) => {
               localStorage.setItem('theme', theme);
               setTheme(theme);
-              dispatch(recalculateDataPluginColors(theme));
+              requestAnimationFrame(() => dispatch(recalculateDataPluginColors(theme)));
             }}></TabControllerButtonThemeSwitch>
           <TabControllerButton
             onClick={() => {

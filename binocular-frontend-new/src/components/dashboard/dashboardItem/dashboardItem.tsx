@@ -42,7 +42,9 @@ const DashboardItem = memo(function DashboardItem(props: {
 
   const [poppedOut, setPoppedOut] = useState(false);
 
-  const authorLists = useSelector((state: RootState) => state.authors.authorLists);
+  const authors = useSelector((state: RootState) =>
+    props.item.dataPluginId !== undefined ? state.authors.authorLists[props.item.dataPluginId] : [],
+  );
   const fileLists = useSelector((state: RootState) => state.files.fileLists);
   const filesInitialized = useSelector((state: RootState) => state.files.initialized);
   const sprintList = useSelector((state: RootState) => state.sprints.sprintList);
@@ -111,13 +113,6 @@ const DashboardItem = memo(function DashboardItem(props: {
         .catch((e) => console.log(e));
     }
   }, [selectedDataPlugin]);
-
-  const [authors, setAuthors] = useState([]);
-  useEffect(() => {
-    if (props.item.dataPluginId !== undefined) {
-      setAuthors(authorLists[props.item.dataPluginId]);
-    }
-  }, [authorLists, props.item.dataPluginId]);
 
   const [files, setFiles] = useState<FileListElementType[]>([]);
 

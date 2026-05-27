@@ -95,7 +95,7 @@
   --color-accent: "#0062cc";
   --color-accent-content:"#FFFFFF";
   --color-neutral: "#555";
-  --color-neutral-content:"#666";
+  --color-neutral-content:"#ddd";
   --color-base-100: "#111";
   --color-base-200: "#222";
   --color-base-300: "#333";
@@ -104,7 +104,7 @@
   --color-success-content: "#fff";
   --color-error:"#db131f";
   --color-error-content: "#fff";
-  --color-warning:"#ffcc00";
+  --color-warning:"#c05e00";
   --color-info:"#5ac8fa";
 
   /* border radius */

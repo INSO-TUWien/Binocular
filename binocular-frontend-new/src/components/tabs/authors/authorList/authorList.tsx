@@ -229,7 +229,7 @@ function AuthorList(props: { orientation?: string }) {
             className="btn btn-ghost btn-xs p-0.5"
             title="Author settings"
             onClick={() => window.dispatchEvent(new CustomEvent('openSettingsTab', { detail: { tab: 'Authors' } }))}>
-            <Icon name="settings" size="w-4 h-4" />
+            <Icon name="settings" size="w-4 h-4" className="opacity-50 hover:opacity-90" />
           </button>
         </div>
         <div>

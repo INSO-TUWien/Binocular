@@ -92,7 +92,7 @@ function LayoutSelector(props: { orientation?: string }) {
             ))}
         </div>
         <button className="btn btn-square btn-primary btn-sm" onClick={(e) => showLayoutOverview(e.clientX, e.clientY)}>
-          <Icon name="visualizations" size="w-6 h-6" />
+          <Icon name="visualizations" size="w-6 h-6" colorClass="primary-content" />
         </button>
       </div>
       <button className="btn btn-primary w-fit m-auto" onClick={() => setShowModal(true)}>

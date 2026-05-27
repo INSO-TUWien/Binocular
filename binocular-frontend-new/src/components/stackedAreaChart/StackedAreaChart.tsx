@@ -155,6 +155,15 @@ export const StackedAreaChart = ({ width, height, data, scale, palette, sprintLi
       .duration(TRANSITION_MS)
       .ease(d3.easeCubicOut)
       .call(d3.axisBottom(xScale));
+
+    svg
+      .select('.xAxis')
+      .selectAll('text')
+      .style('text-anchor', 'end')
+      .attr('transform', 'rotate(-35)')
+      .attr('dx', '-0.4em')
+      .attr('dy', '0.6em');
+
     svg.select<SVGGElement>('.yAxis').transition().duration(TRANSITION_MS).ease(d3.easeCubicOut).call(d3.axisLeft(yScale));
     svg.select<SVGGElement>('.brush').call(brush);
 

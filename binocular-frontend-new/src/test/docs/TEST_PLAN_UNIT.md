@@ -1189,6 +1189,30 @@ Tests cover pure functions and utility helpers with no DOM, no Redux, and no net
 
 ---
 
+## U57 — `expertise/codeExpertise/calculateOwnershipMetrics`
+**File**: `src/test/unit/plugins/visualizationPlugins/expertise/codeExpertise/calculateOwnershipMetrics.test.ts`
+**Source**: `src/plugins/visualizationPlugins/expertise/codeExpertise/src/chart/chart.tsx`
+
+| # | Description | Input | Expected |
+|---|---|---|---|
+| U57.1 | Returns empty totals when both inputs are empty | `ownershipData: []`, `commitsWithBuilds: []` | `currentOwnership: {}`, `totalLinesAdded: {}` |
+| U57.2 | Sums additions from a single commit for one developer | one build with `additions: 42` | `totalLinesAdded['Alice'] === 42` |
+| U57.3 | Accumulates additions across multiple commits for the same developer | two builds with 10 and 5 additions | `totalLinesAdded['Alice'] === 15` |
+| U57.4 | Tracks additions separately per developer | Alice 10, Bob 7 | each has their own total |
+| U57.5 | Skips commits with no user without throwing | build with `user: null` | does not throw; `totalLinesAdded` is empty |
+| U57.6 | Returns empty ownership when ownershipData is empty | `ownershipData: []` | `currentOwnership: {}` |
+| U57.7 | Counts lines owned as `to - from + 1` for a single range | range `[3, 7]` | `currentOwnership['Alice'] === 5` |
+| U57.8 | Sums multiple line ranges within a hunk | `[1,3]` and `[10,12]` | `currentOwnership['Alice'] === 6` |
+| U57.9 | Tracks ownership separately for multiple owners of the same file | Alice owns lines 1–5, Bob owns 6–8 | Alice=5, Bob=3 |
+| U57.10 | Includes all files when fileList is undefined | `fileList: undefined` | file is counted |
+| U57.11 | Includes a file when it is checked in fileList | `fileList: [{ path, checked: true }]` | file is counted |
+| U57.12 | Excludes a file when it is unchecked in fileList | `fileList: [{ path, checked: false }]` | file is not counted |
+| U57.13 | Removes a file from ownership tracking when its action is deleted | add commit then delete commit | `currentOwnership['Alice']` is undefined |
+| U57.14 | Later commit replaces earlier ownership for the same file | commit 1: Alice owns 10 lines; commit 2: Bob owns 3 lines | Bob=3, Alice=undefined |
+| U57.15 | Accumulates ownership across multiple independent files | Alice owns 5 lines in a.ts and 3 in b.ts | `currentOwnership['Alice'] === 8` |
+
+---
+
 ## Unit test file locations
 
 ```
@@ -1234,6 +1258,7 @@ src/test/unit/
 │       │       └── dataConverter.test.ts                               (U2)
 │       ├── expertise/
 │       │   ├── codeExpertise/
+│       │   │   ├── calculateOwnershipMetrics.test.ts                   (U57)
 │       │   │   └── dbUtils.test.ts                                     (U3)
 │       │   └── knowledgeRadar/
 │       │       └── dataConverter.test.ts                               (U38)

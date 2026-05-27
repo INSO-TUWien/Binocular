@@ -31,7 +31,7 @@ FROM nginxinc/nginx-unprivileged:alpine3.22 AS lean
 COPY  --from=builder --chown=node:node /app/binocular/dist /usr/share/nginx/html
 
 # copying nginx config from local to image
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
 # exposing internal port
 EXPOSE 80

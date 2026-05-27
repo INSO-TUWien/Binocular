@@ -134,7 +134,7 @@ export function convertToWeeklyFormat(
 
   // Generate labels (transposed: days as rows, hours as columns)
   const rowLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const colLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+  const colLabels = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
   return {
     chartData: chartData,
     rowLabels,

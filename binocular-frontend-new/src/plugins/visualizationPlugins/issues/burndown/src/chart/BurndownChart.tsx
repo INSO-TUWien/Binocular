@@ -13,7 +13,7 @@ import { BurndownChartDataPoint } from './components/BurndownChartDataPoint';
 import type { MappedIssue } from './types';
 import { SprintAreas } from '../../../../../../components/sprintAreas/SprintAreas';
 
-export const legendBarHeight = 40;
+export const legendBarHeight = 60;
 
 export const margin = 20;
 
@@ -76,7 +76,7 @@ export const BurndownChart: React.FC<
 
   const yScale = d3
     .scaleLinear()
-    .range([height - margin * 2, margin])
+    .range([height - legendBarHeight, margin])
     .domain([-yPadding, visibleMax + yPadding]);
 
   // Stable refs so the brush event handler always sees the latest scale/dates
@@ -97,7 +97,7 @@ export const BurndownChart: React.FC<
       .brushX()
       .extent([
         [margin * 2, 0],
-        [width - margin * 2, height - margin * 2],
+        [width - margin * 2, height - legendBarHeight],
       ])
       .on('end', (e: d3.D3BrushEvent<unknown>) => {
         if (!e.sourceEvent) return;
@@ -146,7 +146,7 @@ export const BurndownChart: React.FC<
           <>
             <defs>
               <clipPath id={clipId}>
-                <rect x={margin * 2 - 5} y={-5} width={width - margin * 4 + 10} height={height - margin * 2 + 10} />
+                <rect x={margin * 2 - 5} y={-5} width={width - margin * 4 + 10} height={height - legendBarHeight + 10} />
               </clipPath>
             </defs>
 
