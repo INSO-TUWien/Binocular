@@ -6,7 +6,7 @@ import type { DataPluginNote } from '../../../../../interfaces/dataPluginInterfa
 import type { TimeTrackingData } from '../../../../types/timeTrackingDataType';
 import distinctColors from 'distinct-colors';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
-import type { AuthorType } from '../../../../../../types/data/authorType.ts';
+import { type AuthorType, resolveAuthorName } from '../../../../../../types/data/authorType.ts';
 import { extractTimeTrackingDataFromNotes } from '../../../../utils/extractTimeTrackingDataFromNotes.ts';
 
 interface TimeSpentChartData {
@@ -363,7 +363,7 @@ function getDataByAuthor(
   data.forEach((object) => {
     const obj: TimeSpentChartData = { date: object.date };
     if (props.settings.splitSpentRemoved) {
-      for (const author of props.authorList) {
+      for (const author of props.authorList.filter((a) => a.parent === -1)) {
         palette['(Spent) ' + (author.displayName || author.user.gitSignature)] = {
           main: chroma(author.color.main).hex(),
           secondary: chroma(author.color.secondary).hex(),
@@ -376,7 +376,7 @@ function getDataByAuthor(
         obj['(Removed) ' + (author.displayName || author.user.gitSignature)] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
       }
     } else if (props.settings.breakdown) {
-      for (const author of props.authorList) {
+      for (const author of props.authorList.filter((a) => a.parent === -1)) {
         palette['(Total) ' + (author.displayName || author.user.gitSignature)] = {
           main: chroma(author.color.main).hex(),
           secondary: chroma(author.color.secondary).hex(),
@@ -385,7 +385,7 @@ function getDataByAuthor(
       }
       obj['others'] = 0;
     } else {
-      for (const author of props.authorList) {
+      for (const author of props.authorList.filter((a) => a.parent === -1)) {
         palette[author.displayName || author.user.gitSignature] = {
           main: chroma(author.color.main).hex(),
           secondary: chroma(author.color.secondary).hex(),
@@ -397,12 +397,7 @@ function getDataByAuthor(
 
     props.authorList.forEach((author: AuthorType) => {
       if (!author.selected) return;
-      const name =
-        author.parent === -1
-          ? author.displayName || author.user.gitSignature
-          : author.parent === 0
-            ? 'others'
-            : props.authorList.filter((a: AuthorType) => a.id === author.parent)[0].user.gitSignature;
+      const name = resolveAuthorName(author, props.authorList);
       if (props.settings.splitSpentRemoved) {
         if (author.user.id in object.statsBySortingObject) {
           //Insert number of changes with the author name as key,

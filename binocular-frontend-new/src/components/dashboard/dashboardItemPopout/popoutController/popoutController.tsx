@@ -50,7 +50,7 @@ export default function PopoutController(props: PropsType) {
   const [container, setContainer] = useState<HTMLDivElement>();
   const popoutWindow = useRef<Window>(null);
 
-  const storedTheme = localStorage.getItem('theme');
+  const storedTheme = localStorage.getItem('bino_theme');
   const [theme] = useState(storedTheme || 'binocularLight');
 
   useEffect(() => {

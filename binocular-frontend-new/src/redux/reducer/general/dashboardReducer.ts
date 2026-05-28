@@ -30,9 +30,9 @@ const initialState: DashboardInitialState = {
 export const dashboardSlice = createSlice({
   name: 'dashboard',
   initialState: () => {
-    const storedState = localStorage.getItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
       return initialState;
     } else {
       return JSON.parse(storedState);
@@ -54,7 +54,7 @@ export const dashboardSlice = createSlice({
         }
         state.dashboardItems = [...state.dashboardItems, payload];
         updateDashboardState(state.dashboardState, payload, DashboardStateUpdateType.place);
-        localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+        localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
       }
       state.initialized = true;
     },
@@ -72,22 +72,22 @@ export const dashboardSlice = createSlice({
         });
         updateDashboardState(state.dashboardState, action.payload, DashboardStateUpdateType.move);
       }
-      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     placeDashboardItem: (state, action: PayloadAction<DashboardItemType | undefined>) => {
       state.placeableItem = action.payload;
       state.initialized = true;
-      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     clearDashboardItem: (state) => {
       state.placeableItem = undefined;
       state.initialized = true;
-      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     deleteDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
       state.dashboardItems = state.dashboardItems.filter((item: DashboardItemType) => item.id !== action.payload.id);
       updateDashboardState(state.dashboardState, action.payload, DashboardStateUpdateType.delete);
-      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     updateDashboardItem: (state, action: PayloadAction<DashboardItemType>) => {
       state.dashboardItems = state.dashboardItems.map((item: DashboardItemType) => {
@@ -96,18 +96,18 @@ export const dashboardSlice = createSlice({
         }
         return item;
       });
-      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     increasePopupCount: (state) => {
       state.popupCount++;
-      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     clearDashboardStorage: () => {
-      localStorage.removeItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`);
+      localStorage.removeItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`);
     },
     importDashboardStorage: (state, action: PayloadAction<DashboardInitialState>) => {
       state = action.payload;
-      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     clearDashboard: (state) => {
       state.dashboardState = Array.from({ length: state.dashboardState.length }, () =>
@@ -117,7 +117,7 @@ export const dashboardSlice = createSlice({
       state.dashboardItems = [];
       state.dashboardItemCount = 0;
       state.placeableItem = undefined;
-      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setDashboardState: (state, action: PayloadAction<DashboardItemType[]>) => {
       const dashboardItems = action.payload.map((item, id) => {
@@ -139,11 +139,11 @@ export const dashboardSlice = createSlice({
       });
       state.dashboardItems = dashboardItems;
       state.initialized = true;
-      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     initializeDashboardState: (state) => {
       state.initialized = true;
-      localStorage.setItem(`${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${dashboardSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });

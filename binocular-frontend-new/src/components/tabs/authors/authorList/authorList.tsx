@@ -5,10 +5,12 @@ import {
   checkAllAuthors,
   editAuthor,
   moveAuthorToOther,
+  releaseAuthor,
   resetAuthor,
   setAuthorList,
   setAuthorsDataPluginId,
   setDragging,
+  setDraggingSource,
   setParentAuthor,
   switchAllAuthorSelection,
   switchAuthorSelection,
@@ -38,6 +40,7 @@ function AuthorList(props: { orientation?: string }) {
 
   const authorLists: { [id: number]: AuthorType[] } = useSelector((state: RootState) => state.authors.authorLists);
   const dragging = useSelector((state: RootState) => state.authors.dragging);
+  const draggingSource = useSelector((state: RootState) => state.authors.draggingSource);
   const authorsDataPluginId = useSelector((state: RootState) => state.authors.dataPluginId);
 
   const [authors, setAuthors] = useState<AuthorType[]>(authorLists[authorsDataPluginId] || []);
@@ -95,10 +98,10 @@ function AuthorList(props: { orientation?: string }) {
   function refreshAuthors(dP: DatabaseSettingsDataPluginType) {
     if (dP && dP.id !== undefined) {
       console.log(`REFRESH AUTHORS (${dP.name} #${dP.id})`);
-      const stored = localStorage.getItem(`${accountsSlice.name}StateV${Config.localStorageVersion}`);
-      let accounts: AccountType[];
+      const stored = localStorage.getItem(`bino_${accountsSlice.name}StateV${Config.localStorageVersion}`);
+      let accounts: AccountType[] = [];
       if (stored) {
-        accounts = JSON.parse(stored).accountLists[dP.id];
+        accounts = JSON.parse(stored).accountLists[dP.id] ?? [];
       }
       DataPluginStorage.getDataPlugin(dP)
         .then((dataPlugin) => {
@@ -292,6 +295,7 @@ function AuthorList(props: { orientation?: string }) {
                         onDragOver={(event) => event.preventDefault()}
                         onDragStart={(event) => {
                           setTimeout(() => dispatch(setDragging(true), 1));
+                          dispatch(setDraggingSource('authors'));
                           event.dataTransfer.setData('draggingAuthorId', String(parentAuthor.id));
                         }}
                         onDragEnd={() => dispatch(setDragging(false))}
@@ -347,6 +351,7 @@ function AuthorList(props: { orientation?: string }) {
                               draggable={true}
                               onDragStart={(event) => {
                                 setTimeout(() => dispatch(setDragging(true), 1));
+                                dispatch(setDraggingSource('authors'));
                                 event.dataTransfer.setData('draggingAuthorId', String(author.id));
                               }}
                               onDragEnd={() => dispatch(setDragging(false))}
@@ -389,21 +394,43 @@ function AuthorList(props: { orientation?: string }) {
         </div>
       </div>
       {(dragging || props.orientation === 'horizontal') && (
-        <div
-          className={
-            authorListStyles.authorDropNoParent +
-            ' ' +
-            (props.orientation === 'horizontal'
-              ? authorListStyles.authorDropNoParentHorizontal
-              : authorListStyles.authorDropNoParentVertical)
-          }
-          onDrop={(event) => {
-            event.stopPropagation();
-            dispatch(setDragging(false));
-            dispatch(resetAuthor(Number(event.dataTransfer.getData('draggingAuthorId'))));
-          }}
-          onDragOver={(event) => event.preventDefault()}>
-          <span>Drop here to remove Parent!</span>
+        <div className="flex flex-col gap-1">
+          {(draggingSource === 'authors' || props.orientation === 'horizontal') && (
+            <div
+              className={
+                authorListStyles.authorDropNoParent +
+                ' ' +
+                (props.orientation === 'horizontal'
+                  ? authorListStyles.authorDropNoParentHorizontal
+                  : authorListStyles.authorDropNoParentVertical)
+              }
+              onDrop={(event) => {
+                event.stopPropagation();
+                dispatch(setDragging(false));
+                dispatch(resetAuthor(Number(event.dataTransfer.getData('draggingAuthorId'))));
+              }}
+              onDragOver={(event) => event.preventDefault()}>
+              <span>Drop here to remove Parent!</span>
+            </div>
+          )}
+          {draggingSource === 'other' && (
+            <div
+              className={
+                authorListStyles.authorDropNoParent +
+                ' ' +
+                (props.orientation === 'horizontal'
+                  ? authorListStyles.authorDropNoParentHorizontal
+                  : authorListStyles.authorDropNoParentVertical)
+              }
+              onDrop={(event) => {
+                event.stopPropagation();
+                dispatch(setDragging(false));
+                dispatch(releaseAuthor(Number(event.dataTransfer.getData('draggingAuthorId'))));
+              }}
+              onDragOver={(event) => event.preventDefault()}>
+              <span>Drop here to move back to authors!</span>
+            </div>
+          )}
         </div>
       )}
     </>

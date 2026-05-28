@@ -16,9 +16,9 @@ export const parametersInitialState: ParametersType = {
 export const parametersSlice = createSlice({
   name: 'parameters',
   initialState: () => {
-    const storedState = localStorage.getItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`bino_${parametersSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(parametersInitialState));
+      localStorage.setItem(`bino_${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(parametersInitialState));
       return parametersInitialState;
     } else {
       return JSON.parse(storedState);
@@ -27,18 +27,18 @@ export const parametersSlice = createSlice({
   reducers: {
     setParametersGeneral: (state, action: PayloadAction<ParametersGeneralType>) => {
       state.parametersGeneral = action.payload;
-      localStorage.setItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setParametersDateRange: (state, action: PayloadAction<ParametersDateRangeType>) => {
       state.parametersDateRange = action.payload;
-      localStorage.setItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     clearParametersStorage: () => {
-      localStorage.removeItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`);
+      localStorage.removeItem(`bino_${parametersSlice.name}StateV${Config.localStorageVersion}`);
     },
     importParametersStorage: (state, action: PayloadAction<ParametersType>) => {
       state = action.payload;
-      localStorage.setItem(`${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${parametersSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });

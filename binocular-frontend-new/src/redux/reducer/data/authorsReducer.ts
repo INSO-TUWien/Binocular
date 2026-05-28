@@ -7,6 +7,7 @@ import { cloneDeep } from 'lodash';
 export interface AuthorsInitialState {
   authorLists: { [id: number]: AuthorType[] };
   dragging: boolean;
+  draggingSource: 'authors' | 'other' | null;
   authorToEdit: AuthorType | undefined;
   dataPluginId: number | undefined;
 }
@@ -14,6 +15,7 @@ export interface AuthorsInitialState {
 const initialState: AuthorsInitialState = {
   authorLists: {},
   dragging: false,
+  draggingSource: null,
   authorToEdit: undefined,
   dataPluginId: undefined,
 };
@@ -21,9 +23,9 @@ const initialState: AuthorsInitialState = {
 export const authorsSlice = createSlice({
   name: 'authors',
   initialState: () => {
-    const storedState = localStorage.getItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
       return initialState;
     } else {
       return JSON.parse(storedState);
@@ -50,20 +52,34 @@ export const authorsSlice = createSlice({
         });
       }
       state.authorLists[action.payload.dataPluginId] = authorList;
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setDragging: (state, action: PayloadAction<boolean>) => {
       state.dragging = action.payload;
+      if (!action.payload) state.draggingSource = null;
+    },
+    setDraggingSource: (state, action: PayloadAction<'authors' | 'other'>) => {
+      state.draggingSource = action.payload;
     },
     moveAuthorToOther: (state, action: PayloadAction<number>) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
       state.authorLists[state.dataPluginId] = state.authorLists[state.dataPluginId].map((a: AuthorType) => {
-        if (a.parent === action.payload || a.id === action.payload) {
+        if (a.id === action.payload || a.parent === action.payload) {
           a.parent = 0;
         }
         return a;
       });
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+    },
+    releaseAuthor: (state, action: PayloadAction<number>) => {
+      if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
+      state.authorLists[state.dataPluginId] = state.authorLists[state.dataPluginId].map((a: AuthorType) => {
+        if (a.id === action.payload) {
+          a.parent = -1;
+        }
+        return a;
+      });
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     resetAuthor: (state, action: PayloadAction<number>) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -73,7 +89,7 @@ export const authorsSlice = createSlice({
         }
         return a;
       });
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setParentAuthor: (state, action: PayloadAction<{ author: number; parent: number }>) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -85,7 +101,7 @@ export const authorsSlice = createSlice({
           }
           return a;
         });
-        localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+        localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
       }
     },
     editAuthor: (state, action: PayloadAction<number>) => {
@@ -101,7 +117,7 @@ export const authorsSlice = createSlice({
         }
         return a;
       });
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     switchAuthorSelection: (state, action: PayloadAction<number>) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -111,7 +127,7 @@ export const authorsSlice = createSlice({
         }
         return a;
       });
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     switchAllAuthorSelection: (state) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -119,7 +135,7 @@ export const authorsSlice = createSlice({
         a.selected = !a.selected;
         return a;
       });
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     checkAllAuthors: (state) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -127,7 +143,7 @@ export const authorsSlice = createSlice({
         a.selected = true;
         return a;
       });
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     uncheckAllAuthors: (state) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -135,18 +151,18 @@ export const authorsSlice = createSlice({
         a.selected = false;
         return a;
       });
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setAuthorsDataPluginId: (state, action: PayloadAction<number | undefined>) => {
       state.dataPluginId = action.payload;
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     clearAuthorsStorage: () => {
-      localStorage.removeItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`);
+      localStorage.removeItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`);
     },
     importAuthorsStorage: (state, action: PayloadAction<AuthorsInitialState>) => {
       state = action.payload;
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     assignAccount: (state, action: PayloadAction<{ account: AccountType; author: number }>) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -160,7 +176,7 @@ export const authorsSlice = createSlice({
         return a;
       });
 
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     resetAccount: (state) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId] || !state.authorToEdit) return;
@@ -171,7 +187,7 @@ export const authorsSlice = createSlice({
         return a;
       });
 
-      localStorage.setItem(`${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });
@@ -195,7 +211,9 @@ function updateAuthorStorage(account: DataPluginAccount) {
 export const {
   setAuthorList,
   setDragging,
+  setDraggingSource,
   moveAuthorToOther,
+  releaseAuthor,
   resetAuthor,
   setParentAuthor,
   editAuthor,

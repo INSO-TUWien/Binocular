@@ -56,6 +56,15 @@ export function convertToChartData(
   const palette: Palette = {};
   const parentAuthors = props.authorList.filter((a) => a.parent === -1 && a.selected);
   const knownIds = new Set(props.authorList.map((a) => a.user.id));
+  const otherGroupAuthors = props.authorList.filter((a) => {
+    if (!a.selected) return false;
+    if (a.parent === 0) return true;
+    if (a.parent > 0) {
+      const parent = props.authorList.find((p) => p.id === a.parent);
+      return parent?.parent === 0;
+    }
+    return false;
+  });
 
   function trimLabel(label: string): string {
     const maxLength = 15;
@@ -106,6 +115,32 @@ export function convertToChartData(
           : undefined,
     });
   });
+
+  /**
+   * Sum up commits from authors in the "Other" group (and their children)
+   */
+  if (otherGroupAuthors.length > 0) {
+    const otherSignatures = otherGroupAuthors.map((a) => a.user.gitSignature);
+    const otherTotal = _.sumBy(otherSignatures, (sig) => countsByUser[sig] ?? 0);
+    const otherCommits = _.flatMap(otherSignatures, (sig) => commitsByUser[sig] ?? []);
+    if (otherTotal > 0) {
+      chartData.push({
+        user: 'others',
+        gitSignature: 'others',
+        value: otherTotal,
+        avgCommitsPerWeek: avgCommitsPerWeek(otherCommits),
+        segments:
+          otherGroupAuthors.length > 1
+            ? otherGroupAuthors.map((a) => ({
+                label: trimLabel(a.user.gitSignature),
+                gitSignature: a.user.gitSignature,
+                value: countsByUser[a.user.gitSignature] ?? 0,
+              }))
+            : undefined,
+      });
+      palette['others'] = { main: '#555555', secondary: '#777777' };
+    }
+  }
 
   /**
    *  optional: sum up commits from unknown users

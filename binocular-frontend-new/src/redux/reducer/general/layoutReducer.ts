@@ -16,9 +16,9 @@ const initialState: LayoutsInitialState = {
 export const layoutSlice = createSlice({
   name: 'layout',
   initialState: () => {
-    const storedState = localStorage.getItem(`${layoutSlice.name}StateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`bino_${layoutSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`${layoutSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      localStorage.setItem(`bino_${layoutSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
       return initialState;
     } else {
       return JSON.parse(storedState);
@@ -31,7 +31,7 @@ export const layoutSlice = createSlice({
       newLayout.id = state.customLayoutCount;
       state.customLayouts = [...state.customLayouts, newLayout];
       state.customLayoutCount++;
-      localStorage.setItem(`${layoutSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${layoutSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     saveChanges(state, action: { payload: DashboardLayout }) {
       state.customLayouts = state.customLayouts.map((layout: DashboardLayout) => {
@@ -40,14 +40,17 @@ export const layoutSlice = createSlice({
         }
         return layout;
       });
-      localStorage.setItem(`${layoutSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${layoutSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     deleteCustomLayout(state, action: { payload: number }) {
       state.customLayouts = state.customLayouts.filter((layout: DashboardLayout) => layout.id !== action.payload);
-      localStorage.setItem(`${layoutSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${layoutSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+    },
+    clearLayoutStorage: () => {
+      localStorage.removeItem(`bino_${layoutSlice.name}StateV${Config.localStorageVersion}`);
     },
   },
 });
 
-export const { addCustomLayout, saveChanges, deleteCustomLayout } = layoutSlice.actions;
+export const { addCustomLayout, saveChanges, deleteCustomLayout, clearLayoutStorage } = layoutSlice.actions;
 export default layoutSlice.reducer;

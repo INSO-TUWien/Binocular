@@ -2,7 +2,7 @@ import moment from 'moment/moment';
 import chroma from 'chroma-js';
 import _ from 'lodash';
 import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
-import type { AuthorType } from '../../../../../../types/data/authorType.ts';
+import { type AuthorType, resolveAuthorName } from '../../../../../../types/data/authorType.ts';
 import type { ChangesSettings } from '../settings/settings.tsx';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 
@@ -135,7 +135,7 @@ export function convertToChartData(
       const obj: CommitChartData = { date: commit.date };
 
       if (props.settings.splitAdditionsDeletions) {
-        for (const author of props.authorList) {
+        for (const author of props.authorList.filter((a) => a.parent === -1)) {
           commitPalette['(Additions) ' + (author.displayName || author.user.gitSignature)] = {
             main: chroma(author.color.main).hex(),
             secondary: chroma(author.color.secondary).hex(),
@@ -150,7 +150,7 @@ export function convertToChartData(
         obj['(Additions) others'] = 0;
         obj['(Deletions) others'] = -0.001;
       } else {
-        for (const author of props.authorList) {
+        for (const author of props.authorList.filter((a) => a.parent === -1)) {
           commitPalette[author.displayName || author.user.gitSignature] = {
             main: chroma(author.color.main).hex(),
             secondary: chroma(author.color.secondary).hex(),
@@ -161,13 +161,7 @@ export function convertToChartData(
       }
       props.authorList.forEach((author: AuthorType) => {
         if (!author.selected) return;
-        const name =
-          author.parent === -1
-            ? author.displayName || author.user.gitSignature
-            : author.parent === 0
-              ? 'others'
-              : props.authorList.filter((a: AuthorType) => a.id === author.parent)[0].displayName ||
-                props.authorList.filter((a: AuthorType) => a.id === author.parent)[0].user.gitSignature;
+        const name = resolveAuthorName(author, props.authorList);
         if (props.settings.splitAdditionsDeletions) {
           if (author.user.id in commit.statsByAuthor) {
             //Insert number of changes with the author name as key,

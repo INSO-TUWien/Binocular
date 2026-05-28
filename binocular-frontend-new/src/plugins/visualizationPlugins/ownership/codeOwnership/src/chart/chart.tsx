@@ -183,9 +183,21 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Visu
     }
 
     //get all users
-    const selectedAuthors = props.authorList.filter((author) => author.selected && author.parent == -1);
-    const mergedAuthors = props.authorList.filter((author) => author.selected && author.parent > 0);
-    const otherAuthors = props.authorList.filter((author) => author.selected && author.parent == 0);
+    const selectedAuthors = props.authorList.filter((author) => author.selected && author.parent === -1);
+    const otherAuthors = props.authorList.filter((author) => {
+      if (!author.selected) return false;
+      if (author.parent === 0) return true;
+      if (author.parent > 0) {
+        const parent = props.authorList.find((a) => a.id === author.parent);
+        return parent?.parent === 0;
+      }
+      return false;
+    });
+    const mergedAuthors = props.authorList.filter((author) => {
+      if (!author.selected || author.parent <= 0) return false;
+      const parent = props.authorList.find((a) => a.id === author.parent);
+      return parent?.parent === -1;
+    });
     const tempKeys: string[] = selectedAuthors.map((author) => author.user.gitSignature);
 
     // Build palette with { main, secondary } format for simpleVis StackedAreaChart.

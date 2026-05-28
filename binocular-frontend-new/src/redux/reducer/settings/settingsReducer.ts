@@ -46,15 +46,15 @@ function persistSettings(state: SettingsInitialState) {
     localDatabaseLoadingState: LocalDatabaseLoadingState.none,
     localDatabaseLoadingMessage: '',
   };
-  localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(stateToSave));
+  localStorage.setItem(`bino_${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(stateToSave));
 }
 
 export const settingsSlice = createSlice({
   name: 'settings',
   initialState: () => {
-    const storedState = localStorage.getItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`bino_${settingsSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      localStorage.setItem(`bino_${settingsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
       return initialState;
     } else {
       const parsed = JSON.parse(storedState) as SettingsInitialState;
@@ -71,7 +71,7 @@ export const settingsSlice = createSlice({
     addDataPlugin: (state, action: PayloadAction<DatabaseSettingsDataPluginType>) => {
       const newDataPlugin = cloneDeep(action.payload);
       if (newDataPlugin.id === undefined) {
-        const isDark = localStorage.getItem('theme') === 'binocularDark';
+        const isDark = localStorage.getItem('bino_theme') === 'binocularDark';
         newDataPlugin.isDefault = state.database.dataPlugins.length === 0;
 
         state.database.currID++;
@@ -126,7 +126,7 @@ export const settingsSlice = createSlice({
       persistSettings(state);
     },
     clearSettingsStorage: () => {
-      localStorage.removeItem(`${settingsSlice.name}StateV${Config.localStorageVersion}`);
+      localStorage.removeItem(`bino_${settingsSlice.name}StateV${Config.localStorageVersion}`);
     },
     importSettingsStorage: (state, action: PayloadAction<SettingsInitialState>) => {
       state = action.payload;

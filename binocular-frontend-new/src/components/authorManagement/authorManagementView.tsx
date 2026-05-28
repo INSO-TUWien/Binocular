@@ -4,9 +4,11 @@ import { type AppDispatch, type RootState, useAppDispatch } from '../../redux';
 import {
   editAuthor,
   moveAuthorToOther,
+  releaseAuthor,
   resetAuthor,
   setAuthorsDataPluginId,
   setDragging,
+  setDraggingSource,
   setParentAuthor,
 } from '../../redux/reducer/data/authorsReducer.ts';
 import type { AuthorType } from '../../types/data/authorType.ts';
@@ -131,6 +133,7 @@ function AuthorManagementView() {
   const authorLists = useSelector((state: RootState) => state.authors.authorLists);
   const dataPluginId = useSelector((state: RootState) => state.authors.dataPluginId);
   const dragging = useSelector((state: RootState) => state.authors.dragging);
+  const draggingSource = useSelector((state: RootState) => state.authors.draggingSource);
   const availableDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
   const accountLists = useSelector((state: RootState) => state.accounts.accountLists);
   const selectedDataPlugin = availableDataPlugins.find((dP: DatabaseSettingsDataPluginType) => dP.id === dataPluginId);
@@ -167,6 +170,10 @@ function AuthorManagementView() {
 
   function handleDragStart(e: React.DragEvent, authorId: number) {
     setTimeout(() => dispatch(setDragging(true)));
+    const author = authors.find((a) => a.id === authorId);
+    const parentAuthor = author && author.parent > 0 ? authors.find((a) => a.id === author.parent) : null;
+    const isFromOther = author?.parent === 0 || parentAuthor?.parent === 0;
+    dispatch(setDraggingSource(isFromOther ? 'other' : 'authors'));
     e.dataTransfer.setData('draggingAuthorId', String(authorId));
   }
 
@@ -318,14 +325,23 @@ function AuthorManagementView() {
             className="flex-1 border-2 border-dashed border-error/50 bg-error/10 rounded-lg text-sm font-medium text-error text-center px-4 py-4 transition-colors hover:bg-error/20 hover:border-error cursor-copy"
             onDrop={(e) => handleZoneDrop(e, (id) => dispatch(resetAuthor(id)))}
             onDragOver={(e) => e.preventDefault()}>
-            Remove from group
+            Remove from parent
           </div>
-          <div
-            className="flex-1 border-2 border-dashed border-warning/50 bg-warning/10 rounded-lg text-sm font-medium text-warning text-center px-4 py-4 transition-colors hover:bg-warning/20 hover:border-warning cursor-copy"
-            onDrop={(e) => handleZoneDrop(e, (id) => dispatch(moveAuthorToOther(id)))}
-            onDragOver={(e) => e.preventDefault()}>
-            Move to Other
-          </div>
+          {draggingSource === 'other' ? (
+            <div
+              className="flex-1 border-2 border-dashed border-success/50 bg-success/10 rounded-lg text-sm font-medium text-success text-center px-4 py-4 transition-colors hover:bg-success/20 hover:border-success cursor-copy"
+              onDrop={(e) => handleZoneDrop(e, (id) => dispatch(releaseAuthor(id)))}
+              onDragOver={(e) => e.preventDefault()}>
+              Move back to Authors
+            </div>
+          ) : (
+            <div
+              className="flex-1 border-2 border-dashed border-warning/50 bg-warning/10 rounded-lg text-sm font-medium text-warning text-center px-4 py-4 transition-colors hover:bg-warning/20 hover:border-warning cursor-copy"
+              onDrop={(e) => handleZoneDrop(e, (id) => dispatch(moveAuthorToOther(id)))}
+              onDragOver={(e) => e.preventDefault()}>
+              Move to Other
+            </div>
+          )}
         </div>
       )}
       {/* Unassigned accounts modal */}

@@ -2,7 +2,7 @@ import moment from 'moment/moment';
 import type { ParametersType } from '../../../../../../types/parameters/parametersType.ts';
 import chroma from 'chroma-js';
 import _ from 'lodash';
-import type { AuthorType } from '../../../../../../types/data/authorType.ts';
+import { type AuthorType, resolveAuthorName } from '../../../../../../types/data/authorType.ts';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import type { MergeRequestsSettings } from '../settings/settings.tsx';
 import type { DataPluginMergeRequest } from '../../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests.ts';
@@ -398,7 +398,7 @@ function getDataByAuthors(
     const obj: MergeRequestChartData = { date: mergeRequest.date };
 
     if (breakdown) {
-      for (const author of authors) {
+      for (const author of authors.filter((a) => a.parent === -1)) {
         palette['Open Merge Requests ' + (author.displayName || author.user.gitSignature)] = {
           main: chroma(author.color.main).hex(),
           secondary: chroma(author.color.secondary).hex(),
@@ -408,7 +408,7 @@ function getDataByAuthors(
       obj['Open Merge Requests ' + UNASSIGNED] = 0;
       obj['Open Merge Requests ' + ACCOUNT_NOT_ASSIGNED] = 0;
     } else {
-      for (const author of authors) {
+      for (const author of authors.filter((a) => a.parent === -1)) {
         palette['Opened Merge Requests ' + (author.displayName || author.user.gitSignature)] = {
           main: chroma(author.color.main).hex(),
           secondary: chroma(author.color.secondary).hex(),
@@ -435,12 +435,7 @@ function getDataByAuthors(
 
     authors.forEach((author) => {
       if (!author.selected) return;
-      const name =
-        author.parent === -1
-          ? author.displayName || author.user.gitSignature
-          : author.parent === 0
-            ? 'others'
-            : authors.filter((a) => a.id === author.parent)[0].user.gitSignature;
+      const name = resolveAuthorName(author, authors);
 
       if (author.user.id in mergeRequest.statsBySortingObject) {
         //Insert number of changes with the author name as key,

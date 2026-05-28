@@ -67,7 +67,7 @@ function App() {
   const [fileSearch, setFileSearch] = useState('');
 
   const storedTheme =
-    localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'binocularDark' : 'binocularLight');
+    localStorage.getItem('bino_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'binocularDark' : 'binocularLight');
   const [theme, setTheme] = useState(storedTheme);
 
   useEffect(() => {
@@ -107,7 +107,7 @@ function App() {
           <TabControllerButtonThemeSwitch
             theme={theme}
             onChange={(theme: string) => {
-              localStorage.setItem('theme', theme);
+              localStorage.setItem('bino_theme', theme);
               setTheme(theme);
               requestAnimationFrame(() => dispatch(recalculateDataPluginColors(theme)));
             }}></TabControllerButtonThemeSwitch>

@@ -16,9 +16,9 @@ const initialState: AccountsInitialState = {
 export const accountsSlice = createSlice({
   name: 'accounts',
   initialState: () => {
-    const storedState = localStorage.getItem(`${accountsSlice.name}StateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`bino_${accountsSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`${accountsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      localStorage.setItem(`bino_${accountsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
       return initialState;
     } else {
       return JSON.parse(storedState);
@@ -44,18 +44,18 @@ export const accountsSlice = createSlice({
         });
       }
       state.accountLists[action.payload.dataPluginId] = accountList;
-      localStorage.setItem(`${accountsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${accountsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setAccountsDataPluginId: (state, action: PayloadAction<number | undefined>) => {
       state.dataPluginId = action.payload;
-      localStorage.setItem(`${accountsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${accountsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     clearAccountsStorage: () => {
-      localStorage.removeItem(`${accountsSlice.name}StateV${Config.localStorageVersion}`);
+      localStorage.removeItem(`bino_${accountsSlice.name}StateV${Config.localStorageVersion}`);
     },
     importAccountsStorage: (state, action: PayloadAction<AccountsInitialState>) => {
       state = action.payload;
-      localStorage.setItem(`${accountsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`bino_${accountsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });

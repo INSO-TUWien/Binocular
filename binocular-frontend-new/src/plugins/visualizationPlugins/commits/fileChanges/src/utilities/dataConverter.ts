@@ -1,5 +1,5 @@
 import moment from 'moment/moment';
-import type { AuthorType } from '../../../../../../types/data/authorType.ts';
+import { type AuthorType, resolveAuthorName } from '../../../../../../types/data/authorType.ts';
 import chroma from 'chroma-js';
 import type { CommitChartData, Palette } from '../chart/chart.tsx';
 import type { ParametersType } from '../../../../../../types/parameters/parametersType.ts';
@@ -140,7 +140,7 @@ export function convertCommitDataToChangesChartData(
       const obj: CommitChartData = { date: commit.date };
 
       if (splitAdditionsDeletions) {
-        for (const author of authors) {
+        for (const author of authors.filter((a) => a.parent === -1)) {
           commitPalette['(Additions) ' + (author.displayName || author.user.gitSignature)] = {
             main: chroma(author.color.main).hex(),
             secondary: chroma(author.color.secondary).hex(),
@@ -155,7 +155,7 @@ export function convertCommitDataToChangesChartData(
         obj['(Additions) others'] = 0;
         obj['(Deletions) others'] = -0.001;
       } else {
-        for (const author of authors) {
+        for (const author of authors.filter((a) => a.parent === -1)) {
           commitPalette[author.displayName || author.user.gitSignature] = {
             main: chroma(author.color.main).hex(),
             secondary: chroma(author.color.secondary).hex(),
@@ -167,12 +167,7 @@ export function convertCommitDataToChangesChartData(
 
       authors.forEach((author) => {
         if (!author.selected) return;
-        const name =
-          author.parent === -1
-            ? author.displayName || author.user.gitSignature
-            : author.parent === 0
-              ? 'others'
-              : authors.filter((a) => a.id === author.parent)[0].user.gitSignature;
+        const name = resolveAuthorName(author, authors);
         if (splitAdditionsDeletions) {
           if (author.user.id in commit.statsByAuthor) {
             //Insert number of changes with the author name as key,

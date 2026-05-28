@@ -60,7 +60,7 @@ function EditAuthorDialog() {
             <div className="label">
               <span className="label-text font-bold">Signature:</span>
             </div>
-            <div className={'text-neutral-600'}>{authorToEdit.user.gitSignature}</div>
+            <div className={'text-base-content/60'}>{authorToEdit.user.gitSignature}</div>
             <label className="form-control w-full">
               <div className="label">
                 <span className="label-text font-bold">Display Name:</span>

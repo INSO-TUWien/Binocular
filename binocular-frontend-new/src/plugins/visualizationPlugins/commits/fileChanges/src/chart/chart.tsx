@@ -139,7 +139,7 @@ function Chart(props: {
       <div className="w-full h-full flex justify-center items-center">
         <div className="text-center">
           <span className="text-lg font-semibold">No file selected</span>
-          <p className="text-sm text-gray-500">Please select a file to view the chart.</p>
+          <p className="text-sm text-base-content/60">Please select a file to view the chart.</p>
         </div>
       </div>
     );
@@ -151,7 +151,7 @@ function Chart(props: {
         <div className="w-full h-full flex justify-center items-center">
           <div className="text-center">
             <span className="text-lg font-semibold">No commits found</span>
-            <p className="text-sm text-gray-500">Please select a file with commits to view the chart.</p>
+            <p className="text-sm text-base-content/60">Please select a file with commits to view the chart.</p>
           </div>
         </div>
       );
@@ -162,7 +162,7 @@ function Chart(props: {
         <div className="w-full h-full flex justify-center items-center">
           <div className="text-center">
             <span className="text-lg font-semibold">No commits found in the selected time range.</span>
-            <p className="text-sm text-gray-500">Please select a time range with enough data.</p>
+            <p className="text-sm text-base-content/60">Please select a time range with enough data.</p>
           </div>
         </div>
       );
