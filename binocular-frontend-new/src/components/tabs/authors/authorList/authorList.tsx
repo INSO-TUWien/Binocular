@@ -253,7 +253,7 @@ function AuthorList(props: { orientation?: string }) {
                       }>
                       <input
                         type={'checkbox'}
-                        className={'checkbox checkbox-accent ' + authorListStyles.authorCheckbox}
+                        className={'checkbox checkbox-primary ' + authorListStyles.authorCheckbox}
                         checked={parentAuthor.selected}
                         onChange={() => {
                           dispatch(switchAuthorSelection(parentAuthor.id));

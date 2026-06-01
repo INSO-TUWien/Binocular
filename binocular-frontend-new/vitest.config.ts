@@ -1,6 +1,5 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-import svgr from 'vite-plugin-svgr';
 import type { Plugin } from 'vite';
 
 /**
@@ -33,7 +32,7 @@ function dbExportStubPlugin(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [svgr(), react(), dbExportStubPlugin()],
+  plugins: [react(), dbExportStubPlugin()],
   test: {
     environment: 'jsdom',
     globals: true,

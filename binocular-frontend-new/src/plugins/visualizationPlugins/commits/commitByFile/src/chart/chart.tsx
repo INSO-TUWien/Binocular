@@ -56,7 +56,7 @@ function Chart(props: Readonly<VisualizationPluginProperties<SettingsType, DataP
   };
 
   return (
-    <div className={'w-full h-full flex flex-col items-center'} ref={chartContainerRef}>
+    <div className={'relative w-full h-full flex flex-col items-center'} ref={chartContainerRef}>
       {dataState !== DataState.FETCHING && commits.length > 0 && (
         <Select
           className="text-sm w-100 m-2"
@@ -82,8 +82,8 @@ function Chart(props: Readonly<VisualizationPluginProperties<SettingsType, DataP
       {dataState !== DataState.FETCHING && commits.length === 0 && <div>No Commits Found</div>}
       {dataState === DataState.EMPTY && <div>No Data</div>}
       {dataState === DataState.FETCHING && (
-        <div>
-          <span className="loading loading-spinner loading-lg text-accent"></span>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="loading loading-spinner loading-lg text-primary"></span>
         </div>
       )}
       <div ref={chartAreaRef} className={'w-full flex-1'}>

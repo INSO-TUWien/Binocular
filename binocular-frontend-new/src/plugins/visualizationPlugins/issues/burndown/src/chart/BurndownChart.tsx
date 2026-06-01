@@ -4,8 +4,6 @@ import * as d3 from 'd3';
 import type { BurndownSettings } from '../settings/settings';
 import moment, { type Moment, type unitOfTime } from 'moment';
 import type { SprintType } from '../../../../../../types/data/sprintType';
-import { BurndownChartYAxisLegend } from './components/BurndownChartYAxisLegend';
-import { BurndownChartXAxisLegend } from './components/BurndownChartXAxisLegend';
 import { BurndownChartDetailDialog } from './components/BurndownChartDetailDialog';
 import { groupIssuesByGranularity } from './helper/groupIssuesByGranularity';
 import { pairUpDataPoints } from './helper/pairUpDataPoints';
@@ -79,6 +77,35 @@ export const BurndownChart: React.FC<
     .range([height - legendBarHeight, margin])
     .domain([-yPadding, visibleMax + yPadding]);
 
+  const xAxisRef = React.useRef<SVGGElement | null>(null);
+  const yAxisRef = React.useRef<SVGGElement | null>(null);
+
+  React.useEffect(() => {
+    if (!xAxisRef.current || !yAxisRef.current) return;
+
+    const TRANSITION_MS = 300;
+
+    d3.select(xAxisRef.current).transition().duration(TRANSITION_MS).ease(d3.easeCubicOut).call(d3.axisBottom(xScale));
+
+    d3.select(xAxisRef.current)
+      .selectAll('text')
+      .style('text-anchor', 'end')
+      .attr('transform', 'rotate(-35)')
+      .attr('dx', '-0.4em')
+      .attr('dy', '0.6em')
+      .attr('fill', 'var(--color-base-content)')
+      .attr('stroke', 'none');
+
+    d3.select(xAxisRef.current).selectAll('path, line').attr('stroke', 'var(--color-base-content)');
+
+    const yTicks = yScale.ticks().filter((t) => t >= 0 && Number.isInteger(t));
+    d3.select(yAxisRef.current).transition().duration(TRANSITION_MS).ease(d3.easeCubicOut).call(d3.axisLeft(yScale).tickValues(yTicks));
+
+    d3.select(yAxisRef.current).selectAll('text').attr('fill', 'var(--color-base-content)').attr('stroke', 'none');
+
+    d3.select(yAxisRef.current).selectAll('path, line').attr('stroke', 'var(--color-base-content)');
+  }, [xScale, yScale]);
+
   // Stable refs so the brush event handler always sees the latest scale/dates
   const brushRef = React.useRef<SVGGElement | null>(null);
   const xScaleRef = React.useRef(xScale);
@@ -151,17 +178,8 @@ export const BurndownChart: React.FC<
             </defs>
 
             <g clipPath={`url(#${clipId})`}>
-              {pairedUpDataPoints.map(([{ id: aId, date: aDate, issues: aIssues }, { id: bId, date: bDate, issues: bIssues }], i) => (
+              {pairedUpDataPoints.map(([{ id: aId, date: aDate, issues: aIssues }, { id: bId, date: bDate, issues: bIssues }]) => (
                 <g key={`${aId}_${bId}`}>
-                  {i === 0 && (
-                    <BurndownChartDataPoint
-                      cx={xScale(aDate)}
-                      cy={yScale(aIssues.length)}
-                      onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: aId })}
-                      active={aId === tooltipState?.id}
-                    />
-                  )}
-
                   <line
                     x1={xScale(aDate)}
                     y1={yScale(aIssues.length)}
@@ -171,13 +189,6 @@ export const BurndownChart: React.FC<
                     fill={'lightblue'}
                     shapeRendering={'geometricPrecision'}
                     strokeWidth={2}
-                  />
-
-                  <BurndownChartDataPoint
-                    cx={xScale(bDate)}
-                    cy={yScale(bIssues.length)}
-                    onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: bId })}
-                    active={bId === tooltipState?.id}
                   />
                 </g>
               ))}
@@ -192,12 +203,35 @@ export const BurndownChart: React.FC<
               />
             </g>
 
-            <BurndownChartXAxisLegend height={height} width={width} xScale={xScale} />
-            <BurndownChartYAxisLegend height={height} yScale={yScale} maxValue={visibleMax} />
+            <g ref={xAxisRef} transform={`translate(0, ${height - legendBarHeight})`} />
+            <g ref={yAxisRef} transform={`translate(${margin * 2}, 0)`} />
 
             {showSprints && <SprintAreas sprints={sprints} xScale={xScale} height={height} bottomMargin={margin} />}
 
             <g ref={brushRef} />
+
+            {/* Data points rendered after brush so they receive pointer events */}
+            <g clipPath={`url(#${clipId})`}>
+              {pairedUpDataPoints.map(([{ id: aId, date: aDate, issues: aIssues }, { id: bId, date: bDate, issues: bIssues }], i) => (
+                <g key={`${aId}_${bId}`}>
+                  {i === 0 && (
+                    <BurndownChartDataPoint
+                      cx={xScale(aDate)}
+                      cy={yScale(aIssues.length)}
+                      onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: aId })}
+                      active={aId === tooltipState?.id}
+                    />
+                  )}
+
+                  <BurndownChartDataPoint
+                    cx={xScale(bDate)}
+                    cy={yScale(bIssues.length)}
+                    onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: bId })}
+                    active={bId === tooltipState?.id}
+                  />
+                </g>
+              ))}
+            </g>
           </>
         )}
       </svg>

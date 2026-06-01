@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import svgr from 'vite-plugin-svgr';
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 import ConditionalCompile from 'vite-plugin-conditional-compiler';
@@ -28,7 +27,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [nodePolyfills(), svgr(), react(), ConditionalCompile(), viteSingleFile()],
+  plugins: [nodePolyfills(), react(), ConditionalCompile(), viteSingleFile()],
   build: {
     emptyOutDir: true,
     outDir: '../dist',

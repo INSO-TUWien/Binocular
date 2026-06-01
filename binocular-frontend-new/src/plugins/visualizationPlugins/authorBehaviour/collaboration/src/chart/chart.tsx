@@ -78,7 +78,7 @@ export default function Chart<SettingsType extends CollaborationSettings, DataTy
   if (dataState === DataState.FETCHING) {
     return (
       <div ref={chartContainerRef} className="w-full h-full flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg text-accent" />
+        <span className="loading loading-spinner loading-lg text-primary" />
       </div>
     );
   }

@@ -23,7 +23,7 @@ import actionsMiddleware from '../../../redux/middleware/actions/actionsMiddlewa
 import { SettingsGeneralGridSize } from '../../../types/settings/generalSettingsType.ts';
 import type { DatabaseSettingsDataPluginType } from '../../../types/settings/databaseSettingsType.ts';
 
-const LS_KEY = 'settingsStateV1';
+const LS_KEY = 'bino_settingsStateV1';
 
 function createStore() {
   return configureStore({

@@ -25,7 +25,7 @@ function Settings(props: { settings: DefaultSettings; setSettings: (newSettings:
         <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Visualization Style:</span>
           <select
-            className={'select select-accent select-xs w-24'}
+            className={'select select-primary select-xs w-24'}
             defaultValue={props.settings.visualizationStyle}
             onChange={(e) =>
               props.setSettings({

@@ -35,7 +35,7 @@ function CapabilityBadge({ capability }: { capability: VisualizationPluginMetada
     <>
       <span
         ref={badgeRef}
-        className="badge badge-outline cursor-default"
+        className="badge badge-outline rounded-full cursor-default"
         onMouseEnter={() => {
           setStyle({ visibility: 'hidden' });
           setVisible(true);

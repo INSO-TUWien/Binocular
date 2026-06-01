@@ -44,7 +44,7 @@ function SetupDialogDatabasePage() {
         <>
           <h2>Currently Loading Local Database</h2>
           <div>
-            <span className="loading loading-spinner loading-lg text-accent"></span>
+            <span className="loading loading-spinner loading-lg text-primary"></span>
             <br />
             <progress
               className="progress progress-primary w-56"

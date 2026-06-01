@@ -25,10 +25,11 @@ export function loadFileList(dispatch: AppDispatch) {
       if (files !== null) {
         files.text().then(
           (list) => {
-            if (list != '') dispatch(loadState(JSON.parse(list)));
+            dispatch(loadState(list != '' ? JSON.parse(list) : undefined));
           },
           (error) => {
             console.log('Could not access files', error);
+            dispatch(loadState(undefined));
           },
         );
       }

@@ -36,9 +36,10 @@ function Help() {
         <span>Work in Progress!</span>
       </div>
       <h3>Gitlab</h3>
-      For visualizing private gitlab repositories it is necessary to add the <span className="badge badge-accent badge-xs">server url</span>
-      , the <span className="badge badge-accent badge-xs">project id</span> (Example Format: [Group Name]/[SubgroupName]/[ProjectName]) and
-      your <span className="badge badge-accent badge-xs">api key</span> so that the sourcecode can be requested.
+      For visualizing private gitlab repositories it is necessary to add the{' '}
+      <span className="badge badge-primary badge-xs">server url</span>, the <span className="badge badge-primary badge-xs">project id</span>{' '}
+      (Example Format: [Group Name]/[SubgroupName]/[ProjectName]) and your <span className="badge badge-primary badge-xs">api key</span> so
+      that the sourcecode can be requested.
     </>
   );
 }

@@ -9,7 +9,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import AccountsReducer, { setAccountList, clearAccountsStorage } from '../../../redux/reducer/data/accountsReducer.ts';
 import type { AccountType } from '../../../types/data/accountType.ts';
 
-const LS_KEY = 'accountsStateV1';
+const LS_KEY = 'bino_accountsStateV1';
 const PLUGIN_ID = 1;
 
 function makeAccount(id: string, name: string): AccountType {

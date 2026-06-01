@@ -288,7 +288,7 @@ function AuthorManagementView() {
       <div className="overflow-y-auto flex-1 min-h-0 pb-1 flex flex-col gap-3">
         {/* Author grid */}
         {authors.length === 0 ? (
-          <div role="alert" className="alert alert-info">
+          <div role="alert" className="alert alert-warning">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-6 w-6 shrink-0 stroke-current">
               <path
                 strokeLinecap="round"

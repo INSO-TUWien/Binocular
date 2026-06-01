@@ -120,6 +120,12 @@ export function convertToChartData(
    * Sum up commits from authors in the "Other" group (and their children)
    */
   if (otherGroupAuthors.length > 0) {
+    otherGroupAuthors.forEach((a) => {
+      palette[a.user.gitSignature] = {
+        main: chroma(a.color.main).hex(),
+        secondary: chroma(a.color.secondary).hex(),
+      };
+    });
     const otherSignatures = otherGroupAuthors.map((a) => a.user.gitSignature);
     const otherTotal = _.sumBy(otherSignatures, (sig) => countsByUser[sig] ?? 0);
     const otherCommits = _.flatMap(otherSignatures, (sig) => commitsByUser[sig] ?? []);

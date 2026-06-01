@@ -109,7 +109,7 @@ function StatusBarDataPlugin(props: {
                 Commits: {progress.report.commits.processed}/{progress.report.commits.total}
               </div>
               <progress
-                className="progress w-56 progress-accent"
+                className="progress w-56 progress-primary"
                 value={progress.report.commits.processed}
                 max={progress.report.commits.total}></progress>
             </div>
@@ -118,7 +118,7 @@ function StatusBarDataPlugin(props: {
                 Issues: {progress.report.issues.processed}/{progress.report.issues.total}
               </div>
               <progress
-                className="progress w-56 progress-accent"
+                className="progress w-56 progress-primary"
                 value={progress.report.issues.processed}
                 max={progress.report.issues.total}></progress>
             </div>
@@ -127,7 +127,7 @@ function StatusBarDataPlugin(props: {
                 Builds: {progress.report.builds.processed}/{progress.report.builds.total}
               </div>
               <progress
-                className="progress w-56 progress-accent"
+                className="progress w-56 progress-primary"
                 value={progress.report.builds.processed}
                 max={progress.report.builds.total}></progress>
             </div>
@@ -136,7 +136,7 @@ function StatusBarDataPlugin(props: {
                 Files: {progress.report.files.processed}/{progress.report.files.total}
               </div>
               <progress
-                className="progress w-56 progress-accent"
+                className="progress w-56 progress-primary"
                 value={progress.report.files.processed}
                 max={progress.report.files.total}></progress>
             </div>
@@ -145,7 +145,7 @@ function StatusBarDataPlugin(props: {
                 Modules: {progress.report.modules.processed}/{progress.report.modules.total}
               </div>
               <progress
-                className="progress w-56 progress-accent"
+                className="progress w-56 progress-primary"
                 value={progress.report.modules.processed}
                 max={progress.report.modules.total}></progress>
             </div>
@@ -154,7 +154,7 @@ function StatusBarDataPlugin(props: {
                 Milestones: {progress.report.milestones.processed}/{progress.report.milestones.total}
               </div>
               <progress
-                className="progress w-56 progress-accent"
+                className="progress w-56 progress-primary"
                 value={progress.report.milestones.processed}
                 max={progress.report.milestones.total}></progress>
             </div>
@@ -163,7 +163,7 @@ function StatusBarDataPlugin(props: {
                 Merge Requests: {progress.report.mergeRequests.processed}/{progress.report.mergeRequests.total}
               </div>
               <progress
-                className="progress w-56 progress-accent"
+                className="progress w-56 progress-primary"
                 value={progress.report.mergeRequests.processed}
                 max={progress.report.mergeRequests.total}></progress>
             </div>

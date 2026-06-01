@@ -19,7 +19,7 @@ import AuthorsReducer, {
 } from '../../../redux/reducer/data/authorsReducer.ts';
 import type { AuthorType } from '../../../types/data/authorType.ts';
 
-const LS_KEY = 'authorsStateV1';
+const LS_KEY = 'bino_authorsStateV1';
 const PLUGIN_ID = 1;
 
 function makeAuthor(userId: string, displayName: string): AuthorType {

@@ -175,7 +175,7 @@ function Chart(props: {
         {dataState === DataState.EMPTY && <div>NoData</div>}
         {dataState === DataState.FETCHING && (
           <div>
-            <span className="loading loading-spinner loading-lg text-accent"></span>
+            <span className="loading loading-spinner loading-lg text-primary"></span>
           </div>
         )}
         {dataState === DataState.COMPLETE && !props.settings.showExtraMetrics && (

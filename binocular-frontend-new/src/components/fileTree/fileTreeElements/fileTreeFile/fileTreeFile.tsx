@@ -17,7 +17,7 @@ function FileTreeFile(props: {
         {props.showSelect && (props.listOnly === undefined || !props.listOnly) && (
           <input
             type={'checkbox'}
-            className={'checkbox checkbox-accent checkbox-xs'}
+            className={'checkbox checkbox-primary checkbox-xs'}
             checked={props.file.checked}
             onChange={(e) => {
               if (props.onElementSelectionChange !== undefined) {

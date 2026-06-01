@@ -47,14 +47,14 @@ function DateRange(props: {
             <td>
               <div className="join">
                 <button
-                  className={'btn btn-xs btn-accent join-item ml-2'}
+                  className={'btn btn-xs btn-primary join-item ml-2'}
                   onClick={() => props.setParametersDateRange({ from: today(), to: props.parametersDateRange.to })}
                   title={'set date to today'}
                   disabled={props.disabled}>
                   T
                 </button>
                 <button
-                  className={'btn btn-xs btn-accent join-item'}
+                  className={'btn btn-xs btn-primary join-item'}
                   onClick={() =>
                     shiftMode
                       ? props.setParametersDateRange({
@@ -71,7 +71,7 @@ function DateRange(props: {
                   {shiftMode ? '-Y' : '-M'}
                 </button>
                 <button
-                  className={'btn btn-xs btn-accent join-item'}
+                  className={'btn btn-xs btn-primary join-item'}
                   onClick={() =>
                     shiftMode
                       ? props.setParametersDateRange({
@@ -109,14 +109,14 @@ function DateRange(props: {
             <td>
               <div className="join">
                 <button
-                  className={'btn btn-xs btn-accent join-item ml-2'}
+                  className={'btn btn-xs btn-primary join-item ml-2'}
                   onClick={() => props.setParametersDateRange({ from: props.parametersDateRange.from, to: today() })}
                   title={'set date to today'}
                   disabled={props.disabled}>
                   T
                 </button>
                 <button
-                  className={'btn btn-xs btn-accent join-item'}
+                  className={'btn btn-xs btn-primary join-item'}
                   onClick={() =>
                     shiftMode
                       ? props.setParametersDateRange({
@@ -133,7 +133,7 @@ function DateRange(props: {
                   {shiftMode ? '-Y' : '-M'}
                 </button>
                 <button
-                  className={'btn btn-xs btn-accent join-item'}
+                  className={'btn btn-xs btn-primary join-item'}
                   onClick={() =>
                     shiftMode
                       ? props.setParametersDateRange({

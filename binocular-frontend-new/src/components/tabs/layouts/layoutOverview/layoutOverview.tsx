@@ -101,7 +101,7 @@ function LayoutOverview() {
                               </div>
                               <DashboardPreview layout={layout} small={true}></DashboardPreview>
                               <button
-                                className={'btn btn-accent w-fit'}
+                                className={'btn btn-primary w-fit'}
                                 disabled={layout.name === selectedLayout}
                                 onClick={(e) => {
                                   setSelectedLayout(layout.name);

@@ -304,7 +304,7 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Visu
         {dataState === DataState.EMPTY && <div>NoData</div>}
         {dataState === DataState.FETCHING && (
           <div>
-            <span className="loading loading-spinner loading-lg text-accent"></span>
+            <span className="loading loading-spinner loading-lg text-primary"></span>
           </div>
         )}
         {dataState !== DataState.FETCHING && ownershipData.length > 0 && chartData.length > 0 && (

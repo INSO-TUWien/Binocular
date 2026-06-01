@@ -21,7 +21,7 @@ function FileTreeFolder(props: {
             {props.showSelect && (props.listOnly === undefined || !props.listOnly) && props.folder.id !== undefined && (
               <input
                 type={'checkbox'}
-                className={'checkbox checkbox-accent checkbox-xs'}
+                className={'checkbox checkbox-primary checkbox-xs'}
                 checked={props.folder.checked}
                 onChange={(e) => {
                   if (props.onElementSelectionChange !== undefined) {
@@ -94,7 +94,7 @@ function FileTreeFolder(props: {
           {props.showSelect && (
             <input
               type={'checkbox'}
-              className={'checkbox checkbox-accent checkbox-xs'}
+              className={'checkbox checkbox-primary checkbox-xs'}
               checked={props.folder.checked}
               onChange={(e) => {
                 if (props.onElementSelectionChange !== undefined) {

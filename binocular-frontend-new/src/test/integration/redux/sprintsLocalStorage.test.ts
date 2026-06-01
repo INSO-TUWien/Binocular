@@ -14,7 +14,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import SprintsReducer, { addSprint, deleteSprint, clearSprintStorage } from '../../../redux/reducer/data/sprintsReducer.ts';
 import type { SprintType } from '../../../types/data/sprintType.ts';
 
-const LS_KEY = 'sprintsStateV1';
+const LS_KEY = 'bino_sprintsStateV1';
 
 const sampleSprint: SprintType = {
   name: 'Sprint 1',

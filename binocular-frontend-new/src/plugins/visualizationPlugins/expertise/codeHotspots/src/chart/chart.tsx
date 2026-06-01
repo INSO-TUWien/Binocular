@@ -138,7 +138,7 @@ function Chart(props: {
         }}></OverLaySettings>
       {data.dataState === DataState.FETCHING && (
         <div className={'p-1 fixed w-full border border-base-300 card bg-base-100 shadow-sm'} style={{ zIndex: '+1', bottom: '0' }}>
-          <progress className="progress progress-accent w-full"></progress>
+          <progress className="progress progress-primary w-full"></progress>
         </div>
       )}
       <div className={'w-full h-full flex flex-row p-1'} ref={chartContainerRef}>

@@ -10,7 +10,7 @@ import LayoutReducer, { addCustomLayout, deleteCustomLayout } from '../../../red
 import { DashboardLayoutCategory } from '../../../types/general/dashboardLayoutType.ts';
 import type { DashboardLayout } from '../../../types/general/dashboardLayoutType.ts';
 
-const LS_KEY = 'layoutStateV1';
+const LS_KEY = 'bino_layoutStateV1';
 
 function createStore() {
   return configureStore({ reducer: { layout: LayoutReducer } });

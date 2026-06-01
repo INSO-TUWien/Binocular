@@ -12,7 +12,7 @@ import TabsReducer, { setTabList, clearTabsStorage } from '../../../redux/reduce
 import { TabAlignment } from '../../../types/general/tabType.ts';
 import type { TabType } from '../../../types/general/tabType.ts';
 
-const LS_KEY = 'tabsStateV1';
+const LS_KEY = 'bino_tabsStateV1';
 
 function createStore() {
   return configureStore({ reducer: { tabs: TabsReducer } });

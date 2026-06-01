@@ -10,12 +10,12 @@ export interface SumSettings extends DefaultSettings {
 function Settings(props: { settings: SumSettings; setSettings: (newSettings: SumSettings) => void }) {
   return (
     <>
-      <div>
-        <label className="label cursor-pointer">
+      <div className="flex flex-col gap-2">
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Show Mean:</span>
           <input
             type="checkbox"
-            className="toggle toggle-accent toggle-sm"
+            className="toggle toggle-primary toggle-sm"
             defaultChecked={props.settings.showMean}
             onChange={(event) =>
               props.setSettings({
@@ -25,11 +25,11 @@ function Settings(props: { settings: SumSettings; setSettings: (newSettings: Sum
             }
           />
         </label>
-        <label className="label cursor-pointer">
+        <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
           <span className="label-text">Show other authors:</span>
           <input
             type="checkbox"
-            className="toggle toggle-accent toggle-sm"
+            className="toggle toggle-primary toggle-sm"
             defaultChecked={props.settings.showOther}
             onChange={(event) =>
               props.setSettings({
@@ -42,7 +42,7 @@ function Settings(props: { settings: SumSettings; setSettings: (newSettings: Sum
       </div>
 
       <div className="divider my-0" />
-      <label className="label cursor-pointer">
+      <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
         <span className="label-text">Minimum Commits</span>
         <input
           type="number"
@@ -59,7 +59,7 @@ function Settings(props: { settings: SumSettings; setSettings: (newSettings: Sum
         />
       </label>
 
-      <label className="label cursor-pointer">
+      <label className="label cursor-pointer flex w-full justify-between items-center mt-0.5">
         <span className="label-text">Top N Authors</span>
         <input
           type="number"
@@ -74,10 +74,8 @@ function Settings(props: { settings: SumSettings; setSettings: (newSettings: Sum
             })
           }
         />
-        <div className="label">
-          <span className="label-text-alt">Use 0 to show all authors</span>
-        </div>
       </label>
+      <span className="label-text-alt pl-1">Use 0 to show all authors</span>
     </>
   );
 }

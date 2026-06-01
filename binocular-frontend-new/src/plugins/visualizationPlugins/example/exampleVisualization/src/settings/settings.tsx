@@ -32,14 +32,14 @@ function Settings(props: { settings: SettingsType; setSettings: (newSettings: Se
     <>
       <div>
         <button
-          className={'btn btn-xs btn-accent w-full mb-1'}
+          className={'btn btn-xs btn-primary w-full mb-1'}
           onClick={() => {
             props.setSettings({ data: data1, color: props.settings.color });
           }}>
           Dataset 1
         </button>
         <button
-          className={'btn btn-xs btn-accent w-full mb-1'}
+          className={'btn btn-xs btn-primary w-full mb-1'}
           onClick={() => {
             props.setSettings({ data: data2, color: props.settings.color });
           }}>

@@ -32,11 +32,11 @@ Verifies that `actionsMiddleware` intercepts every dispatched action (except `se
 **File**: `src/test/integration/redux/settingsLocalStorage.test.ts`
 **Source**: `src/redux/reducer/settings/settingsReducer.ts`
 
-Verifies round-trip: every mutation writes to `localStorage` (`settingsStateV1`), and a new store created after the mutation hydrates from that persisted state.
+Verifies round-trip: every mutation writes to `localStorage` (`bino_settingsStateV1`), and a new store created after the mutation hydrates from that persisted state.
 
 | # | Description | Input | Expected output |
 |---|---|---|---|
-| I2.1 | Fresh store writes initial state to `localStorage` | create store | `localStorage['settingsStateV1']` exists with `dataPlugins: []` |
+| I2.1 | Fresh store writes initial state to `localStorage` | create store | `localStorage['bino_settingsStateV1']` exists with `dataPlugins: []` |
 | I2.2 | Store hydrates from pre-seeded `localStorage` | seed key before creating store | `settings.database.dataPlugins` matches seeded data |
 | I2.3 | `addDataPlugin` (no id) assigns `id: 1` and persists | dispatch `addDataPlugin` | `plugin.id === 1`; `localStorage` updated |
 | I2.4 | First added plugin is automatically default | dispatch `addDataPlugin` | `plugin.isDefault === true`; `defaultDataPluginItemId` set |
@@ -44,7 +44,7 @@ Verifies round-trip: every mutation writes to `localStorage` (`settingsStateV1`)
 | I2.6 | `addDataPlugin` with existing id performs upsert | dispatch with existing id | list length unchanged; name updated |
 | I2.7 | `removeDataPlugin` removes entry and persists | dispatch `removeDataPlugin` | `dataPlugins` length 0; `localStorage` updated |
 | I2.8 | `setDataPluginAsDefault` marks exactly one plugin | add two plugins; set second as default | exactly one plugin has `isDefault === true` |
-| I2.9 | `clearSettingsStorage` removes `localStorage` key | dispatch `clearSettingsStorage` | `localStorage.getItem('settingsStateV1') === null` |
+| I2.9 | `clearSettingsStorage` removes `localStorage` key | dispatch `clearSettingsStorage` | `localStorage.getItem('bino_settingsStateV1') === null` |
 | I2.10 | `setGeneralSettings` persists new value | dispatch with `gridSize: large` | `localStorage` and state both reflect new value |
 | I2.11 | Removing the default plugin promotes the first remaining plugin to default | add two plugins; remove default | remaining plugin has `isDefault === true`; `defaultDataPluginItemId` updated |
 | I2.12 | Removing the only (default) plugin clears `defaultDataPluginItemId` | add one plugin; remove it | `dataPlugins` empty; `defaultDataPluginItemId === undefined` |
@@ -56,7 +56,7 @@ Verifies round-trip: every mutation writes to `localStorage` (`settingsStateV1`)
 **File**: `src/test/integration/redux/dashboardStateGrid.test.ts`
 **Source**: `src/redux/reducer/general/dashboardReducer.ts`
 
-Verifies that the 40×40 `dashboardState` grid remains consistent with `dashboardItems` across add/move/delete/clear, that collision detection rejects illegal moves, and that `localStorage` (`dashboardStateV1`) is kept in sync.
+Verifies that the 40×40 `dashboardState` grid remains consistent with `dashboardItems` across add/move/delete/clear, that collision detection rejects illegal moves, and that `localStorage` (`bino_dashboardStateV1`) is kept in sync.
 
 | # | Description | Input | Expected output |
 |---|---|---|---|
@@ -68,7 +68,7 @@ Verifies that the 40×40 `dashboardState` grid remains consistent with `dashboar
 | I3.6 | `deleteDashboardItem` removes item and zeros its cells | dispatch `deleteDashboardItem` | `dashboardItems` empty; cells → 0 |
 | I3.7 | `clearDashboard` resets items, count, and all grid cells | add 3 items then clear | `items: []`, `count: 0`, all cells 0 |
 | I3.8 | `setDashboardState` rebuilds grid from supplied items | dispatch with 2 positioned items | grid cells match item positions |
-| I3.9 | Every mutation persists to `localStorage` | dispatch `addDashboardItem` | `localStorage['dashboardStateV1']` updated |
+| I3.9 | Every mutation persists to `localStorage` | dispatch `addDashboardItem` | `localStorage['bino_dashboardStateV1']` updated |
 | I3.10 | Store hydrates `dashboardItems` and count from `localStorage` | seed via store1, create store2 | store2 has same items and count |
 
 ---
@@ -77,14 +77,14 @@ Verifies that the 40×40 `dashboardState` grid remains consistent with `dashboar
 **File**: `src/test/integration/redux/tabsLocalStorage.test.ts`
 **Source**: `src/redux/reducer/general/tabsReducer.ts`
 
-Verifies `setTabList` persists to `localStorage` (`tabsStateV1`), the store hydrates from a pre-seeded key on creation, and `clearTabsStorage` removes the key.
+Verifies `setTabList` persists to `localStorage` (`bino_tabsStateV1`), the store hydrates from a pre-seeded key on creation, and `clearTabsStorage` removes the key.
 
 | # | Description | Input | Expected output |
 |---|---|---|---|
-| I4.1 | Fresh store writes empty `tabList` to `localStorage` | create store | `localStorage['tabsStateV1']` has `tabList: []` |
+| I4.1 | Fresh store writes empty `tabList` to `localStorage` | create store | `localStorage['bino_tabsStateV1']` has `tabList: []` |
 | I4.2 | `setTabList` updates state and persists | dispatch `setTabList([...])` | state and `localStorage` both have 2 tabs |
 | I4.3 | Store hydrates `tabList` from pre-seeded `localStorage` | seed key before creating store | `tabs.tabList` matches seeded tabs |
-| I4.4 | `clearTabsStorage` removes the `localStorage` key | dispatch `clearTabsStorage` | `localStorage.getItem('tabsStateV1') === null` |
+| I4.4 | `clearTabsStorage` removes the `localStorage` key | dispatch `clearTabsStorage` | `localStorage.getItem('bino_tabsStateV1') === null` |
 | I4.5 | Second `setTabList` replaces first list entirely | dispatch twice | only items from second dispatch remain |
 
 ---
@@ -202,15 +202,15 @@ Mirrors the Changes saga flow (I6) but wired to the real PouchDB plugin backed b
 **File**: `src/test/integration/redux/parametersLocalStorage.test.ts`
 **Source**: `src/redux/reducer/parameters/parametersReducer.ts`
 
-Verifies that the parameters reducer reads and writes `parametersStateV1` in localStorage, hydrates state on creation, persists on mutation, and clears on demand.
+Verifies that the parameters reducer reads and writes `bino_parametersStateV1` in localStorage, hydrates state on creation, persists on mutation, and clears on demand.
 
 | # | Description | Input | Expected output |
 |---|---|---|---|
-| I11.1 | Fresh store writes initial state to localStorage | create store | `parametersStateV1` exists; `granularity: 'weeks'`, `excludeMergeCommits: false` |
+| I11.1 | Fresh store writes initial state to localStorage | create store | `bino_parametersStateV1` exists; `granularity: 'weeks'`, `excludeMergeCommits: false` |
 | I11.2 | Store hydrates from pre-seeded localStorage | seed key before creating store | state matches seeded values |
 | I11.3 | `setParametersGeneral` updates state and persists | dispatch with `granularity: 'days'` | state and localStorage both updated |
 | I11.4 | `setParametersDateRange` updates state and persists | dispatch with `from`/`to` | `parametersDateRange` updated in state and localStorage |
-| I11.5 | `clearParametersStorage` removes the localStorage key | dispatch `clearParametersStorage` | `localStorage.getItem('parametersStateV1') === null` |
+| I11.5 | `clearParametersStorage` removes the localStorage key | dispatch `clearParametersStorage` | `localStorage.getItem('bino_parametersStateV1') === null` |
 | I11.6 | `importParametersStorage` writes payload to localStorage | dispatch with `granularity: 'days'` payload | localStorage reflects imported values |
 | I11.7 | `importParametersStorage` does NOT update Redux state (Immer no-op) | dispatch `importParametersStorage` | Redux state unchanged — documents `state = action.payload` Immer bug |
 
@@ -220,7 +220,7 @@ Verifies that the parameters reducer reads and writes `parametersStateV1` in loc
 **File**: `src/test/integration/redux/layoutLocalStorage.test.ts`
 **Source**: `src/redux/reducer/general/layoutReducer.ts`
 
-Verifies custom dashboard layout creation, id assignment, deletion, and localStorage persistence under `layoutStateV1`.
+Verifies custom dashboard layout creation, id assignment, deletion, and localStorage persistence under `bino_layoutStateV1`.
 
 | # | Description | Input | Expected output |
 |---|---|---|---|
@@ -257,12 +257,12 @@ Verifies author list management per data-plugin-id. **Do NOT dispatch `editAutho
 
 | # | Description | Input | Expected output |
 |---|---|---|---|
-| I14.1 | Fresh store writes initial state to localStorage | create store | `authorsStateV1` key exists |
+| I14.1 | Fresh store writes initial state to localStorage | create store | `bino_authorsStateV1` key exists |
 | I14.2 | `setAuthorList` stores list under `dataPluginId` and persists | dispatch with 2 authors | list of 2 in state and localStorage |
 | I14.3 | `switchAuthorSelection(id)` toggles `selected` for matching author | add author; switch selection | `selected` flips from `false` to `true` |
 | I14.4 | `checkAllAuthors` sets all `selected: true` | add 2 authors; dispatch | all authors have `selected === true` |
 | I14.5 | `uncheckAllAuthors` sets all `selected: false` | check all; then uncheck all | all authors have `selected === false` |
-| I14.6 | `clearAuthorsStorage` removes the localStorage key | dispatch | `localStorage.getItem('authorsStateV1') === null` |
+| I14.6 | `clearAuthorsStorage` removes the localStorage key | dispatch | `localStorage.getItem('bino_authorsStateV1') === null` |
 
 ---
 
@@ -270,14 +270,14 @@ Verifies author list management per data-plugin-id. **Do NOT dispatch `editAutho
 **File**: `src/test/integration/redux/accountsLocalStorage.test.ts`
 **Source**: `src/redux/reducer/data/accountsReducer.ts`
 
-Verifies account list management per data-plugin-id and persistence under `accountsStateV1`.
+Verifies account list management per data-plugin-id and persistence under `bino_accountsStateV1`.
 
 | # | Description | Input | Expected output |
 |---|---|---|---|
-| I15.1 | Fresh store writes initial state to localStorage | create store | `accountsStateV1` key exists |
+| I15.1 | Fresh store writes initial state to localStorage | create store | `bino_accountsStateV1` key exists |
 | I15.2 | `setAccountList` stores list under `dataPluginId` and persists | dispatch with 2 accounts | list of 2 in state and localStorage |
 | I15.3 | Second `setAccountList` for same `pluginId` replaces the previous list | dispatch twice | only accounts from second dispatch remain |
-| I15.4 | `clearAccountsStorage` removes the localStorage key | dispatch | `localStorage.getItem('accountsStateV1') === null` |
+| I15.4 | `clearAccountsStorage` removes the localStorage key | dispatch | `localStorage.getItem('bino_accountsStateV1') === null` |
 
 ---
 
@@ -285,7 +285,7 @@ Verifies account list management per data-plugin-id and persistence under `accou
 **File**: `src/test/integration/redux/sprintsLocalStorage.test.ts`
 **Source**: `src/redux/reducer/data/sprintsReducer.ts`
 
-Verifies sprint CRUD and persistence under `sprintsStateV1`. **Do NOT dispatch `sprintToEdit`** — it calls `showModal()`. `SprintType` uses `startDate`/`endDate` (not `from`/`to`).
+Verifies sprint CRUD and persistence under `bino_sprintsStateV1`. **Do NOT dispatch `sprintToEdit`** — it calls `showModal()`. `SprintType` uses `startDate`/`endDate` (not `from`/`to`).
 
 | # | Description | Input | Expected output |
 |---|---|---|---|
@@ -293,7 +293,7 @@ Verifies sprint CRUD and persistence under `sprintsStateV1`. **Do NOT dispatch `
 | I16.2 | `addSprint` assigns `id = currID` before incrementing and persists | dispatch | `sprintList[0].id === 0`; `currID === 1` |
 | I16.3 | Two `addSprint` calls assign distinct IDs | dispatch twice | `sprintList[0].id !== sprintList[1].id` |
 | I16.4 | `deleteSprint(sprint)` removes the sprint and persists | add then delete | `sprintList` empty in state and localStorage |
-| I16.5 | `clearSprintStorage` removes the localStorage key | dispatch | `localStorage.getItem('sprintsStateV1') === null` |
+| I16.5 | `clearSprintStorage` removes the localStorage key | dispatch | `localStorage.getItem('bino_sprintsStateV1') === null` |
 
 ---
 

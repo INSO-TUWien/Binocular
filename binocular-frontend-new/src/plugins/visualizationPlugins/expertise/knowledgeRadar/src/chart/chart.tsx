@@ -332,7 +332,7 @@ function RadarChart(properties: VisualizationPluginProperties<SettingsType, Data
         <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
           {dataState === DataState.FETCHING && (
             <div className="absolute inset-0 flex justify-center items-center bg-base-100 bg-opacity-75">
-              <span className="loading loading-spinner loading-lg"></span>
+              <span className="loading loading-spinner loading-lg text-primary"></span>
             </div>
           )}
           <svg ref={svgRef} width="100%" height="100%" style={{ display: 'block' }} xmlns="http://www.w3.org/2000/svg" />

@@ -51,6 +51,8 @@ describe('GeneralSettings', () => {
     localStorage.clear();
     store = createTestStore();
     vi.restoreAllMocks();
+    HTMLDialogElement.prototype.showModal = vi.fn();
+    HTMLDialogElement.prototype.close = vi.fn();
   });
 
   it('C31.1 renders a grid size select element', () => {
@@ -77,9 +79,10 @@ describe('GeneralSettings', () => {
   });
 
   it('C31.5 clicking the clear-storage button causes "Reload Page" button to appear', async () => {
+    vi.stubGlobal('location', { reload: vi.fn() });
     renderWithStore(store);
-    const clearBtn = screen.getByRole('button', { name: /clear storage/i });
-    fireEvent.click(clearBtn);
+    fireEvent.click(screen.getByRole('button', { name: /clear storage/i }));
+    fireEvent.click(screen.getByRole('button', { name: /clear selected/i, hidden: true }));
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /reload page/i })).toBeInTheDocument();
     });
@@ -147,17 +150,20 @@ describe('GeneralSettings', () => {
 
     renderWithStore(store);
 
-    // First make the "Reload Page" button appear
-    const clearBtn = screen.getByRole('button', { name: /clear storage/i });
-    fireEvent.click(clearBtn);
+    fireEvent.click(screen.getByRole('button', { name: /clear storage/i }));
+
+    // Uncheck the "Reload Page" toggle so handleClear doesn't auto-reload
+    const checkboxes = screen.getAllByRole('checkbox', { hidden: true });
+    const reloadToggle = checkboxes[checkboxes.length - 1];
+    fireEvent.click(reloadToggle);
+
+    fireEvent.click(screen.getByRole('button', { name: /clear selected/i, hidden: true }));
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /reload page/i })).toBeInTheDocument();
     });
 
-    const reloadBtn = screen.getByRole('button', { name: /reload page/i });
-    fireEvent.click(reloadBtn);
-
+    fireEvent.click(screen.getByRole('button', { name: /reload page/i }));
     expect(reloadMock).toHaveBeenCalledOnce();
   });
 });

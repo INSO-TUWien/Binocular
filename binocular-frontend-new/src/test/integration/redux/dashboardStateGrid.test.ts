@@ -18,7 +18,7 @@ import DashboardReducer, {
 } from '../../../redux/reducer/general/dashboardReducer.ts';
 import type { DashboardItemType } from '../../../types/general/dashboardItemType.ts';
 
-const LS_KEY = 'dashboardStateV1';
+const LS_KEY = 'bino_dashboardStateV1';
 
 function createStore() {
   return configureStore({ reducer: { dashboard: DashboardReducer } });

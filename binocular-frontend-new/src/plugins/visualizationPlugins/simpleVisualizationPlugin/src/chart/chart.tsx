@@ -155,7 +155,7 @@ function Chart<SettingsType extends DefaultSettings, DataType>(props: Visualizat
         {dataState === DataState.EMPTY && <div>NoData</div>}
         {(dataState === DataState.FETCHING || calculating) && (
           <div>
-            <span className="loading loading-spinner loading-lg text-accent"></span>
+            <span className="loading loading-spinner loading-lg text-primary"></span>
           </div>
         )}
         {dataState === DataState.COMPLETE &&

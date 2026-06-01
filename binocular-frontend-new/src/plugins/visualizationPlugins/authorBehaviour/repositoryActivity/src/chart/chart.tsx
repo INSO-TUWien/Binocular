@@ -122,7 +122,7 @@ function Chart(props: VisualizationPluginProperties<RepositoryActivitySettings, 
       {dataState === DataState.EMPTY && <div>No Data</div>}
       {dataState === DataState.FETCHING && (
         <div>
-          <span className="loading loading-spinner loading-lg text-accent"></span>
+          <span className="loading loading-spinner loading-lg text-primary"></span>
         </div>
       )}
       {!showActivityTimeline

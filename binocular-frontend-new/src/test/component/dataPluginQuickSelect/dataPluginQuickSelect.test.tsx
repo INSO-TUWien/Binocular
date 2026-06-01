@@ -85,41 +85,39 @@ describe('DataPluginQuickSelect', () => {
     vi.restoreAllMocks();
   });
 
-  it('C1.1 renders a select element', () => {
+  it('C1.1 renders the trigger element', () => {
     renderComponent(store, testPlugins[0]);
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Plugin A #1 \(default\)/i })).toBeInTheDocument();
   });
 
   it('C1.2 renders one option per data plugin (3 plugins → 3 options)', () => {
     renderComponent(store, testPlugins[0]);
-    const options = screen.getAllByRole('option');
-    expect(options).toHaveLength(3);
+    fireEvent.click(screen.getByRole('button', { name: /Plugin A #1 \(default\)/i }));
+    expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
 
-  it('C1.3 pre-selects the currently active plugin', () => {
+  it('C1.3 displays the currently active plugin name in the trigger', () => {
     renderComponent(store, testPlugins[1]);
-    const select = screen.getByRole('combobox') as HTMLSelectElement;
-    expect(select.value).toBe('2');
+    expect(screen.getByRole('button', { name: /Plugin B #2/i })).toBeInTheDocument();
   });
 
   it('C1.4 calls onChange with the selected plugin when user picks', () => {
     const onChange = vi.fn();
     renderComponent(store, testPlugins[0], onChange);
-    const select = screen.getByRole('combobox');
-    fireEvent.change(select, { target: { value: '2' } });
+    fireEvent.click(screen.getByRole('button', { name: /Plugin A #1 \(default\)/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Plugin B #2/i }));
     expect(onChange).toHaveBeenCalledWith(testPlugins[1]);
   });
 
-  it('C1.5 select is disabled when dataPlugins list is empty', () => {
+  it('C1.5 trigger shows "—" when dataPlugins list is empty', () => {
     const emptyStore = createTestStore([]);
     renderComponent(emptyStore, undefined);
-    expect(screen.getByRole('combobox')).toBeDisabled();
+    expect(screen.getByRole('button', { name: '—' })).toBeInTheDocument();
   });
 
-  it('C1.6 select has background color styling when a plugin is selected', () => {
+  it('C1.6 trigger has border-color styling when a plugin is selected', () => {
     renderComponent(store, testPlugins[0]);
-    const select = screen.getByRole('combobox') as HTMLSelectElement;
-    // Should have a background style set
-    expect(select.style.background).toBeTruthy();
+    const trigger = screen.getByRole('button', { name: /Plugin A #1 \(default\)/i });
+    expect(trigger.style.borderColor).toBeTruthy();
   });
 });

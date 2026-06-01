@@ -130,7 +130,7 @@ function Chart(props: VisualizationPluginProperties<BranchSettings, ExpertiseDat
     if (dataState === DataState.FETCHING) {
       return (
         <div className="flex justify-center items-center h-full">
-          <span className="loading loading-spinner loading-lg text-accent"></span>
+          <span className="loading loading-spinner loading-lg text-primary"></span>
         </div>
       );
     }

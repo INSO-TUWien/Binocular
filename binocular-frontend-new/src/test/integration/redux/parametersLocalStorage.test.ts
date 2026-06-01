@@ -13,7 +13,7 @@ import ParametersReducer, {
   importParametersStorage,
 } from '../../../redux/reducer/parameters/parametersReducer.ts';
 
-const LS_KEY = 'parametersStateV1';
+const LS_KEY = 'bino_parametersStateV1';
 const FROM = '2024-01-01T00:00:00.000Z';
 const TO = '2024-12-31T23:59:59.000Z';
 

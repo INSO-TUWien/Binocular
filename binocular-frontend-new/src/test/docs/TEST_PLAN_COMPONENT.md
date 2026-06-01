@@ -19,16 +19,16 @@
 **File**: `src/test/component/dataPluginQuickSelect/dataPluginQuickSelect.test.tsx`
 **Source**: `src/components/dataPluginQuickSelect/dataPluginQuickSelect.tsx`
 
-Redux-connected `<select>`. Reads `settings.database.dataPlugins`.
+Redux-connected custom dropdown (`role="button"` trigger + `<ul>/<li>/<button>` list). Reads `settings.database.dataPlugins`.
 
 | # | Description | Setup | Expected |
 |---|---|---|---|
-| C1.1 | Renders a `<select>` element | store with plugins | `<select>` present |
-| C1.2 | Renders one `<option>` per data plugin | store with 3 plugins | 3 option elements |
-| C1.3 | Pre-selects the currently active plugin | `selected` prop matches plugin id | that option is selected |
-| C1.4 | Calls `onChange` with the selected plugin when user picks | change select | `onChange` called with plugin object |
-| C1.5 | Select is disabled when `dataPlugins` list is empty | store with `dataPlugins: []` | `<select disabled>` |
-| C1.6 | Each option has background color from plugin palette | store with coloured plugins | `style` attribute on option contains color |
+| C1.1 | Renders the trigger button | store with plugins | `role="button"` with plugin name text present |
+| C1.2 | Renders one list item per data plugin when open | store with 3 plugins; click trigger | 3 `listitem` elements |
+| C1.3 | Displays the currently active plugin name in the trigger | `selected` prop = plugin 2 | trigger button name contains `'Plugin B #2'` |
+| C1.4 | Calls `onChange` with the selected plugin when user picks | open dropdown; click option | `onChange` called with plugin object |
+| C1.5 | Shows `"—"` in trigger when `dataPlugins` list is empty | store with `dataPlugins: []` | trigger button name is `'—'` |
+| C1.6 | Trigger has `borderColor` styling when a plugin is selected | store with coloured plugins | `trigger.style.borderColor` is truthy |
 
 ---
 
@@ -576,7 +576,7 @@ Redux-connected (reads/writes `state.settings`, `state.dashboard`, and several o
 | C31.2 | Changing grid size select dispatches `setGeneralSettings` and updates store | fire change to `large` | `settings.general.gridSize === SettingsGeneralGridSize.large` |
 | C31.3 | "Clear Storage" button is rendered | default store | button with name `/clear storage/i` present |
 | C31.4 | "Reload Page" button NOT visible before clearing storage | default store | button absent |
-| C31.5 | Clicking "Clear Storage" makes "Reload Page" button appear | click Clear Storage | "Reload Page" button appears |
+| C31.5 | Clicking "Clear Storage" then "Clear Selected" makes "Reload Page" button appear | click Clear Storage; click Clear Selected in dialog (hidden: true) | "Reload Page" button appears |
 | C31.6 | "Export Storage" button is present | default store | button with name `/export storage/i` present |
 | C31.7 | Invalid JSON in file import shows error message | mock FileReader returning bad JSON | text `/error reading file/i` visible |
 | C31.8 | JSON with wrong `storageVersion` shows error message | mock FileReader returning version 9999 | text `/storage version not compatible/i` visible |

@@ -29,16 +29,16 @@ function FileTreeElementInfoDialog() {
             <div>
               <span className={'mr-2'}>
                 {selectedFileTreeElement.foldedOut ? (
-                  <div className="badge badge-accent">folded out</div>
+                  <div className="badge badge-primary">folded out</div>
                 ) : (
-                  <div className="badge badge-accent badge-outline">folded in</div>
+                  <div className="badge badge-primary badge-outline">folded in</div>
                 )}
               </span>
               <span className={'mr-2'}>
                 {selectedFileTreeElement.checked ? (
-                  <div className="badge badge-accent">checked</div>
+                  <div className="badge badge-primary">checked</div>
                 ) : (
-                  <div className="badge badge-accent badge-outline">unchecked</div>
+                  <div className="badge badge-primary badge-outline">unchecked</div>
                 )}
               </span>
             </div>

@@ -72,7 +72,7 @@ const Chart = (props: VisualizationPluginProperties<IssuesTimelineSettings, Data
         {dataState === DataState.EMPTY && <div>NoData</div>}
         {dataState === DataState.FETCHING && (
           <div>
-            <span className="loading loading-spinner loading-lg text-accent" />
+            <span className="loading loading-spinner loading-lg text-primary" />
           </div>
         )}
         {dataState === DataState.COMPLETE &&
