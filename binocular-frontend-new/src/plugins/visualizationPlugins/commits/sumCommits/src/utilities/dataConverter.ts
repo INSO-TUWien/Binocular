@@ -119,7 +119,7 @@ export function convertToChartData(
   /**
    * Sum up commits from authors in the "Other" group (and their children)
    */
-  if (otherGroupAuthors.length > 0) {
+  if (props.settings.showOther && otherGroupAuthors.length > 0) {
     otherGroupAuthors.forEach((a) => {
       palette[a.user.gitSignature] = {
         main: chroma(a.color.main).hex(),
