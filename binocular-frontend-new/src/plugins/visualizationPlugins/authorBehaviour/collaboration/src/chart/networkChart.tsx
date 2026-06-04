@@ -277,6 +277,10 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
     }
   }, [data, width, height, colorScale, clipId, hasData]);
 
+  function tooltipOffset(coord: number, viewportSize: number, gap = 15): number {
+    return coord + (coord >= viewportSize / 2 ? -gap : gap);
+  }
+
   function showLinkTooltip(link: LinkType, x: number, y: number) {
     const sectionLabel: CSSProperties = {
       fontSize: '10px',
@@ -342,7 +346,9 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
       </div>
     );
 
-    showInfoTooltip(tooltipRef, tooltipVisibleFlagRef, x, y, {
+    const ax = tooltipOffset(x, document.body.clientWidth);
+    const ay = tooltipOffset(y, document.body.clientHeight);
+    showInfoTooltip(tooltipRef, tooltipVisibleFlagRef, ax, ay, {
       headline: '',
       reactContent: content,
       borderColor: colorScale((link.source as NodeType).group),
@@ -355,7 +361,9 @@ export const NetworkChart = ({ width, height, data }: NetworkChartProps) => {
         <div style={{ fontSize: '13px', fontWeight: 500 }}>{node.name || node.url}</div>
       </div>
     );
-    showInfoTooltip(tooltipRef, tooltipVisibleFlagRef, x + 20, y + 20, {
+    const ax = tooltipOffset(x, document.body.clientWidth);
+    const ay = tooltipOffset(y, document.body.clientHeight);
+    showInfoTooltip(tooltipRef, tooltipVisibleFlagRef, ax, ay, {
       headline: '',
       reactContent: content,
       borderColor: colorScale(node.group),

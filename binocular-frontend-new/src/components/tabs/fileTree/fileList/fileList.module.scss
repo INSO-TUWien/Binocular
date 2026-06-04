@@ -9,13 +9,14 @@
 }
 
 .fileListHorizontal{
-  display: inline-block;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
   float: left;
-  width: 30rem;
   margin-left: .5rem;
   height: 3rem;
   box-shadow: $shadow-default-inset;
-  overflow-y: scroll;
+  overflow: hidden;
 }
 
 .fileListVertical{

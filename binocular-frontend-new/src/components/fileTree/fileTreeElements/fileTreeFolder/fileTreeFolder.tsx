@@ -7,12 +7,59 @@ import { formatName } from '../../utils/fileTreeUtilities';
 function FileTreeFolder(props: {
   folder: FileTreeElementType;
   foldedOut: boolean;
+  hideRoot?: boolean;
   listOnly?: boolean;
   showSelect: boolean;
   onShowContextMenu?: (e: React.MouseEvent<HTMLDivElement>, element: FileTreeElementType) => void;
   onElementClick?: (element: FileTreeElementType, foldOutState?: boolean) => void;
   onElementSelectionChange?: (folder: FileTreeElementType, selectionState: boolean) => void;
 }) {
+  if (props.hideRoot) {
+    return (
+      <>
+        {props.folder.children &&
+          props.folder.children
+            .slice()
+            .sort(function (e1, e2) {
+              if (e1.name < e2.name) {
+                return 1;
+              }
+              if (e1.name > e2.name) {
+                return -1;
+              }
+              return 0;
+            })
+            .sort((e) => (e.type === FileTreeElementTypeType.Folder ? -1 : 1))
+            .map((element, i) => {
+              if (element.type === FileTreeElementTypeType.Folder && element.children) {
+                return (
+                  <FileTreeFolder
+                    key={`fileListElement${i}`}
+                    folder={element}
+                    foldedOut={false}
+                    listOnly={props.listOnly}
+                    showSelect={props.showSelect}
+                    onElementSelectionChange={props.onElementSelectionChange}
+                    onElementClick={props.onElementClick}
+                    onShowContextMenu={props.onShowContextMenu}></FileTreeFolder>
+                );
+              } else {
+                return (
+                  <FileTreeFile
+                    key={`fileListElement${i}`}
+                    file={element}
+                    listOnly={props.listOnly}
+                    showSelect={props.showSelect}
+                    onElementClick={props.onElementClick}
+                    onShowContextMenu={props.onShowContextMenu}
+                    onElementSelectionChange={props.onElementSelectionChange}></FileTreeFile>
+                );
+              }
+            })}
+      </>
+    );
+  }
+
   return (
     <>
       {props.listOnly === true || props.folder.foldedOut ? (
