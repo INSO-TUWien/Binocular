@@ -5,6 +5,7 @@ import com.inso_world.binocular.core.delegates.logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.Locale
+import com.inso_world.binocular.core.service.LizardFileAnalysisInfrastructurePort
 
 /**
  * Service for running Lizard on chosen paths *
@@ -27,7 +28,9 @@ import java.util.Locale
  */
 
 @Service
-class LizardService()
+class LizardService(
+    @Autowired private val lizardFileAnalysisPort: LizardFileAnalysisInfrastructurePort,
+)
 {
     companion object {
         private val logger by logger()
@@ -400,6 +403,22 @@ class LizardService()
         return processedData
     }
 
+    /**
+     * Saves the processed Lizarddata to the database.
+     *
+     * @param lizardData the processedd Data given as an array
+     */
+    fun saveLizardData(
+        lizardData: List<String>,
+    ) {
+        val rows = lizardData.map { row ->
+            row.split(",").map{it.trim()}
+        }
+
+        lizardFileAnalysisPort.saveAllRows(rows)
+
+        logger.debug("Successfully saved all Lizard Data")
+    }
 
 
 }

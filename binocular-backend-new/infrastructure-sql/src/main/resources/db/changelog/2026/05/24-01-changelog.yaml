@@ -1,0 +1,78 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2026-05-24-01-create-lizard-file-analysis
+      author: lukas
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            tableName: lizard_file_analysis
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+#              - column:
+#                  name: file_id
+#                  type: BIGINT
+#                  constraints:
+#                    nullable: false
+              - column:
+                  name: file_path
+                  type: VARCHAR(1024)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: max_nloc
+                  type: DOUBLE PRECISION
+              - column:
+                  name: max_ccn
+                  type: DOUBLE PRECISION
+              - column:
+                  name: max_tokens
+                  type: DOUBLE PRECISION
+              - column:
+                  name: max_parameters
+                  type: DOUBLE PRECISION
+              - column:
+                  name: max_length
+                  type: DOUBLE PRECISION
+              - column:
+                  name: avg_nloc
+                  type: DOUBLE PRECISION
+              - column:
+                  name: avg_ccn
+                  type: DOUBLE PRECISION
+              - column:
+                  name: avg_tokens
+                  type: DOUBLE PRECISION
+              - column:
+                  name: avg_parameters
+                  type: DOUBLE PRECISION
+              - column:
+                  name: avg_length
+                  type: DOUBLE PRECISION
+              - column:
+                  name: function_count
+                  type: INT
+              - column:
+                  name: max_lizard_score
+                  type: DOUBLE PRECISION
+              - column:
+                  name: avg_lizard_score
+                  type: DOUBLE PRECISION
+              - column:
+                  name: normalized_max_lizard_score
+                  type: DOUBLE PRECISION
+              - column:
+                  name: normalized_avg_lizard_score
+                  type: DOUBLE PRECISION
+#        - addForeignKeyConstraint:
+#            baseTableName: lizard_file_analysis
+#            baseColumnNames: file_id
+#            constraintName: FK_LIZARD_FILE_ANALYSIS_ON_FILE
+#            referencedTableName: files
+#            referencedColumnNames: id
+#            onDelete: CASCADE
