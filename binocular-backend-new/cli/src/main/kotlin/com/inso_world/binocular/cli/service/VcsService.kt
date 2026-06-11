@@ -100,10 +100,10 @@ class VcsService(
         repoService.addCommits(vcsRepo, commits)
 
         if(lizardActive) {
-            runLizardWithSettings(repoPath, lizardInclude, lizardThreads)
+            runLizardWithSettings(vcsRepo, repoPath, lizardInclude, lizardThreads)
         }
 
-        logger.trace("<<< indexRepository({}, {}, {})", repoPath, branch, project)
+        logger.trace("<<< indexRepository({}, {}, {}, {})",vcsRepo, repoPath, branch, project)
     }
 
     /**
@@ -113,11 +113,17 @@ class VcsService(
      * A single list is returned containing all information regarding Lizard output. Which is processed
      * afterwards and then the information is stored in the database.
      *
+     * @param repository The repository with information that got saved prior
      * @param repoPath The path of which is the root for the lizard pathing
      * @param lizardInclude The actual path for individual folders relative to the root path
      * @param lizardThreads the amount of threads used to run lizard
      */
-    private fun runLizardWithSettings(repoPath: String?, lizardInclude: String?, lizardThreads: Int) {
+    private fun runLizardWithSettings(
+        repository: Repository,
+        repoPath: String?,
+        lizardInclude: String?,
+        lizardThreads: Int
+    ) {
 
         val lizardIncludeCleaned = lizardService.removeNonexistendPaths(repoPath,lizardInclude)
 
@@ -132,7 +138,7 @@ class VcsService(
 
         val lizardProcessedFileData = lizardService.evaluateLizardData(lizardFileData)
 
-        lizardService.saveLizardData(lizardProcessedFileData)
+        lizardService.saveLizardData(repository, lizardProcessedFileData)
 
     }
 

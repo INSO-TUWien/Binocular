@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.Locale
 import com.inso_world.binocular.core.service.LizardFileAnalysisInfrastructurePort
+import com.inso_world.binocular.model.Repository
 import kotlin.math.ln
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -423,16 +424,20 @@ class LizardService(
     /**
      * Saves the processed Lizarddata to the database.
      *
+     * @param repository The Repostiroy saved earlier in the VCSservice
      * @param lizardData the processedd Data given as an array
      */
     fun saveLizardData(
+        repository: Repository,
         lizardData: List<String>,
     ) {
+        val repositoryId = requireNotNull(repository.id?.toLongOrNull())
+
         val rows = lizardData.map { row ->
             row.split(",").map{it.trim()}
         }
 
-        lizardFileAnalysisPort.saveAllRows(rows)
+        lizardFileAnalysisPort.saveAllRows(repositoryId, rows)
 
         logger.debug("Successfully saved all Lizard Data")
     }

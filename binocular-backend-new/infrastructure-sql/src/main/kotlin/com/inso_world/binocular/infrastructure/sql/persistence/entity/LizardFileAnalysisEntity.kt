@@ -5,16 +5,17 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-//import jakarta.persistence.JoinColumn
-//import jakarta.persistence.ManyToOne
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.FetchType
 import jakarta.persistence.Table
 
 @Entity
 @Table(name = "lizard_file_analysis")
 internal data class LizardFileAnalysisEntity(
-//    @ManyToOne(optional = false)
-//    @JoinColumn(name = "file_id", nullable = false)
-//    val file: FileEntity,
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "file_id", nullable = false)
+    val file: FileEntity,
 
     @Column(name = "file_path", nullable = false, length = 1024)
     val filePath: String,

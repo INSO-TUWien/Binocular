@@ -14,11 +14,11 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
-#              - column:
-#                  name: file_id
-#                  type: BIGINT
-#                  constraints:
-#                    nullable: false
+              - column:
+                  name: file_id
+                  type: BIGINT
+                  constraints:
+                   nullable: false
               - column:
                   name: file_path
                   type: VARCHAR(1024)
@@ -69,10 +69,10 @@ databaseChangeLog:
               - column:
                   name: normalized_avg_lizard_score
                   type: DOUBLE PRECISION
-#        - addForeignKeyConstraint:
-#            baseTableName: lizard_file_analysis
-#            baseColumnNames: file_id
-#            constraintName: FK_LIZARD_FILE_ANALYSIS_ON_FILE
-#            referencedTableName: files
-#            referencedColumnNames: id
-#            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: lizard_file_analysis
+            baseColumnNames: file_id
+            constraintName: FK_LIZARD_FILE_ANALYSIS_ON_FILE
+            referencedTableName: files
+            referencedColumnNames: id
+            onDelete: CASCADE

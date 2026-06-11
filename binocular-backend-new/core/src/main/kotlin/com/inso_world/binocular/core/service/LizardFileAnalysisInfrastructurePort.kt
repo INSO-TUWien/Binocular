@@ -1,5 +1,5 @@
 package com.inso_world.binocular.core.service
 
 interface LizardFileAnalysisInfrastructurePort {
-    fun saveAllRows(rows: Collection<List<String>>)
+    fun saveAllRows(repositoryId: Long, rows: Collection<List<String>>)
 }
