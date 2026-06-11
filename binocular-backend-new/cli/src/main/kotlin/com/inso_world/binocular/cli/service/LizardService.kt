@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.Locale
 import com.inso_world.binocular.core.service.LizardFileAnalysisInfrastructurePort
+import kotlin.math.ln
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 /**
  * Service for running Lizard on chosen paths *
@@ -316,6 +319,8 @@ class LizardService(
      * Processes the information from the lizard file. Evaluating the parameters created
      * by lizard. Giving each a score. Returns a list containing the scores for each of the files
      *
+     * Higher score means harder to maintain.
+     *
      * @param lizardData A list containing all relevant data, created and summarized information from lizard.
      */
     fun evaluateLizardData(
@@ -325,7 +330,7 @@ class LizardService(
         val evaluatedRows = mutableListOf<MutableList<String>>()
 
         var globalMaxScore = 0.0
-        var globalAverageScore = 0.0
+        var globalMaxAverageScore = 0.0
 
         lizardData.forEach{ file ->
 
@@ -343,26 +348,38 @@ class LizardService(
             val avgParameters = columns[9].toDouble()
             val avgLength = columns[10].toDouble()
 
+            val maxCommentRation = (maxLength - maxNloc) / maxLength
+            val maxHalsteadVolumeApproximation = maxTokens * (ln(maxTokens + maxParameters + 1.0) / ln(2.0))
+
+            val avgCommentRation = (avgLength - avgNloc) / avgLength
+            val avgHalsteadVolumeApproximation = avgTokens * (ln(avgTokens + avgParameters + 1.0) / ln(2.0))
+
+            /**
+             * Formula adapted from Oman et al.
+             * https://www.researchgate.net/publication/2954310_Using_Metrics_to_Evaluate_Software_System_Maintainability
+             *
+             * Removed the offset of 171
+             * Inverted the signs
+             */
+
             val maxScore =
-                (maxCcn * 5.0) +
-                (maxLength * 3.0) +
-                (maxNloc * 1.5) +
-                (maxTokens * 0.5) +
-                (maxParameters * 0.5)
+                    (5.2 * ln(maxHalsteadVolumeApproximation)
+                     + 0.23 * maxCcn
+                     + 16.2 * ln(maxLength)
+                     - 50 * sin(sqrt(2.4 * maxCommentRation)))
 
             val avgScore =
-                (avgCcn * 3.0) +
-                (avgLength * 3.0) +
-                (avgNloc * 2.5) +
-                (avgTokens * 0.5) +
-                (avgParameters * 0.5)
+                    (5.2 * ln(avgHalsteadVolumeApproximation)
+                     + 0.23 * avgCcn
+                     + 16.2 * ln(avgLength)
+                     - 50 * sin(sqrt(2.4 * avgCommentRation)))
 
             if (maxScore > globalMaxScore) {
                 globalMaxScore = maxScore
             }
 
-            if (avgScore > globalAverageScore) {
-                globalAverageScore = avgScore
+            if (avgScore > globalMaxAverageScore) {
+                globalMaxAverageScore = avgScore
             }
 
             columns.add("%.2f".format(Locale.US, maxScore))
@@ -386,10 +403,10 @@ class LizardService(
                 }
 
             val normalizedAvgScore =
-                if (globalAverageScore == 0.0){
+                if (globalMaxAverageScore == 0.0){
                     0.0
                 } else {
-                    avgScore / globalAverageScore
+                    avgScore / globalMaxAverageScore
                 }
 
             columns.add("%.4f".format(Locale.US, normalizedMaxScore))
