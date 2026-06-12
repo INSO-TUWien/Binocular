@@ -8,6 +8,7 @@ import distinctColors from 'distinct-colors';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import { type AuthorType, resolveAuthorName } from '../../../../../../types/data/authorType.ts';
 import { extractTimeTrackingDataFromNotes } from '../../../../utils/extractTimeTrackingDataFromNotes.ts';
+import { filterOtherAuthors } from '../../../../../../utils/authorUtils.ts';
 
 interface TimeSpentChartData {
   date: number;
@@ -359,6 +360,7 @@ function getDataByAuthor(
   }
 
   //---- STEP 2: CONSTRUCT CHART DATA FROM AGGREGATED NOTES ----
+  const otherGroupAuthors = filterOtherAuthors(props.authorList);
   const previousTotals: { [authorId: string]: { spent: number; removed: number } } = {};
   data.forEach((object) => {
     const obj: TimeSpentChartData = { date: object.date };
@@ -372,8 +374,14 @@ function getDataByAuthor(
           main: chroma(author.color.main).darken(0.5).hex(),
           secondary: chroma(author.color.secondary).darken(0.5).hex(),
         };
-        obj['(Spent) ' + (author.displayName || author.user.gitSignature)] = 0.001;
-        obj['(Removed) ' + (author.displayName || author.user.gitSignature)] = -0.001; //-0.001 for stack layout to realize it belongs on the bottom
+        obj['(Spent) ' + (author.displayName || author.user.gitSignature)] = props.settings.breakdown ? 0 : 0.001;
+        obj['(Removed) ' + (author.displayName || author.user.gitSignature)] = props.settings.breakdown ? 0 : -0.001;
+      }
+      if (otherGroupAuthors.length > 0) {
+        palette['(Spent) others'] = { main: '#555555', secondary: '#777777' };
+        palette['(Removed) others'] = { main: '#444444', secondary: '#666666' };
+        obj['(Spent) others'] = props.settings.breakdown ? 0 : 0.001;
+        obj['(Removed) others'] = props.settings.breakdown ? 0 : -0.001;
       }
     } else if (props.settings.breakdown) {
       for (const author of props.authorList.filter((a) => a.parent === -1)) {
@@ -383,7 +391,10 @@ function getDataByAuthor(
         };
         obj['(Total) ' + (author.displayName || author.user.gitSignature)] = 0;
       }
-      obj['others'] = 0;
+      if (otherGroupAuthors.length > 0) {
+        palette['(Total) others'] = { main: '#555555', secondary: '#777777' };
+        obj['(Total) others'] = 0;
+      }
     } else {
       for (const author of props.authorList.filter((a) => a.parent === -1)) {
         palette[author.displayName || author.user.gitSignature] = {
@@ -392,22 +403,23 @@ function getDataByAuthor(
         };
         obj[author.displayName || author.user.gitSignature] = 0;
       }
+      if (otherGroupAuthors.length > 0) {
+        palette['others'] = { main: '#555555', secondary: '#777777' };
+      }
       obj['others'] = 0;
     }
 
     props.authorList.forEach((author: AuthorType) => {
       if (!author.selected) return;
       const name = resolveAuthorName(author, props.authorList);
-      if (props.settings.splitSpentRemoved) {
+      if (props.settings.splitSpentRemoved && !props.settings.breakdown) {
         if (author.user.id in object.statsBySortingObject) {
-          //Insert number of changes with the author name as key,
-          //statsBySortingObject has structure {{authorName: {spent, removed}}, ...}
           if ('(Spent) ' + name in obj && '(Removed) ' + name in obj) {
             obj['(Spent) ' + name] += object.statsBySortingObject[author.user.id].spent;
             //-0.001 for stack layout to realize it belongs on the bottom
             obj['(Removed) ' + name] += object.statsBySortingObject[author.user.id].removed - 0.001;
           } else {
-            obj['(Removed) ' + name] = object.statsBySortingObject[author.user.id].spent;
+            obj['(Spent) ' + name] = object.statsBySortingObject[author.user.id].spent;
             //-0.001 for stack layout to realize it belongs on the bottom
             obj['(Removed) ' + name] = object.statsBySortingObject[author.user.id].removed - 0.001;
           }
@@ -429,13 +441,12 @@ function getDataByAuthor(
         }
         previousTotals[author.user.id] = { spent: currentSpent, removed: currentRemoved };
         if (!props.settings.splitSpentRemoved) {
-          obj['(Total) ' + (author.displayName || author.user.gitSignature)] = currentSpent + currentRemoved;
+          obj['(Total) ' + name] = (obj['(Total) ' + name] ?? 0) + currentSpent + currentRemoved;
         } else {
-          obj['(Spent) ' + (author.displayName || author.user.gitSignature)] = currentSpent;
-          //-0.001 for stack layout to realize it belongs on the bottom
-          obj['(Removed) ' + (author.displayName || author.user.gitSignature)] = currentRemoved - 0.001;
+          obj['(Spent) ' + name] = (obj['(Spent) ' + name] ?? 0) + currentSpent;
+          obj['(Removed) ' + name] = (obj['(Removed) ' + name] ?? 0) + currentRemoved;
         }
-      } else {
+      } else if (!props.settings.splitSpentRemoved) {
         if (author.user.id in object.statsBySortingObject) {
           if (name in obj) {
             obj[name] += object.statsBySortingObject[author.user.id].spent + object.statsBySortingObject[author.user.id].removed;

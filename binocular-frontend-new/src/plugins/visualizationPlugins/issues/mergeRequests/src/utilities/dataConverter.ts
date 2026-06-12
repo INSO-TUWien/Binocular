@@ -3,6 +3,7 @@ import type { ParametersType } from '../../../../../../types/parameters/paramete
 import chroma from 'chroma-js';
 import _ from 'lodash';
 import { type AuthorType, resolveAuthorName } from '../../../../../../types/data/authorType.ts';
+import { filterOtherAuthors } from '../../../../../../utils/authorUtils.ts';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import type { MergeRequestsSettings } from '../settings/settings.tsx';
 import type { DataPluginMergeRequest } from '../../../../../interfaces/dataPluginInterfaces/dataPluginMergeRequests.ts';
@@ -393,6 +394,8 @@ function getDataByAuthors(
     palette['Merged Merge Requests ' + ACCOUNT_NOT_ASSIGNED] = { main: '#333333', secondary: '#555555' };
     palette['Closed Merge Requests ' + ACCOUNT_NOT_ASSIGNED] = { main: '#111111', secondary: '#333333' };
   }
+  const otherGroupAuthors = filterOtherAuthors(authors);
+
   data.forEach((mergeRequest) => {
     //commit has structure {date, statsByAuthor: {}} (see next line)}
     const obj: MergeRequestChartData = { date: mergeRequest.date };
@@ -404,6 +407,10 @@ function getDataByAuthors(
           secondary: chroma(author.color.secondary).hex(),
         };
         obj['Open Merge Requests ' + (author.displayName || author.user.gitSignature)] = 0;
+      }
+      if (otherGroupAuthors.length > 0) {
+        palette['Open Merge Requests others'] = { main: '#555555', secondary: '#777777' };
+        obj['Open Merge Requests others'] = 0;
       }
       obj['Open Merge Requests ' + UNASSIGNED] = 0;
       obj['Open Merge Requests ' + ACCOUNT_NOT_ASSIGNED] = 0;
@@ -424,6 +431,14 @@ function getDataByAuthors(
         obj['Opened Merge Requests ' + (author.displayName || author.user.gitSignature)] = 0;
         obj['Merged Merge Requests ' + (author.displayName || author.user.gitSignature)] = 0;
         obj['Closed Merge Requests ' + (author.displayName || author.user.gitSignature)] = 0;
+      }
+      if (otherGroupAuthors.length > 0) {
+        palette['Opened Merge Requests others'] = { main: '#666666', secondary: '#888888' };
+        palette['Merged Merge Requests others'] = { main: '#444444', secondary: '#666666' };
+        palette['Closed Merge Requests others'] = { main: '#222222', secondary: '#444444' };
+        obj['Opened Merge Requests others'] = 0;
+        obj['Merged Merge Requests others'] = 0;
+        obj['Closed Merge Requests others'] = 0;
       }
       obj['Opened Merge Requests ' + UNASSIGNED] = 0;
       obj['Merged Merge Requests ' + UNASSIGNED] = 0;

@@ -98,9 +98,6 @@ function LayoutSelector(props: { orientation?: string }) {
       <button className="btn btn-primary w-fit m-auto" onClick={() => setShowModal(true)}>
         Save Dashboard
       </button>
-      <button className="btn btn-accent w-fit m-auto" onClick={() => setShowModal(true)}>
-        Save Dashboard
-      </button>
 
       {/* Modal */}
       {showModal && (

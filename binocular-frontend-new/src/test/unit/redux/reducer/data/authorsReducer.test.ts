@@ -51,7 +51,7 @@ describe('authorsReducer – moveAuthorToOther', () => {
     expect(a?.parent).toBe(0);
   });
 
-  it('U26.3 also sets parent = 0 for children of the target', () => {
+  it('U26.3 children of the target keep their parent reference', () => {
     const child = makeAuthor(3, 1);
     const stateWithChild: AuthorsInitialState = {
       ...emptyState,
@@ -59,7 +59,7 @@ describe('authorsReducer – moveAuthorToOther', () => {
     };
     const state = reducer(stateWithChild, moveAuthorToOther(1));
     const c = (state.authorLists[1] as AuthorType[]).find((a) => a.id === 3);
-    expect(c?.parent).toBe(0);
+    expect(c?.parent).toBe(1);
   });
 });
 
@@ -214,7 +214,7 @@ describe('authorsReducer – switchAllAuthorSelection (extended)', () => {
 });
 
 describe('authorsReducer – moveAuthorToOther with children (extended)', () => {
-  it('U26.16 author AND its children are moved (parent set to 0)', () => {
+  it('U26.16 author is moved (parent set to 0) and its children keep their parent reference', () => {
     const parent = makeAuthor(10, -1, true);
     const child1 = makeAuthor(11, 10, true);
     const child2 = makeAuthor(12, 10, true);
@@ -225,7 +225,7 @@ describe('authorsReducer – moveAuthorToOther with children (extended)', () => 
     const state = reducer(stateWithFamily, moveAuthorToOther(10));
     const list = state.authorLists[1] as AuthorType[];
     expect(list.find((a) => a.id === 10)?.parent).toBe(0);
-    expect(list.find((a) => a.id === 11)?.parent).toBe(0);
-    expect(list.find((a) => a.id === 12)?.parent).toBe(0);
+    expect(list.find((a) => a.id === 11)?.parent).toBe(10);
+    expect(list.find((a) => a.id === 12)?.parent).toBe(10);
   });
 });

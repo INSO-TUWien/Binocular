@@ -93,6 +93,7 @@ export const IssuesTimelineChartIssue: React.FC<
           width={w}
           height={h}
           style={{ display: h > 25 ? undefined : 'none' }}
+          fill={'var(--color-base-content)'}
           paintOrder={'stroke'}
           stroke={'var(--color-base-100)'}
           strokeWidth={2}>

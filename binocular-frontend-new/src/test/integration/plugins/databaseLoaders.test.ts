@@ -125,7 +125,7 @@ describe('I9 — DatabaseLoaders.loadJsonFilesToPouchDB', () => {
       localDatabaseLoadingState: 0,
       localDatabaseLoadingMessage: '',
     };
-    localStorage.setItem(`settingsStateV1`, JSON.stringify(existingState));
+    localStorage.setItem(`bino_settingsStateV1`, JSON.stringify(existingState));
 
     const store = createTestStore();
     await DatabaseLoaders.loadJsonFilesToPouchDB(store.dispatch);
@@ -156,7 +156,7 @@ describe('I9 — DatabaseLoaders.loadJsonFilesToPouchDB', () => {
       localDatabaseLoadingState: 0,
       localDatabaseLoadingMessage: '',
     };
-    localStorage.setItem(`settingsStateV1`, JSON.stringify(existingState));
+    localStorage.setItem(`bino_settingsStateV1`, JSON.stringify(existingState));
 
     const store = createTestStore();
     await DatabaseLoaders.loadJsonFilesToPouchDB(store.dispatch);

@@ -115,10 +115,11 @@ export const BurndownChart: React.FC<
   minDateRef.current = minDate;
   maxDateRef.current = maxDate;
 
+  // Persists across effect re-runs (panel resizes) so double-click reset survives a resize
+  const idleTimeoutRef = React.useRef<number | null>(null);
+
   React.useEffect(() => {
     if (!brushRef.current) return;
-
-    let idleTimeout: number | null = null;
 
     const brush = d3
       .brushX()
@@ -129,12 +130,14 @@ export const BurndownChart: React.FC<
       .on('end', (e: d3.D3BrushEvent<unknown>) => {
         if (!e.sourceEvent) return;
         if (!e.selection) {
-          if (!idleTimeout) {
-            idleTimeout = window.setTimeout(() => {
-              idleTimeout = null;
+          if (!idleTimeoutRef.current) {
+            idleTimeoutRef.current = window.setTimeout(() => {
+              idleTimeoutRef.current = null;
             }, 350);
             return;
           }
+          window.clearTimeout(idleTimeoutRef.current);
+          idleTimeoutRef.current = null;
           setBrushDomain([minDateRef.current.toDate(), maxDateRef.current.toDate()]);
           return;
         }
@@ -144,11 +147,14 @@ export const BurndownChart: React.FC<
       });
 
     d3.select(brushRef.current).call(brush);
-
-    return () => {
-      if (idleTimeout) window.clearTimeout(idleTimeout);
-    };
   }, [width, height]);
+
+  // Cancel any pending idle timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (idleTimeoutRef.current) window.clearTimeout(idleTimeoutRef.current);
+    };
+  }, []);
 
   const handleDoubleClick = () => {
     setBrushDomain([minDate.toDate(), maxDate.toDate()]);
@@ -159,7 +165,29 @@ export const BurndownChart: React.FC<
     id: number;
   }>();
 
-  const clipId = 'burndown-clip';
+  const hideTooltipTimeout = React.useRef<number | null>(null);
+
+  const showTooltip = (anchor: SVGElement, id: number) => {
+    if (hideTooltipTimeout.current) {
+      window.clearTimeout(hideTooltipTimeout.current);
+      hideTooltipTimeout.current = null;
+    }
+    setTooltipState({ anchor, id });
+  };
+
+  const scheduleHideTooltip = () => {
+    hideTooltipTimeout.current = window.setTimeout(() => setTooltipState(undefined), 120);
+  };
+
+  const cancelHideTooltip = () => {
+    if (hideTooltipTimeout.current) {
+      window.clearTimeout(hideTooltipTimeout.current);
+      hideTooltipTimeout.current = null;
+    }
+  };
+
+  const rawId = React.useId();
+  const clipId = rawId.replace(/:/g, '-');
 
   return (
     <div style={{ height, width, position: 'relative' }}>
@@ -218,7 +246,8 @@ export const BurndownChart: React.FC<
                     <BurndownChartDataPoint
                       cx={xScale(aDate)}
                       cy={yScale(aIssues.length)}
-                      onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: aId })}
+                      onMouseEnter={({ currentTarget }) => showTooltip(currentTarget, aId)}
+                      onMouseLeave={scheduleHideTooltip}
                       active={aId === tooltipState?.id}
                     />
                   )}
@@ -226,7 +255,8 @@ export const BurndownChart: React.FC<
                   <BurndownChartDataPoint
                     cx={xScale(bDate)}
                     cy={yScale(bIssues.length)}
-                    onClick={({ currentTarget }) => setTooltipState({ anchor: currentTarget, id: bId })}
+                    onMouseEnter={({ currentTarget }) => showTooltip(currentTarget, bId)}
+                    onMouseLeave={scheduleHideTooltip}
                     active={bId === tooltipState?.id}
                   />
                 </g>
@@ -237,16 +267,18 @@ export const BurndownChart: React.FC<
       </svg>
 
       {tooltipState?.anchor && (
-        <BurndownChartDetailDialog
-          {...tooltipState}
-          onClickClose={() => setTooltipState(undefined)}
-          issuesPerGranularity={issuesPerGranularity}
-          minDate={fromDate}
-          maxDate={toDate}
-          granularity={granularity}
-          nmbrOfIssues={issues.length}
-          maxNumberOfIssuesPerGranularity={maxNumberOfIssuesPerGranularity}
-        />
+        <div onMouseEnter={cancelHideTooltip} onMouseLeave={scheduleHideTooltip}>
+          <BurndownChartDetailDialog
+            {...tooltipState}
+            onClickClose={() => setTooltipState(undefined)}
+            issuesPerGranularity={issuesPerGranularity}
+            minDate={fromDate}
+            maxDate={toDate}
+            granularity={granularity}
+            nmbrOfIssues={issues.length}
+            maxNumberOfIssuesPerGranularity={maxNumberOfIssuesPerGranularity}
+          />
+        </div>
       )}
     </div>
   );

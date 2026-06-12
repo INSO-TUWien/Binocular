@@ -9,8 +9,7 @@ import TabSection from './components/tabMenu/tabSection/tabSection.tsx';
 import DateRange from './components/tabs/parameters/dataRange/dateRange.tsx';
 import ParametersGeneral from './components/tabs/parameters/parametersGeneral/parametersGeneral.tsx';
 import VisualizationSelector from './components/tabs/visualizations/visualizationSelector/visualizationSelector.tsx';
-import AuthorList from './components/tabs/authors/authorList/authorList.tsx';
-import OtherAuthors from './components/tabs/authors/otherAuthors/otherAuthors.tsx';
+import Authors from './components/tabs/authors/authors.tsx';
 import TabControllerButton from './components/tabMenu/tabControllerButton/tabControllerButton.tsx';
 import { type AppDispatch, type RootState, useAppDispatch } from './redux';
 import { useSelector } from 'react-redux';
@@ -19,7 +18,7 @@ import { recalculateDataPluginColors } from './redux/reducer/settings/settingsRe
 import SprintView from './components/tabs/sprints/sprintView/sprintView.tsx';
 import AddSprint from './components/tabs/sprints/addSprint/addSprint.tsx';
 import { ExportType, setExportType } from './redux/reducer/export/exportReducer.ts';
-import FileList from './components/tabs/fileTree/fileList/fileList.tsx';
+import FileTree from './components/tabs/fileTree/fileTree.tsx';
 import HelpGeneral from './components/tabs/help/helpGeneral/helpGeneral.tsx';
 import HelpComponents from './components/tabs/help/helpComponents/helpComponents.tsx';
 import DataPluginQuickSelect from './components/dataPluginQuickSelect/dataPluginQuickSelect.tsx';
@@ -30,7 +29,6 @@ import TabControllerButtonThemeSwitch from './components/tabMenu/tabControllerBu
 import { useEffect, useState } from 'react';
 import DatabaseLoaders from './utils/databaseLoaders.ts';
 import OverlayController from './components/overlayController/overlayController.tsx';
-import FileSearch from './components/tabs/fileTree/fileSearch/fileSearch.tsx';
 import { TabAlignment } from './types/general/tabType.ts';
 import LayoutSelector from './components/tabs/layouts/layoutSelector/layoutSelector.tsx';
 import { loadFileList } from './components/tabs/fileTree/utils/fileListUtilities.tsx';
@@ -64,11 +62,11 @@ function App() {
     filesDataPluginId !== undefined
       ? availableDataPlugins.find((dP: DatabaseSettingsDataPluginType) => dP.id === filesDataPluginId)
       : undefined;
-  const [fileSearch, setFileSearch] = useState('');
-
-  const storedTheme =
-    localStorage.getItem('bino_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'binocularDark' : 'binocularLight');
-  const [theme, setTheme] = useState(storedTheme);
+  const [theme, setTheme] = useState(
+    () =>
+      localStorage.getItem('bino_theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'binocularDark' : 'binocularLight'),
+  );
 
   useEffect(() => {
     // #v-ifdef PRE_CONFIGURE_DB=='pouchdb'
@@ -169,10 +167,7 @@ function App() {
                 }}></DataPluginQuickSelect>
             </TabSection>
             <TabSection name={'Authors'}>
-              <AuthorList></AuthorList>
-            </TabSection>
-            <TabSection name={'Other'}>
-              <OtherAuthors></OtherAuthors>
+              <Authors></Authors>
             </TabSection>
           </Tab>
           <Tab displayName={'File Tree'} alignment={TabAlignment.right}>
@@ -185,11 +180,8 @@ function App() {
                   }
                 }}></DataPluginQuickSelect>
             </TabSection>
-            <TabSection name={'File Search'}>
-              <FileSearch setFileSearch={setFileSearch}></FileSearch>
-            </TabSection>
             <TabSection name={'File Tree'}>
-              <FileList search={fileSearch}></FileList>
+              <FileTree></FileTree>
             </TabSection>
           </Tab>
           <Tab displayName={'Help'} alignment={TabAlignment.right}>

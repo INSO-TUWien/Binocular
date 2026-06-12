@@ -6,7 +6,7 @@
     <title>Binocular</title>
     <link rel="icon" type="image/svg+xml" href="/src/assets/logo_icon.svg" />
     <script>
-      const t = localStorage.getItem('theme') ||
+      const t = localStorage.getItem('bino_theme') ||
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'binocularDark' : 'binocularLight');
       document.documentElement.setAttribute('data-theme', t);
     </script>

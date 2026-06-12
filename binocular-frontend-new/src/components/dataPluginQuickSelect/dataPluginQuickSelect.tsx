@@ -31,7 +31,13 @@ function DataPluginQuickSelect(props: {
         className="relative select select-bordered w-full flex items-center cursor-pointer"
         style={accentColor ? { borderColor: accentColor } : undefined}
         onClick={() => setOpen((o) => !o)}
-        onKeyDown={(e) => e.key === 'Enter' && setOpen((o) => !o)}>
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setOpen((o) => !o);
+          }
+          if (e.key === 'Escape') setOpen(false);
+        }}>
         {accentColor && <div className="absolute left-0 inset-y-0 rounded-l" style={{ background: accentColor, width: '5px' }} />}
         <span className={'flex-1 text-left truncate' + (accentColor ? ' pl-2' : '')}>
           {props.selected ? `${props.selected.name} #${props.selected.id}${props.selected.isDefault ? ' (default)' : ''}` : '—'}

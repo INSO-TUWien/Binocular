@@ -10,6 +10,7 @@ import type { FileOwnershipCollection, OwnershipData, PreviousFileData } from '.
 import { DataState, setCurrentBranch } from '../reducer';
 import { handlePopoutResizing } from '../../../../../utils/resizing.ts';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
+import { filterOtherAuthors } from '../../../../../../utils/authorUtils.ts';
 
 function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: VisualizationPluginProperties<SettingsType, DataType>) {
   // /!*
@@ -183,20 +184,12 @@ function Chart<SettingsType extends CodeOwnerShipSettings, DataType>(props: Visu
     }
 
     //get all users
+    const authorById = new Map(props.authorList.map((a) => [a.id, a]));
     const selectedAuthors = props.authorList.filter((author) => author.selected && author.parent === -1);
-    const otherAuthors = props.authorList.filter((author) => {
-      if (!author.selected) return false;
-      if (author.parent === 0) return true;
-      if (author.parent > 0) {
-        const parent = props.authorList.find((a) => a.id === author.parent);
-        return parent?.parent === 0;
-      }
-      return false;
-    });
+    const otherAuthors = filterOtherAuthors(props.authorList);
     const mergedAuthors = props.authorList.filter((author) => {
       if (!author.selected || author.parent <= 0) return false;
-      const parent = props.authorList.find((a) => a.id === author.parent);
-      return parent?.parent === -1;
+      return authorById.get(author.parent)?.parent === -1;
     });
     const tempKeys: string[] = selectedAuthors.map((author) => author.user.gitSignature);
 

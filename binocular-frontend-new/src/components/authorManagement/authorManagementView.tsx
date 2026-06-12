@@ -156,8 +156,16 @@ function AuthorManagementView() {
 
   const filteredTopLevel = topLevel
     .filter((a) => {
-      if (filter === 'matched') return a.user.account != null;
-      if (filter === 'unmatched') return a.user.account == null;
+      if (filter === 'matched') {
+        if (a.user.account != null) return true;
+        const children = authors.filter((child) => child.parent === a.id);
+        return children.some((child) => child.user.account != null);
+      }
+      if (filter === 'unmatched') {
+        if (a.user.account != null) return false;
+        const children = authors.filter((child) => child.parent === a.id);
+        return !children.some((child) => child.user.account != null);
+      }
       return true;
     })
     .sort((a, b) => {

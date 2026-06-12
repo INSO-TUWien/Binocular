@@ -568,7 +568,7 @@ Tests cover pure functions and utility helpers with no DOM, no Redux, and no net
 |---|---|---|
 | U26.1 | `setDragging` updates `dragging` flag | `dragging === true` |
 | U26.2 | `moveAuthorToOther` sets `parent = 0` for the target author | `a.parent === 0` |
-| U26.3 | `moveAuthorToOther` also sets `parent = 0` for children | child `parent === 0` |
+| U26.3 | `moveAuthorToOther` — children of the target keep their parent reference | child `parent === targetId` |
 | U26.4 | `resetAuthor` sets `parent = -1` for the target author | `a.parent === -1` |
 | U26.5 | `setParentAuthor` sets the parent relationship | `a.parent === 1` |
 | U26.6 | `setParentAuthor` ignores self-assignment | parent unchanged |
@@ -581,7 +581,7 @@ Tests cover pure functions and utility helpers with no DOM, no Redux, and no net
 | U26.13 | `setAuthorList` dispatched twice with identical data — no duplicate authors | list length remains 2 |
 | U26.14 | `switchAllAuthorSelection` — all-unselected list → all become selected | all `selected === true` |
 | U26.15 | `switchAllAuthorSelection` — all-selected list → all become unselected | all `selected === false` |
-| U26.16 | `moveAuthorToOther` — author AND its children all get `parent = 0` | parent and both children have `parent === 0` |
+| U26.16 | `moveAuthorToOther` — author gets `parent = 0`, children keep their parent reference | target `parent === 0`, children `parent === targetId` |
 
 ---
 
@@ -809,6 +809,11 @@ Tests cover pure functions and utility helpers with no DOM, no Redux, and no net
 | U37.6 | `splitSpentRemoved:true, splitTimePerIssue:false` — palette keys contain `"(Spent)"` and `"(Removed)"` |
 | U37.7 | `breakdown:true, splitSpentRemoved:false, splitTimePerIssue:false` — palette keys contain `"(Total)"` |
 | U37.8 | `splitSpentRemoved:true, splitTimePerIssue:true` — palette keys contain `"(Spent)"` and `"(Removed)"` for issue |
+| U37.9 | `breakdown:true + splitSpentRemoved:true` — palette has `(Spent)`/`(Removed)` series, not `(Total)` |
+| U37.10 | `breakdown:true + splitSpentRemoved:true` — all `(Spent)` values ≥ 0, all `(Removed)` values ≤ 0 |
+| U37.11 | `breakdown:true + splitSpentRemoved:true` — cumulative totals match input: 2 h spent → `(Spent) = 2.0`, 30 m removed → `(Removed) = -0.5` |
+| U37.12 | `breakdown:true + splitSpentRemoved:true` — no value drifts to ≈ −1 from stale `−0.001` accumulation over ~1 000 daily buckets |
+| U37.13 | `breakdown:true + splitSpentRemoved:true` — two "Others" group members (2 h + 3 h) sum to `(Spent) others = 5 h`, not last-author-wins |
 
 ---
 

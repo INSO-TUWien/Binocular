@@ -4,6 +4,7 @@ import type { DataPluginCommit } from '../../../../../interfaces/dataPluginInter
 import type { AuthorType } from '../../../../../../types/data/authorType.ts';
 import type { VisualizationPluginProperties } from '../../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties.ts';
 import type { SumSettings } from '../settings/settings.tsx';
+import { filterOtherAuthors } from '../../../../../../utils/authorUtils.ts';
 
 interface ColumnChartData {
   user: string;
@@ -56,15 +57,7 @@ export function convertToChartData(
   const palette: Palette = {};
   const parentAuthors = props.authorList.filter((a) => a.parent === -1 && a.selected);
   const knownIds = new Set(props.authorList.map((a) => a.user.id));
-  const otherGroupAuthors = props.authorList.filter((a) => {
-    if (!a.selected) return false;
-    if (a.parent === 0) return true;
-    if (a.parent > 0) {
-      const parent = props.authorList.find((p) => p.id === a.parent);
-      return parent?.parent === 0;
-    }
-    return false;
-  });
+  const otherGroupAuthors = filterOtherAuthors(props.authorList);
 
   function trimLabel(label: string): string {
     const maxLength = 15;

@@ -9,6 +9,14 @@
   border-right: 1px solid;
   @apply border-base-300;
   float: left;
+
+  &.medium {
+    min-width: 35rem;
+  }
+
+  &.large {
+    min-width: 50rem;
+  }
 }
 
 .tabSectionVertical{

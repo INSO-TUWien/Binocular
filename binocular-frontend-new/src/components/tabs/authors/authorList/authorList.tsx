@@ -40,7 +40,7 @@ import { accountsSlice, setAccountList, setAccountsDataPluginId } from '../../..
 import Config from '../../../../config.ts';
 import type { AccountType } from '../../../../types/data/accountType.ts';
 
-function AuthorList(props: { orientation?: string }) {
+function AuthorList(props: { orientation?: string; showSettingsButton?: boolean }) {
   const dispatch: AppDispatch = useAppDispatch();
 
   const authorLists: { [id: number]: AuthorType[] } = useSelector((state: RootState) => state.authors.authorLists);
@@ -106,7 +106,11 @@ function AuthorList(props: { orientation?: string }) {
       const stored = localStorage.getItem(`bino_${accountsSlice.name}StateV${Config.localStorageVersion}`);
       let accounts: AccountType[] = [];
       if (stored) {
-        accounts = JSON.parse(stored).accountLists[dP.id] ?? [];
+        try {
+          accounts = JSON.parse(stored).accountLists[dP.id] ?? [];
+        } catch {
+          accounts = [];
+        }
       }
       DataPluginStorage.getDataPlugin(dP)
         .then((dataPlugin) => {
@@ -216,18 +220,7 @@ function AuthorList(props: { orientation?: string }) {
   const tooltipRef = useRef<HTMLDivElement>(null);
   const tooltipVisibleFlagRef = useRef(false);
 
-  const { isOpen, containerRef, overlayRef, overlayStyle, toggle, close } = useExpandOverlay(props.orientation);
-
-  const showButton = (
-    <button className="btn btn-xs join-item" onClick={toggle} title={isOpen ? 'Collapse file tree' : 'Expand file tree'}>
-      <Icon name={isOpen ? 'hide' : 'show'} size="w-4 h-4" />
-    </button>
-  );
-  const hideButton = (
-    <button className="btn btn-xs join-item" onClick={close} title="Close">
-      <Icon name="hide" size="w-4 h-4" />
-    </button>
-  );
+  const { isOpen, containerRef, overlayRef, overlayStyle } = useExpandOverlay(props.orientation);
 
   const settingsButton = (
     <button
@@ -264,12 +257,7 @@ function AuthorList(props: { orientation?: string }) {
               <Icon name="flip" size="w-4 h-4" />
             </button>
           </div>
-          {eff === 'vertical' && (
-            <div className="join">
-              {settingsButton}
-              {overlay && hideButton}
-            </div>
-          )}
+          {eff === 'vertical' && <div className="join">{props.showSettingsButton !== false && settingsButton}</div>}
         </div>
         <div
           className={
@@ -492,10 +480,7 @@ function AuthorList(props: { orientation?: string }) {
             )}
           </div>
         </div>
-        <div className="join join-vertical">
-          {eff === 'horizontal' && settingsButton}
-          {eff === 'horizontal' && showButton}
-        </div>
+        <div className="join join-vertical">{eff === 'horizontal' && settingsButton}</div>
         {eff === 'horizontal' && dragging && draggingSource === 'authors' && (
           <div
             className={authorListStyles.authorDropNoParent + ' ' + authorListStyles.authorDropNoParentHorizontal}

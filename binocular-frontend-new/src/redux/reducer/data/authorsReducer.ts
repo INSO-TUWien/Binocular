@@ -64,7 +64,7 @@ export const authorsSlice = createSlice({
     moveAuthorToOther: (state, action: PayloadAction<number>) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
       state.authorLists[state.dataPluginId] = state.authorLists[state.dataPluginId].map((a: AuthorType) => {
-        if (a.id === action.payload || a.parent === action.payload) {
+        if (a.id === action.payload) {
           a.parent = 0;
         }
         return a;

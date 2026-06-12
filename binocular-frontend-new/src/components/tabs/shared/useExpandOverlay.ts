@@ -7,7 +7,7 @@ export interface OverlayStyle {
   width: number;
 }
 
-export function useExpandOverlay(orientation?: string) {
+export function useExpandOverlay(orientation?: string, maxWidth = 400) {
   const isHorizontal = orientation === 'horizontal';
   const [isOpen, setIsOpen] = useState(false);
   const [overlayStyle, setOverlayStyle] = useState<OverlayStyle | null>(null);
@@ -18,11 +18,11 @@ export function useExpandOverlay(orientation?: string) {
     if (!containerRef.current) return null;
     const rect = containerRef.current.getBoundingClientRect();
     const isAtBottom = rect.top > window.innerHeight / 2;
-    const width = Math.min(400, window.innerWidth - rect.left - 8);
+    const width = Math.min(maxWidth, window.innerWidth - rect.left - 8);
     return isAtBottom
       ? { bottom: window.innerHeight - rect.top, left: Math.max(4, rect.left), width }
       : { top: rect.bottom, left: Math.max(4, rect.left), width };
-  }, []);
+  }, [maxWidth]);
 
   const open = useCallback(() => {
     setOverlayStyle(calcStyle());
