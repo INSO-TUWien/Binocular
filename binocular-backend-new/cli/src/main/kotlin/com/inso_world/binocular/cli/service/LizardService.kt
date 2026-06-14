@@ -87,9 +87,13 @@ class LizardService(
         val result = mutableListOf<String>()
 
         sortedPaths.forEach { currentPath ->
+            var isSubPath = false
 
-            val isSubPath = result.any {existingPath ->
-                currentPath == existingPath || currentPath.startsWith("$existingPath/")
+            for (existingPath in result) {
+                if (currentPath == existingPath || currentPath.startsWith("$existingPath/")) {
+                    isSubPath = true
+                    break
+                }
             }
 
             if (!isSubPath) {
