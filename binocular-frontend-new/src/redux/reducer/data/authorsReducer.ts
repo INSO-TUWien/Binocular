@@ -23,9 +23,12 @@ const initialState: AuthorsInitialState = {
 export const authorsSlice = createSlice({
   name: 'authors',
   initialState: () => {
-    const storedState = localStorage.getItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      localStorage.setItem(
+        `${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`,
+        JSON.stringify(initialState),
+      );
       return initialState;
     } else {
       return JSON.parse(storedState);
@@ -52,7 +55,7 @@ export const authorsSlice = createSlice({
         });
       }
       state.authorLists[action.payload.dataPluginId] = authorList;
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setDragging: (state, action: PayloadAction<boolean>) => {
       state.dragging = action.payload;
@@ -69,7 +72,7 @@ export const authorsSlice = createSlice({
         }
         return a;
       });
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     releaseAuthor: (state, action: PayloadAction<number>) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -79,7 +82,7 @@ export const authorsSlice = createSlice({
         }
         return a;
       });
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     resetAuthor: (state, action: PayloadAction<number>) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -89,7 +92,7 @@ export const authorsSlice = createSlice({
         }
         return a;
       });
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setParentAuthor: (state, action: PayloadAction<{ author: number; parent: number }>) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -101,7 +104,7 @@ export const authorsSlice = createSlice({
           }
           return a;
         });
-        localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+        localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
       }
     },
     editAuthor: (state, action: PayloadAction<number>) => {
@@ -117,7 +120,7 @@ export const authorsSlice = createSlice({
         }
         return a;
       });
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     switchAuthorSelection: (state, action: PayloadAction<number>) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -127,7 +130,7 @@ export const authorsSlice = createSlice({
         }
         return a;
       });
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     switchAllAuthorSelection: (state) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -135,7 +138,7 @@ export const authorsSlice = createSlice({
         a.selected = !a.selected;
         return a;
       });
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     checkAllAuthors: (state) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -143,7 +146,7 @@ export const authorsSlice = createSlice({
         a.selected = true;
         return a;
       });
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     uncheckAllAuthors: (state) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -151,18 +154,18 @@ export const authorsSlice = createSlice({
         a.selected = false;
         return a;
       });
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     setAuthorsDataPluginId: (state, action: PayloadAction<number | undefined>) => {
       state.dataPluginId = action.payload;
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     clearAuthorsStorage: () => {
-      localStorage.removeItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`);
+      localStorage.removeItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`);
     },
     importAuthorsStorage: (state, action: PayloadAction<AuthorsInitialState>) => {
       state = action.payload;
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     assignAccount: (state, action: PayloadAction<{ account: AccountType; author: number }>) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId]) return;
@@ -176,7 +179,7 @@ export const authorsSlice = createSlice({
         return a;
       });
 
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     resetAccount: (state) => {
       if (state.dataPluginId === undefined || !state.authorLists[state.dataPluginId] || !state.authorToEdit) return;
@@ -187,7 +190,7 @@ export const authorsSlice = createSlice({
         return a;
       });
 
-      localStorage.setItem(`bino_${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${authorsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });

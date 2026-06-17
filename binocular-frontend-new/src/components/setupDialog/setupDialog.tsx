@@ -26,7 +26,7 @@ function SetupDialog() {
 
   return (
     <dialog id={'setupDialog'} className={'modal'}>
-      <div className={'modal-box max-w-full flex flex-col h-[calc(100vh-5em)]'}>
+      <div className={'modal-box max-w-full flex flex-col max-h-[calc(100vh-5em)]'}>
         <ul className="steps steps-vertical lg:steps-horizontal w-full shrink-0">
           <li data-content="●" className="step" id={'setupStep1'}>
             Start
@@ -45,7 +45,7 @@ function SetupDialog() {
           </li>
         </ul>
 
-        <div className="flex-1 min-h-0 overflow-hidden py-4">
+        <div className="flex-1 min-h-0 overflow-y-auto py-4">
           {page === 1 && <SetupDialogStartPage></SetupDialogStartPage>}
           {page === 2 && <SetupDialogDatabasePage></SetupDialogDatabasePage>}
           {page === 3 && <SetupDialogAuthorsPage></SetupDialogAuthorsPage>}

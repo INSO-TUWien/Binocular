@@ -1,16 +1,17 @@
 // I12 — layoutReducer + localStorage
 //
 // Verifies that the layout reducer correctly manages custom dashboard layouts
-// and persists state to/from localStorage using the key `layoutStateV1`.
+// and persists state to/from localStorage using the key `${Config.localStoragePrefix}layoutStateV${Config.localStorageVersion}`.
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import Config from '../../../config.ts';
 import { configureStore } from '@reduxjs/toolkit';
 
 import LayoutReducer, { addCustomLayout, deleteCustomLayout } from '../../../redux/reducer/general/layoutReducer.ts';
 import { DashboardLayoutCategory } from '../../../types/general/dashboardLayoutType.ts';
 import type { DashboardLayout } from '../../../types/general/dashboardLayoutType.ts';
 
-const LS_KEY = 'bino_layoutStateV1';
+const LS_KEY = `${Config.localStoragePrefix}layoutStateV${Config.localStorageVersion}`;
 
 function createStore() {
   return configureStore({ reducer: { layout: LayoutReducer } });

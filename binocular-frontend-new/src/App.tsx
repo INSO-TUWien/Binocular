@@ -1,3 +1,4 @@
+import Config from './config.ts';
 import { Icon } from './components/icon';
 import TabController from './components/tabMenu/tabController/tabController.tsx';
 import Tab from './components/tabMenu/tab/tab.tsx';
@@ -64,7 +65,7 @@ function App() {
       : undefined;
   const [theme, setTheme] = useState(
     () =>
-      localStorage.getItem('bino_theme') ||
+      localStorage.getItem(`${Config.localStoragePrefix}theme`) ||
       (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'binocularDark' : 'binocularLight'),
   );
 
@@ -105,7 +106,7 @@ function App() {
           <TabControllerButtonThemeSwitch
             theme={theme}
             onChange={(theme: string) => {
-              localStorage.setItem('bino_theme', theme);
+              localStorage.setItem(`${Config.localStoragePrefix}theme`, theme);
               setTheme(theme);
               requestAnimationFrame(() => dispatch(recalculateDataPluginColors(theme)));
             }}></TabControllerButtonThemeSwitch>

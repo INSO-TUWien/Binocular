@@ -1,6 +1,7 @@
 import { type ReactElement, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { throttle } from 'throttle-debounce';
+import Config from '../../../../config.ts';
 
 /**
  *  React Popout (https://github.com/JakeGinnivan/react-popout)
@@ -50,7 +51,7 @@ export default function PopoutController(props: PropsType) {
   const [container, setContainer] = useState<HTMLDivElement>();
   const popoutWindow = useRef<Window>(null);
 
-  const storedTheme = localStorage.getItem('bino_theme');
+  const storedTheme = localStorage.getItem(`${Config.localStoragePrefix}theme`);
   const [theme] = useState(storedTheme || 'binocularLight');
 
   useEffect(() => {

@@ -91,7 +91,7 @@ const dbObjects: { [key: string]: JSONObject[] } = {
 export default abstract class DatabaseLoaders {
   public static async loadJsonFilesToPouchDB(dispatch: AppDispatch): Promise<void> {
     // Check for existing plugin with same namespace
-    const storedState = localStorage.getItem(`bino_settingsStateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`${Config.localStoragePrefix}settingsStateV${Config.localStorageVersion}`);
     const settings: SettingsInitialState | null = storedState ? JSON.parse(storedState) : null;
     const existingPlugin = settings?.database.dataPlugins.find(
       (dp: DatabaseSettingsDataPluginType) => dp.name === 'PouchDb' && dp.parameters.fileName === metadata.namespace,

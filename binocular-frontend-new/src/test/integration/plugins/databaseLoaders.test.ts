@@ -13,6 +13,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
 import type { Middleware } from 'redux';
+import Config from '../../../config.ts';
 
 // Mock PouchDB singleton from pluginRegistry before importing databaseLoaders,
 // so PouchDB.init and PouchDB.clearRemains are replaced with spies.
@@ -125,7 +126,7 @@ describe('I9 — DatabaseLoaders.loadJsonFilesToPouchDB', () => {
       localDatabaseLoadingState: 0,
       localDatabaseLoadingMessage: '',
     };
-    localStorage.setItem(`bino_settingsStateV1`, JSON.stringify(existingState));
+    localStorage.setItem(`${Config.localStoragePrefix}settingsStateV${Config.localStorageVersion}`, JSON.stringify(existingState));
 
     const store = createTestStore();
     await DatabaseLoaders.loadJsonFilesToPouchDB(store.dispatch);
@@ -156,7 +157,7 @@ describe('I9 — DatabaseLoaders.loadJsonFilesToPouchDB', () => {
       localDatabaseLoadingState: 0,
       localDatabaseLoadingMessage: '',
     };
-    localStorage.setItem(`bino_settingsStateV1`, JSON.stringify(existingState));
+    localStorage.setItem(`${Config.localStoragePrefix}settingsStateV${Config.localStorageVersion}`, JSON.stringify(existingState));
 
     const store = createTestStore();
     await DatabaseLoaders.loadJsonFilesToPouchDB(store.dispatch);

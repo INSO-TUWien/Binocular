@@ -3,16 +3,17 @@
 // Verifies that setTabList persists to localStorage, the store hydrates from
 // a pre-seeded key on creation, and clearTabsStorage removes the key.
 //
-// localStorage key: `tabsStateV1`
+// localStorage key: `${Config.localStoragePrefix}tabsStateV${Config.localStorageVersion}`
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import Config from '../../../config.ts';
 import { configureStore } from '@reduxjs/toolkit';
 
 import TabsReducer, { setTabList, clearTabsStorage } from '../../../redux/reducer/general/tabsReducer.ts';
 import { TabAlignment } from '../../../types/general/tabType.ts';
 import type { TabType } from '../../../types/general/tabType.ts';
 
-const LS_KEY = 'bino_tabsStateV1';
+const LS_KEY = `${Config.localStoragePrefix}tabsStateV${Config.localStorageVersion}`;
 
 function createStore() {
   return configureStore({ reducer: { tabs: TabsReducer } });

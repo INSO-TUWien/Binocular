@@ -1,9 +1,10 @@
 // I11 — parametersReducer + localStorage
 //
 // Verifies that the parameters reducer correctly reads and writes
-// from/to localStorage using the key `parametersStateV1`.
+// from/to localStorage using the key `${Config.localStoragePrefix}parametersStateV${Config.localStorageVersion}`.
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import Config from '../../../config.ts';
 import { configureStore } from '@reduxjs/toolkit';
 
 import ParametersReducer, {
@@ -13,7 +14,7 @@ import ParametersReducer, {
   importParametersStorage,
 } from '../../../redux/reducer/parameters/parametersReducer.ts';
 
-const LS_KEY = 'bino_parametersStateV1';
+const LS_KEY = `${Config.localStoragePrefix}parametersStateV${Config.localStorageVersion}`;
 const FROM = '2024-01-01T00:00:00.000Z';
 const TO = '2024-12-31T23:59:59.000Z';
 

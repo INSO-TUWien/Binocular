@@ -83,6 +83,7 @@ interface IconProps {
 
 export function Icon({ name, colorClass = 'base-content', size = 'w-4 h-4', className }: IconProps) {
   const SvgComponent = ICONS[name];
-  const colorStyle = colorClass ? { color: `var(--color-${colorClass})` } : undefined;
+  // 'inherit' (or an empty string) skips the inline color override so the icon inherits its parent's currentColor.
+  const colorStyle = colorClass && colorClass !== 'inherit' ? { color: `var(--color-${colorClass})` } : undefined;
   return <SvgComponent role="img" aria-label={name} style={colorStyle} className={[size, className].filter(Boolean).join(' ')} />;
 }

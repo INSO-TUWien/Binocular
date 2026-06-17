@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Binocular</title>
     <link rel="icon" type="image/svg+xml" href="/src/assets/logo_icon.svg" />
+    <!-- Runs pre-module to set the theme before first paint (avoids a flash). The 'bino_' prefix must match localStoragePrefix in src/config.ts. -->
     <script>
       const t = localStorage.getItem('bino_theme') ||
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'binocularDark' : 'binocularLight');

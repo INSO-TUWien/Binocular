@@ -103,7 +103,7 @@ function AuthorList(props: { orientation?: string; showSettingsButton?: boolean 
   function refreshAuthors(dP: DatabaseSettingsDataPluginType) {
     if (dP && dP.id !== undefined) {
       console.log(`REFRESH AUTHORS (${dP.name} #${dP.id})`);
-      const stored = localStorage.getItem(`bino_${accountsSlice.name}StateV${Config.localStorageVersion}`);
+      const stored = localStorage.getItem(`${Config.localStoragePrefix}${accountsSlice.name}StateV${Config.localStorageVersion}`);
       let accounts: AccountType[] = [];
       if (stored) {
         try {

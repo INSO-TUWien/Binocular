@@ -3,11 +3,12 @@
 // Verifies round-trip: every mutation writes to localStorage, and a new store
 // created after the mutation hydrates from that persisted state.
 //
-// localStorage key: `settingsStateV1`  (Config.localStorageVersion === 1)
+// localStorage key: `${Config.localStoragePrefix}settingsStateV${Config.localStorageVersion}`
 // IMPORTANT: store must be created AFTER clearing/seeding localStorage because
 // the reducer reads it synchronously during initialState factory execution.
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import Config from '../../../config.ts';
 import { configureStore } from '@reduxjs/toolkit';
 import type { Middleware } from 'redux';
 
@@ -23,7 +24,7 @@ import actionsMiddleware from '../../../redux/middleware/actions/actionsMiddlewa
 import { SettingsGeneralGridSize } from '../../../types/settings/generalSettingsType.ts';
 import type { DatabaseSettingsDataPluginType } from '../../../types/settings/databaseSettingsType.ts';
 
-const LS_KEY = 'bino_settingsStateV1';
+const LS_KEY = `${Config.localStoragePrefix}settingsStateV${Config.localStorageVersion}`;
 
 function createStore() {
   return configureStore({

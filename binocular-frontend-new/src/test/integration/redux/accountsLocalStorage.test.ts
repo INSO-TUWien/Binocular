@@ -4,12 +4,13 @@
 // data-plugin-id and persists state to/from localStorage.
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import Config from '../../../config.ts';
 import { configureStore } from '@reduxjs/toolkit';
 
 import AccountsReducer, { setAccountList, clearAccountsStorage } from '../../../redux/reducer/data/accountsReducer.ts';
 import type { AccountType } from '../../../types/data/accountType.ts';
 
-const LS_KEY = 'bino_accountsStateV1';
+const LS_KEY = `${Config.localStoragePrefix}accountsStateV${Config.localStorageVersion}`;
 const PLUGIN_ID = 1;
 
 function makeAccount(id: string, name: string): AccountType {

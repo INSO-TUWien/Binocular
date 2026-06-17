@@ -13,9 +13,12 @@ const initialState: TabsInitialState = {
 export const tabsSlice = createSlice({
   name: 'tabs',
   initialState: () => {
-    const storedState = localStorage.getItem(`bino_${tabsSlice.name}StateV${Config.localStorageVersion}`);
+    const storedState = localStorage.getItem(`${Config.localStoragePrefix}${tabsSlice.name}StateV${Config.localStorageVersion}`);
     if (storedState === null) {
-      localStorage.setItem(`bino_${tabsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(initialState));
+      localStorage.setItem(
+        `${Config.localStoragePrefix}${tabsSlice.name}StateV${Config.localStorageVersion}`,
+        JSON.stringify(initialState),
+      );
       return initialState;
     } else {
       return JSON.parse(storedState);
@@ -24,14 +27,14 @@ export const tabsSlice = createSlice({
   reducers: {
     setTabList: (state, action: PayloadAction<TabType[]>) => {
       state.tabList = action.payload;
-      localStorage.setItem(`bino_${tabsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${tabsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
     clearTabsStorage: () => {
-      localStorage.removeItem(`bino_${tabsSlice.name}StateV${Config.localStorageVersion}`);
+      localStorage.removeItem(`${Config.localStoragePrefix}${tabsSlice.name}StateV${Config.localStorageVersion}`);
     },
     importTabsStorage: (state, action: PayloadAction<TabsInitialState>) => {
       state = action.payload;
-      localStorage.setItem(`bino_${tabsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
+      localStorage.setItem(`${Config.localStoragePrefix}${tabsSlice.name}StateV${Config.localStorageVersion}`, JSON.stringify(state));
     },
   },
 });

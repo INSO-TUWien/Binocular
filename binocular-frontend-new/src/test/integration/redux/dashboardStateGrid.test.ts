@@ -4,9 +4,10 @@
 // dashboardItems across add/move/delete/clear, that collision detection
 // rejects illegal moves, and that localStorage is kept in sync.
 //
-// localStorage key: `dashboardStateV1`
+// localStorage key: `${Config.localStoragePrefix}dashboardStateV${Config.localStorageVersion}`
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import Config from '../../../config.ts';
 import { configureStore } from '@reduxjs/toolkit';
 
 import DashboardReducer, {
@@ -18,7 +19,7 @@ import DashboardReducer, {
 } from '../../../redux/reducer/general/dashboardReducer.ts';
 import type { DashboardItemType } from '../../../types/general/dashboardItemType.ts';
 
-const LS_KEY = 'bino_dashboardStateV1';
+const LS_KEY = `${Config.localStoragePrefix}dashboardStateV${Config.localStorageVersion}`;
 
 function createStore() {
   return configureStore({ reducer: { dashboard: DashboardReducer } });
