@@ -44,7 +44,7 @@ function App() {
   const parametersDateRange = useSelector((state: RootState) => state.parameters.parametersDateRange);
   const availableDataPlugins = useSelector((state: RootState) => state.settings.database.dataPlugins);
   const authorsDataPluginId = useSelector((state: RootState) => state.authors.dataPluginId);
-  const [authorsDataPlugin, setAuthorsDataPlugin] = useState();
+  const [authorsDataPlugin, setAuthorsDataPlugin] = useState<DatabaseSettingsDataPluginType | undefined>(undefined);
 
   const settingsInitialized = useSelector((state: RootState) => state.settings.initialized);
   const dashboardInitialized = useSelector((state: RootState) => state.dashboard.initialized);

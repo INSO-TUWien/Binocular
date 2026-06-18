@@ -1,6 +1,7 @@
 import { GraphQL, traversePages } from '../utils';
 import { gql } from '@apollo/client';
 import type {
+  CommitWithFileChanges,
   DataPluginCommit,
   DataPluginCommitBuild,
   DataPluginCommits,
@@ -420,5 +421,66 @@ export default class Commits implements DataPluginCommits {
 
     // Sort by date to ensure consistent results
     return commitFileList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  /**
+   * Returns commits with their changed files (per-file stats, line count and the commit author's
+   * signature) for the change-frequency visualization. `from`/`to` define the significant (visible)
+   * window. The full history is loaded (not just that window) so the most recent commit per file
+   * yields its current line count; commits outside [from, to] are flagged `isSignificant: false`
+   * and contribute only to the line count, not the change metrics.
+   */
+  public async getCommitDataWithFilesAndOwnership(from: string, to: string): Promise<CommitWithFileChanges[]> {
+    const significantSince = new Date(from).getTime();
+    const significantUntil = new Date(to).getTime();
+    const commitList: CommitWithFileChanges[] = [];
+
+    const getCommitsPage = () => async (page: number, perPage: number) => {
+      const resp = await this.graphQl.client.query({
+        query: gql`
+          query ($page: Int, $perPage: Int) {
+            commits(page: $page, perPage: $perPage) {
+              count
+              page
+              perPage
+              data {
+                sha
+                branch
+                message
+                signature
+                webUrl
+                date
+                parents
+                stats {
+                  additions
+                  deletions
+                }
+                files {
+                  data {
+                    file {
+                      path
+                    }
+                    lineCount
+                    stats {
+                      additions
+                      deletions
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+        variables: { page, perPage },
+      });
+      return resp.data.commits;
+    };
+
+    await traversePages(getCommitsPage(), (commit: CommitWithFileChanges) => {
+      const time = new Date(commit.date).getTime();
+      commitList.push({ ...commit, isSignificant: time >= significantSince && time <= significantUntil });
+    });
+
+    return commitList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 }

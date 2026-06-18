@@ -1,56 +1,49 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import * as d3 from 'd3';
 import styles from '../../styles.module.scss';
-import { store as globalStore } from '../../../../../redux';
-import { HierarchyNode } from '../utilities/utilities';
-import { Properties } from '../../../../interfaces/visualizationPluginInterfaces/properties';
-import { ChangeFrequencySettings } from '../../index';
+import { setNavigation, type ChangeFrequencyState } from '../reducer';
+import { colorGradient, escapeHtml } from '../utilities/utilities';
+import type { HierarchyNode } from '../utilities/hierarchy';
+import HierarchyTab from '../tabs/hierarchyTab';
+import Breadcrumb from '../tabs/breadcrumb';
+import type { VisualizationPluginProperties } from '../../../../interfaces/visualizationPluginInterfaces/visualizationPluginProperties';
+import type { ChangeFrequencySettings } from '../../index';
 
 interface ChartDimensions {
   width: number;
   height: number;
 }
 
-const ChartComponent: React.FC<Properties<ChangeFrequencySettings, any>> = (props) => {
+const ChartComponent = (props: VisualizationPluginProperties<ChangeFrequencySettings, unknown>) => {
+  const { store } = props;
+  type RootState = { plugin: ChangeFrequencyState };
+
   const chartRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
-  const globalState = globalStore.getState();
+  const loading = useSelector((state: RootState) => state.plugin.loading);
+  const currentPath = useSelector((state: RootState) => state.plugin.currentPath);
+  const hierarchyStack = useSelector((state: RootState) => state.plugin.hierarchyStack);
+  const hierarchyData = useSelector((state: RootState) => state.plugin.hierarchyData);
 
-  const [storeState, setStoreState] = useState(globalState);
-
+  // Push the resolved global date range into the per-instance store so the saga can (re)load data.
   useEffect(() => {
-    console.log('Setting up global store subscription');
-    console.log('Initial global store state:', globalStore.getState().changeFrequency);
+    if (props.parameters?.parametersDateRange) {
+      store.dispatch({ type: 'changeFrequency/setDateRange', payload: props.parameters.parametersDateRange });
+    }
+  }, [props.parameters.parametersDateRange, store]);
 
-    const unsubscribe = globalStore.subscribe(() => {
-      const newState = globalStore.getState();
-      console.log('Global store updated:', {
-        changeFrequency: newState.changeFrequency,
-        hierarchyDataLength: newState.changeFrequency?.hierarchyData?.length,
-      });
-      setStoreState(newState);
-    });
-    return unsubscribe;
-  }, []);
-
-  const loading = storeState.changeFrequency?.loading ?? false;
-  const state = storeState.changeFrequency?.state;
-  const data = storeState.changeFrequency?.hierarchyData;
-
-  const hierarchyState = useMemo(() => {
-    return state || { currentPath: '', hierarchyStack: [] };
-  }, [state]);
-
-  const hierarchyData = useMemo(() => {
-    return data || [];
-  }, [data]);
+  // Trigger an initial load (and a reload when the data plugin changes).
+  useEffect(() => {
+    store.dispatch({ type: 'REFRESH' });
+  }, [store, props.dataConnection]);
 
   const [dimensions, setDimensions] = useState<ChartDimensions>({ width: 0, height: 0 });
+  const [directoryOpen, setDirectoryOpen] = useState(false);
 
   useEffect(() => {
     if (chartRef.current && props.chartContainerRef) {
-      // @ts-expect-error - assign the current element to the passed ref
       props.chartContainerRef.current = chartRef.current;
     }
   }, [props.chartContainerRef]);
@@ -82,15 +75,8 @@ const ChartComponent: React.FC<Properties<ChangeFrequencySettings, any>> = (prop
   }, []);
 
   function handleNavigateToDirectory(path: string) {
-    const newStack = [...(hierarchyState.hierarchyStack || []), path];
-
-    globalStore.dispatch({
-      type: 'changeFrequency/setGlobalState',
-      payload: {
-        currentPath: path,
-        hierarchyStack: newStack,
-      },
-    });
+    const newStack = [...(hierarchyStack || []), path];
+    store.dispatch(setNavigation({ currentPath: path, hierarchyStack: newStack }));
   }
 
   // Function for drawing the scatter plot
@@ -159,14 +145,15 @@ const ChartComponent: React.FC<Properties<ChangeFrequencySettings, any>> = (prop
       .attr('text-anchor', 'middle')
       .text('Number of Commits');
 
-    // Mean lines
+    // Mean lines (theme-aware: inherit the text color at reduced opacity)
     svg
       .append('line')
       .attr('x1', xScale(xMean))
       .attr('x2', xScale(xMean))
       .attr('y1', 0)
       .attr('y2', height)
-      .attr('stroke', '#666')
+      .attr('stroke', 'currentColor')
+      .attr('stroke-opacity', 0.4)
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '4,4');
 
@@ -176,23 +163,10 @@ const ChartComponent: React.FC<Properties<ChangeFrequencySettings, any>> = (prop
       .attr('x2', width)
       .attr('y1', yScale(yMean))
       .attr('y2', yScale(yMean))
-      .attr('stroke', '#666')
+      .attr('stroke', 'currentColor')
+      .attr('stroke-opacity', 0.4)
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '4,4');
-
-    // Function to generate the color gradient based on the ratio of additions to deletions
-    function colorGradient(additions: number, deletions: number) {
-      const total = additions + deletions;
-      if (total === 0) return '#a0a0a0';
-
-      const ratio = additions / total;
-
-      if (ratio <= 0.5) {
-        return d3.interpolateRgb('#ff1a1a', '#ffcc00')(ratio * 2);
-      } else {
-        return d3.interpolateRgb('#ffcc00', '#2ecc40')((ratio - 0.5) * 2);
-      }
-    }
 
     const sizeScale = d3
       .scaleLog()
@@ -210,19 +184,22 @@ const ChartComponent: React.FC<Properties<ChangeFrequencySettings, any>> = (prop
       .attr('cx', (d) => xScale(d.averageChangesPerCommit))
       .attr('cy', (d) => yScale(d.commitCount))
       .attr('r', (d) => {
-        const lineCount = d.lineCount || d.totalAdditions - d.totalDeletions;
+        // lineCount can be missing (e.g. GitHub) -> fall back to net change, clamped to a positive
+        // value so the log size scale never receives <= 0.
+        const lineCount = Math.max(d.lineCount || d.totalAdditions - d.totalDeletions, 1);
         return sizeScale(lineCount);
       })
       .attr('fill', (d) => colorGradient(d.totalAdditions, d.totalDeletions))
       .attr('opacity', 0.7)
-      .attr('stroke', '#000')
+      .attr('stroke', 'currentColor')
+      .attr('stroke-opacity', 0.6)
       .attr('cursor', 'pointer')
       .on('mouseover', (event, d: HierarchyNode) => {
         d3.select(event.target).attr('opacity', 1).attr('stroke-width', 2);
 
         const tooltipHtml = `
           <div>
-            <strong>${d.isDirectory ? 'Module' : 'File'}:</strong> ${d.path}<br>
+            <strong>${d.isDirectory ? 'Module' : 'File'}:</strong> ${escapeHtml(d.path)}<br>
             <strong>First Modification:</strong> ${d.firstModification ? new Date(d.firstModification).toLocaleString() : 'Unknown'}<br>
             <strong>Last Modification:</strong> ${d.lastModification ? new Date(d.lastModification).toLocaleString() : 'Unknown'}<br>
             <strong>Total Lines of Code:</strong> <span style="color: #9c27b0">${Math.max(d.lineCount || d.totalAdditions - d.totalDeletions, 0)?.toLocaleString() || 'Unknown'}</span><br>
@@ -243,7 +220,7 @@ const ChartComponent: React.FC<Properties<ChangeFrequencySettings, any>> = (prop
                     .sort((a, b) => Number(b.percentage) - Number(a.percentage))
                     .map(
                       (item) =>
-                        `<div>${item.author}: <span style="color: #4caf50">${item.additions.toLocaleString()}</span> 
+                        `<div>${escapeHtml(item.author)}: <span style="color: #4caf50">${item.additions.toLocaleString()}</span>
                            <span style="color: #f44336">${item.deletions.toLocaleString()}</span> ${item.percentage}%
                          </div>`,
                     )
@@ -278,47 +255,58 @@ const ChartComponent: React.FC<Properties<ChangeFrequencySettings, any>> = (prop
         tooltip.style('visibility', 'hidden');
       })
       .on('click', (_event, d: HierarchyNode) => {
-        console.log('Data point clicked:', {
-          path: d.path,
-          isDirectory: d.isDirectory,
-          name: d.name,
-        });
-
         tooltip.style('visibility', 'hidden');
 
         if (d.isDirectory) {
-          console.log('Navigating to directory:', d.path);
           handleNavigateToDirectory(d.path);
-        } else {
-          console.log('Clicked on file, not navigating');
         }
       });
-  }, [hierarchyData, dimensions, hierarchyState]);
+  }, [hierarchyData, dimensions, currentPath]);
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      {loading && (
-        <div className={styles.loadingHintContainer}>
-          <h1>Loading...</h1>
-        </div>
-      )}
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Current navigation scope of the chart, so the scatter plot's level stays clear. */}
+      <div className={styles.chartBreadcrumb}>
+        <Breadcrumb />
+      </div>
 
-      {!loading && hierarchyData.length === 0 && (
-        <div className={styles.loadingHintContainer}>
-          <h2>No data available</h2>
-        </div>
-      )}
+      <div className={styles.chartArea}>
+        {loading && (
+          <div className={styles.loadingHintContainer}>
+            <span className="loading loading-spinner loading-lg text-accent"></span>
+          </div>
+        )}
 
-      <div
-        ref={chartRef}
-        style={{
-          display: hierarchyData.length > 0 ? 'block' : 'none',
-          height: '100%',
-          width: '100%',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-        }}></div>
+        {!loading && hierarchyData.length === 0 && (
+          <div className={styles.loadingHintContainer}>
+            <h2>No data available</h2>
+          </div>
+        )}
+
+        <div
+          ref={chartRef}
+          style={{
+            display: hierarchyData.length > 0 ? 'block' : 'none',
+            height: '100%',
+            width: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }}></div>
+
+        {/* Vertical handle pinned to the right edge; rides on the drawer's left edge when open. */}
+        <button
+          className={styles.directoryHandle}
+          style={{ right: directoryOpen ? '20rem' : 0 }}
+          onClick={() => setDirectoryOpen((open) => !open)}>
+          Directory
+        </button>
+
+        {/* Directory listing slides in from the right; overlays the chart so its width stays stable. */}
+        <div className={`${styles.directoryDrawer} ${directoryOpen ? styles.directoryDrawerOpen : ''}`}>
+          <HierarchyTab />
+        </div>
+      </div>
 
       <div ref={tooltipRef} className={styles.tooltip} style={{ visibility: 'hidden' }}></div>
     </div>

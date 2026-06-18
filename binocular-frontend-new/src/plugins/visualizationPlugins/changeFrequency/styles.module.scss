@@ -1,0 +1,218 @@
+@reference "../../../index.scss";
+
+.chartContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  padding: 0;
+  box-sizing: border-box;
+  min-height: 700px;
+}
+
+.configContainer {
+  @apply bg-base-200 text-base-content;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumbContainer {
+  @apply bg-base-200 border-primary;
+  padding: 8px 12px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  border-left-width: 4px;
+  border-left-style: solid;
+  font-size: 14px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.breadcrumbItem {
+  display: inline-block;
+  padding: 2px 4px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.breadcrumbLink {
+  @apply text-primary;
+  cursor: pointer;
+}
+
+.breadcrumbCurrent {
+  @apply text-base-content;
+  font-weight: 700;
+}
+
+.breadcrumbSeparator {
+  display: inline-block;
+  margin: 0 4px;
+  opacity: 0.6;
+}
+
+.directoryContents {
+  h3 {
+    @apply text-base-content border-base-300;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    padding-bottom: 8px;
+  }
+}
+
+.emptyDirectory {
+  @apply bg-base-200;
+  padding: 15px;
+  opacity: 0.7;
+  font-style: italic;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.directoryEntry {
+  @apply bg-base-100;
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s;
+
+  &:hover {
+    @apply bg-base-200;
+  }
+}
+
+.colorIndicator {
+  width: 8px;
+  height: 32px;
+  border-radius: 2px;
+  margin-right: 10px;
+}
+
+.entryIcon {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.entryName {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.entryStats {
+  font-size: 12px;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.chart {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+}
+
+.loadingHintContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  flex-direction: column;
+
+  h1,
+  h2 {
+    margin-bottom: 15px;
+  }
+
+  p {
+    opacity: 0.6;
+  }
+}
+
+.tooltip {
+  @apply bg-base-100 text-base-content border-base-300;
+  position: fixed;
+  padding: 8px;
+  border-radius: 4px;
+  border-width: 1px;
+  border-style: solid;
+  pointer-events: none;
+  z-index: 1000;
+  font-size: 12px;
+  max-width: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+// Compact breadcrumb header above the scatter plot showing the current navigation scope.
+.chartBreadcrumb {
+  flex-shrink: 0;
+  padding: 6px 6px 0;
+
+  .breadcrumbContainer {
+    margin-bottom: 0;
+  }
+}
+
+// Holds the always-on scatter chart plus the right-edge directory handle and slide-in drawer.
+.chartArea {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+// Vertical tab handle pinned to the right edge; mirrors the app-wide vertical tab handles.
+.directoryHandle {
+  @apply bg-base-100 border-base-300;
+  position: absolute;
+  top: 0.5rem;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 1rem 0.25rem;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4px 0 0 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  user-select: none;
+  z-index: 10;
+  transition: right 0.25s ease;
+}
+
+// Directory listing that slides in from the right; overlays the chart so its width stays stable.
+.directoryDrawer {
+  @apply bg-base-100 border-base-300;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 20rem;
+  max-width: 100%;
+  overflow-y: auto;
+  border-left-width: 1px;
+  border-left-style: solid;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  z-index: 9;
+}
+
+.directoryDrawerOpen {
+  transform: translateX(0);
+}

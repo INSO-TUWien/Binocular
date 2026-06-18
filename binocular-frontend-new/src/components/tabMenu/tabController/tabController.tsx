@@ -289,8 +289,9 @@ function TabController(props: {
         <div className={tabControllerStyles.tabBar + ' ' + tabControllerStyles.tabBarHorizontal + ' ' + tabControllerStyles.tabBarTopRight}>
           {props.children.filter(
             (child) =>
-              (child.type as TabElementType).name === TabControllerButton.name ||
-              (child.type as TabElementType).name === TabControllerButtonThemeSwitch.name,
+              React.isValidElement(child) &&
+              ((child.type as TabElementType).name === TabControllerButton.name ||
+                (child.type as TabElementType).name === TabControllerButtonThemeSwitch.name),
           )}
         </div>
       </>
@@ -315,7 +316,7 @@ function generateTabs(
   let id = 0;
   const tabContents: TabContents = {};
   const tabList = children
-    .filter((child) => (child.type as TabElementType).name === Tab.name)
+    .filter((child) => React.isValidElement(child) && (child.type as TabElementType).name === Tab.name)
     .map((tab) => {
       const selected =
         (tab.props.alignment === TabAlignment.top && !firstFound[0]) ||

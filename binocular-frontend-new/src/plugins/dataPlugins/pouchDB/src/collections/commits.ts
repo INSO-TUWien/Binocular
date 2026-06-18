@@ -1,4 +1,5 @@
 import type {
+  CommitWithFileChanges,
   DataPluginCommit,
   DataPluginCommitBuild,
   DataPluginCommitShort,
@@ -115,6 +116,34 @@ export default class Commits implements DataPluginCommits {
 
   public async getCommitsWithFiles(from: string, to: string) {
     return this.getAll(from, to);
+  }
+
+  /**
+   * Returns commits with their changed files (per-file stats and a `signature` field)
+   * in the shape expected by the change-frequency visualization.
+   */
+  public async getCommitDataWithFilesAndOwnership(from: string, to: string): Promise<CommitWithFileChanges[]> {
+    // from/to is the significant (visible) window. PouchDB exposes no per-commit line count, so only
+    // that window is loaded and every returned commit is significant.
+    const commits = await this.getAll(from, to);
+
+    return commits.map((commit) => ({
+      sha: commit.sha,
+      date: commit.date,
+      signature: commit.user?.gitSignature,
+      branch: commit.branch,
+      message: commit.message,
+      webUrl: commit.webUrl,
+      parents: commit.parents,
+      stats: commit.stats,
+      files: {
+        data: (commit.files?.data ?? []).map((file) => ({
+          file: { path: file.file.path },
+          stats: file.stats ?? { additions: 0, deletions: 0 },
+        })),
+      },
+      isSignificant: true,
+    }));
   }
 
   public async getCommitsWithBuilds(from: string, to: string) {
