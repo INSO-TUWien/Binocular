@@ -24,8 +24,9 @@ internal class LizardFileAnalysisInfrastructurePortImpl(
      * currently also saves files if they are not already in the database, so that
      * there is a file_id to be referenced as the foreign key. Needs to be changed or removed in the future.
      *
+     * @param repositoryId the ID of the repository that the files belong to.
+     * @param rows Contains the information of the lizard score, that is saved.
      */
-
     @Transactional
     override fun saveAllRows(
         repositoryId: Long,
@@ -74,6 +75,33 @@ internal class LizardFileAnalysisInfrastructurePortImpl(
             }
 
         lizardFileAnalysisRepository.saveAll(entities)
+    }
+
+    /**
+     * Returns all lizard Information to the frontend.
+     */
+    @Transactional(readOnly = true)
+    override fun findAllRows(): List<List<String>> {
+        return lizardFileAnalysisRepository.findAll().map{entity ->
+            listOf(
+                entity.filePath,
+                entity.maxNloc.toString(),
+                entity.maxCcn.toString(),
+                entity.maxTokens.toString(),
+                entity.maxParameters.toString(),
+                entity.maxLength.toString(),
+                entity.avgNloc.toString(),
+                entity.avgCcn.toString(),
+                entity.avgTokens.toString(),
+                entity.avgParameters.toString(),
+                entity.avgLength.toString(),
+                entity.functionCount.toString(),
+                entity.maxLizardScore.toString(),
+                entity.avgLizardScore.toString(),
+                entity.normalizedMaxLizardScore.toString(),
+                entity.normalizedAvgLizardScore.toString(),
+            )
+        }
     }
 
 }
