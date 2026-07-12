@@ -14,6 +14,7 @@ import MergeRequests from './collections/mergeRequests.ts';
 import AccountsIssues from './collections/accounts-issues.ts';
 import AccountsMergeRequests from './collections/accounts-merge-requests.ts';
 import CommitsFiles from './collections/commitsFiles.ts';
+import Lizards from './collections/lizards.ts';
 import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 class BinocularBackend implements DataPlugin {
@@ -42,6 +43,7 @@ class BinocularBackend implements DataPlugin {
   public mergeRequests;
   public notes;
   public general;
+  public lizards;
   public files;
   public commitByFile;
   public accountsIssues;
@@ -62,6 +64,7 @@ class BinocularBackend implements DataPlugin {
     this.accountsIssues = new AccountsIssues('/graphQl');
     this.accountsMergeRequests = new AccountsMergeRequests('/graphQl');
     this.commitByFile = new CommitsFiles('/graphQl');
+    this.lizards = new Lizards('graphQl');
   }
 
   public async init(
@@ -83,6 +86,7 @@ class BinocularBackend implements DataPlugin {
     this.notes = new Notes(endpoint);
     this.general = new General(endpoint, progressUpdateConfig);
     this.files = new Files(endpoint);
+    this.lizards = new Lizards(endpoint);
     this.accountsIssues = new AccountsIssues(endpoint);
     this.accountsMergeRequests = new AccountsMergeRequests(endpoint);
     this.commitByFile = new CommitsFiles(endpoint);

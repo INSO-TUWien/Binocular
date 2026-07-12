@@ -11,6 +11,7 @@ import Notes from './collections/notes.ts';
 import Issues from './collections/issues.ts';
 import Accounts from './collections/accounts.ts';
 import Branches from './collections/branches.ts';
+import Lizards from './collections/lizards.ts';
 import MergeRequests from './collections/mergeRequests.ts';
 import AccountsIssues from './collections/accounts-issues';
 import AccountsMergeRequests from './collections/accounts-merge-requests';
@@ -45,6 +46,7 @@ class PouchDb implements DataPlugin {
   public branches;
   public notes;
   public issues;
+  public lizards;
   public accountsIssues;
   public accountsMergeRequests;
   public mergeRequests;
@@ -63,6 +65,7 @@ class PouchDb implements DataPlugin {
     this.general = new General();
     this.files = new Files(undefined);
     this.database = new Database();
+    this.lizards = new Lizards(undefined);
     this.branches = new Branches(undefined);
     this.accountsIssues = new AccountsIssues(undefined);
     this.accountsMergeRequests = new AccountsMergeRequests(undefined);
@@ -83,6 +86,7 @@ class PouchDb implements DataPlugin {
       this.builds = new Builds(this.database);
       this.notes = new Notes(this.database);
       this.issues = new Issues(this.database);
+      this.lizards = new Lizards(this.database);
       this.mergeRequests = new MergeRequests(this.database);
       this.users = new Users(this.database);
       this.accounts = new Accounts(this.database);

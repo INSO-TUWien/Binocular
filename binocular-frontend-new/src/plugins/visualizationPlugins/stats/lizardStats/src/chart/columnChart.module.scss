@@ -1,0 +1,112 @@
+@use "../../../../../../variables" as *;
+@reference "../../../../../../index.scss";
+
+.infoBox {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+
+  width: 22rem;
+  max-width: 22rem;
+  max-height: 70%;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 0.5rem;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  background-color: var(--color-base-100);
+  color: var(--color-base-content);
+  border: 1px solid var(--color-base-300);
+
+  z-index: 1000;
+
+  display: block;
+}
+
+.infoBoxSpace {
+  height: 1px;
+  background: oklch(var(--bc) / .2);
+  margin: 0.25rem 0;
+}
+
+.infoRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.selectBox {
+  max-width: 12rem;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.infoBoxLabel {
+  @apply font-medium text-base-content/70;
+}
+
+.infoBoxValue  {
+  @apply font-semibold text-primary;
+}
+
+.infoBoxHeader {
+  text-align: center;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 100%;
+}
+
+// Buttons
+.addButton {
+  @apply btn btn-xs btn-outline ml-2;
+}
+
+.infoBoxButton {
+  @apply btn btn-xs btn-outline transition-colors;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+}
+
+.combineUsersBlock {
+  display: flex;
+  align-items: center;
+}
+
+// User chips
+.userChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.userChip {
+  @apply badge badge-outline;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 12rem;
+}
+
+.userName {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 12rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chipClose {
+  flex: 0 0 auto;
+  line-height: 1;
+  @apply btn btn-xs btn-ghost p-0 min-h-0 h-auto w-auto;
+}
+

@@ -12,6 +12,7 @@ import MergeRequests from './collections/mergeRequests.ts';
 import AccountsIssues from './collections/accounts-issues.ts';
 import AccountsMergeRequests from './collections/accounts-merge-requests.ts';
 import CommitsFiles from './collections/commitsFiles.ts';
+import Lizards from './collections/lizards.ts'
 import { VisualizationPluginMetadataCategory } from '../../../interfaces/visualizationPluginInterfaces/visualizationPluginMetadata.ts';
 
 class MockData implements DataPlugin {
@@ -45,6 +46,7 @@ class MockData implements DataPlugin {
   public mergeRequests;
   public notes;
   public commitByFile;
+  public lizards;
 
   constructor() {
     this.commits = new Commits();
@@ -58,6 +60,7 @@ class MockData implements DataPlugin {
     this.issues = new Issues();
     this.mergeRequests = new MergeRequests();
     this.notes = new Notes();
+    this.lizards = new Lizards();
     this.accountsIssues = new AccountsIssues();
     this.accountsMergeRequests = new AccountsMergeRequests();
   }
