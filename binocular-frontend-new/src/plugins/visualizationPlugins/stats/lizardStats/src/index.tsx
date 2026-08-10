@@ -25,6 +25,7 @@ const LizardStats: VisualizationPlugin<LizardSettings, DataPluginLizard> = {
   capabilities: {
     popoutOnly: false,
     export: true,
+    usesGlobalParameters: false,
   },
   images: {
     thumbnail: PreviewImage,

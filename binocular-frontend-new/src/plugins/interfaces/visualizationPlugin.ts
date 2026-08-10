@@ -27,6 +27,7 @@ export interface VisualizationPlugin<SettingsType, DataType> {
     //capabilities that the visualization can fulfill
     popoutOnly: boolean;
     export: boolean;
+    usesGlobalParameters?: boolean;
   };
   dependencies?: VisualizationPluginDependencies;
   images: {

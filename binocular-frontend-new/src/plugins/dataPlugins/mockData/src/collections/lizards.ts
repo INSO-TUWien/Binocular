@@ -95,6 +95,24 @@ export default class Lizards implements DataPluginLizards {
         normalizedMaxLizardScore: 0.33,
         normalizedAvgLizardScore: 0.35,
       },
+      {
+        filePath: 'backend/src/main/kotlin/service/LizardService2.kt',
+        maxNloc: 120,
+        maxCcn: 18,
+        maxTokens: 850,
+        maxParameters: 7,
+        maxLength: 160,
+        avgNloc: 45,
+        avgCcn: 7,
+        avgTokens: 320,
+        avgParameters: 3,
+        avgLength: 62,
+        functionCount: 12,
+        maxLizardScore: 10,
+        avgLizardScore: 410,
+        normalizedMaxLizardScore: 0.01,
+        normalizedAvgLizardScore: 1.0,
+      },
     ];
   }
 }
