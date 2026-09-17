@@ -5,6 +5,7 @@
 import type { Page } from '@playwright/test';
 import { gotoSeededPage, type SeedState } from '../seedState.ts';
 
+// TODO show filtering of author, date and files. When file filtering is mentioned to deselect large files, it should be shown to change outcome
 // ─── Seeded localStorage values ───────────────────────────────────────────────
 
 const DEMO_SETTINGS = JSON.stringify({

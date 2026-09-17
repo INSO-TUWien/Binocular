@@ -4,8 +4,9 @@ import type { Locator, Page } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-// Ground-truth timing: beat() logs the real wall-clock offset since module load; narrate.mjs maps these to "// Cue N" comments
-// to time narration to the actual video. demo:record shares one process across tests — call resetBeatClock() at each test's start.
+// beat() logs the real wall-clock offset since module load. dumpBeatLog() persists it, but narrate.mjs no longer reads it —
+// cues are placed sequentially with a fixed gap instead (see README.md's Timing model). demo:record shares one process across
+// tests — call resetBeatClock() at each test's start.
 let beatClockStart: number | null = null;
 let beatLog: { index: number; tMs: number; ms: number }[] = [];
 

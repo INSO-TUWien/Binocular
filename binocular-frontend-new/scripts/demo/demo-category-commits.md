@@ -111,7 +111,7 @@ Grounded in:
 **[cue: hold on the metrics row]**
 
 > One thing those metrics can't see: a rename. The chart matches hunks to this file by its
-> *current* exact path — `f.file.path === currentFile` — so if this file used to live somewhere
+> *current* exact path,  so if this file used to live somewhere
 > else and got renamed partway through its life, every commit from before the rename is invisible
 > to the file selector entirely. A file that's actually years old can look, by these metrics, like
 > it was only just created — Entropy and Mean Period of Change both understate its true lifetime
