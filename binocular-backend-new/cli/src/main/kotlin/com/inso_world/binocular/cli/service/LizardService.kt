@@ -52,7 +52,7 @@ class LizardService(
         repoPath: String?,
         lizardInclude: String?,
     ): List<String> {
-        val listOfPaths  = lizardInclude?.split(",")?.map{it.trim()}?.filter{it.isNotEmpty()}?.distinct()?:listOf("backend/src", "frontend/src")
+        val listOfPaths  = lizardInclude?.split(",")?.map{it.trim()}?.filter{it.isNotEmpty()}?.distinct()?:listOf("backend\\src", "frontend\\src")
 
         val includeListOfPathsCleaned = mutableListOf<String>()
 
@@ -370,13 +370,13 @@ class LizardService(
             val maxScore =
                     (5.2 * ln(maxHalsteadVolumeApproximation)
                      + 0.23 * maxCcn
-                     + 16.2 * ln(maxLength)
+                     + 16.2 * ln(maxNloc)
                      - 50 * sin(sqrt(2.4 * maxCommentRation)))
 
             val avgScore =
                     (5.2 * ln(avgHalsteadVolumeApproximation)
                      + 0.23 * avgCcn
-                     + 16.2 * ln(avgLength)
+                     + 16.2 * ln(avgNloc)
                      - 50 * sin(sqrt(2.4 * avgCommentRation)))
 
             if (maxScore > globalMaxScore) {
