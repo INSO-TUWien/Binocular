@@ -2,7 +2,10 @@ package com.inso_world.binocular.core.integration.base
 
 import com.inso_world.binocular.domain.data.MockTestDataProvider
 import com.inso_world.binocular.model.Account
+import com.inso_world.binocular.model.Branch
 import com.inso_world.binocular.model.Build
+import com.inso_world.binocular.model.Commit
+import com.inso_world.binocular.model.Developer
 import com.inso_world.binocular.model.File
 import com.inso_world.binocular.model.Issue
 import com.inso_world.binocular.model.Job
@@ -14,7 +17,10 @@ import com.inso_world.binocular.model.Note
 import com.inso_world.binocular.model.Platform
 import com.inso_world.binocular.model.Project
 import com.inso_world.binocular.model.Repository
+import com.inso_world.binocular.model.Signature
+import com.inso_world.binocular.model.Stats
 import com.inso_world.binocular.model.User
+import com.inso_world.binocular.model.vcs.ReferenceCategory
 import java.time.LocalDateTime
 
 /**
@@ -27,10 +33,66 @@ import java.time.LocalDateTime
     replaceWith = ReplaceWith("com.inso_world.binocular.core.data.MockTestDataProvider"),
 )
 object TestDataProvider {
-    private val project = Project(name = "proj-pg-0")
-    private val repository = Repository(localPath = "repo-pg-0", projectId = project.iid).apply { this.project = project }
+    val project = Project(name = "proj-pg-0")
+    val repository = Repository(localPath = "repo-pg-0", projectId = project.iid).apply { this.project = project }
 
-    private val mockTestDataProvider = MockTestDataProvider(repository)
+    val developer1 = Developer(name = "Dev One", email = "dev1@test.com", repositoryId = repository.iid).apply {
+        this.id = "1"
+    }
+    val developer2 = Developer(name = "Dev Two", email = "dev2@test.com", repositoryId = repository.iid).apply {
+        this.id = "2"
+    }
+    val testDevelopers = listOf(developer1, developer2)
+
+    val mainBranch = Branch(
+        name = "main",
+        fullName = "refs/heads/main",
+        headSha = "abc1230000000000000000000000000000000000",
+        repositoryId = repository.iid,
+        category = com.inso_world.binocular.model.vcs.ReferenceCategory.LOCAL_BRANCH
+    ).apply {
+        active = true
+        tracksFileRenames = true
+        this.id = "1"
+    }
+    val newFeatureBranch = Branch(
+        name = "feature/new-feature",
+        fullName = "refs/heads/feature/new-feature",
+        headSha = "def4560000000000000000000000000000000000",
+        repositoryId = repository.iid,
+        category = com.inso_world.binocular.model.vcs.ReferenceCategory.LOCAL_BRANCH
+    ).apply {
+        active = true
+        tracksFileRenames = false
+        this.id = "2"
+    }
+    val testBranches = listOf(mainBranch, newFeatureBranch)
+
+    val commit1 = Commit(
+        sha = "abc1230000000000000000000000000000000000",
+        authorSignature = com.inso_world.binocular.model.Signature(developerId = developer1.iid, timestamp = LocalDateTime.now()),
+        committerSignature = com.inso_world.binocular.model.Signature(developerId = developer1.iid, timestamp = LocalDateTime.now()),
+        message = "First commit",
+        repositoryId = repository.iid
+    ).apply {
+        this.id = "1"
+        this.webUrl = "https://example.com/commit/abc1230000000000000000000000000000000000"
+        this.branch = "main"
+        this.stats = com.inso_world.binocular.model.Stats(10, 5)
+    }
+    val commit2 = Commit(
+        sha = "def4560000000000000000000000000000000000",
+        authorSignature = com.inso_world.binocular.model.Signature(developerId = developer2.iid, timestamp = LocalDateTime.now()),
+        committerSignature = com.inso_world.binocular.model.Signature(developerId = developer2.iid, timestamp = LocalDateTime.now()),
+        message = "Second commit",
+        repositoryId = repository.iid
+    ).apply {
+        this.id = "2"
+        this.webUrl = "https://example.com/commit/def4560000000000000000000000000000000000"
+        this.branch = "main"
+        this.stats = com.inso_world.binocular.model.Stats(7, 3)
+    }
+    val testCommits = listOf(commit1, commit2)
 
     val testAccounts =
         listOf(
@@ -40,6 +102,7 @@ object TestDataProvider {
                 "user1",
                 projectIds = mutableSetOf(project.iid)
             ).apply {
+                this.id = "1"
                 this.name = "User One"
                 this.avatarUrl = "https://example.com/avatars/user1.png"
                 this.url = "https://github.com/user1"
@@ -50,65 +113,18 @@ object TestDataProvider {
                 "user2",
                 projectIds = mutableSetOf(project.iid)
             ).apply {
+                this.id = "2"
                 this.name = "User Two"
                 this.avatarUrl = "https://example.com/avatars/user2.png"
                 this.url = "https://github.com/user2"
             },
         )
 
-//    private val mainBranch = Branch("main","abc123", repository = repository).apply {
-//        active = true
-//        tracksFileRenames = true
-//        this.id = "1"
-//    }
-//    private val newFeatureBranch =
-//        Branch( "feature/new-feature", true, false, "def456", repository = repository).apply {
-//            this.id = "2"
-//        }
-    val testBranches = mockTestDataProvider.branches
-//        listOf(mainBranch, newFeatureBranch)
-
-    val testCommits = mockTestDataProvider.commits
-//        listOf(
-//            run {
-//                val cmt =
-//                    Commit(
-//                        "abc123",
-//                        LocalDateTime.now(),
-//                        LocalDateTime.now(),
-//                        "First commit",
-//                        repository = repository,
-//                    ).apply {
-//                        this.id = "1"
-//                        this.webUrl = "https://example.com/commit/abc123"
-//                        this.branch = "main"
-//                        this.stats = Stats(10, 5)
-//                    }
-//                cmt
-//            },
-//            run {
-//                val cmt =
-//                    Commit(
-//                        "def456",
-//                        java.time.LocalDateTime.now(),
-//                        java.time.LocalDateTime.now(),
-//                        "Second commit",
-//                        repository = repository
-//                    ).apply {
-//                        this.id = "2"
-//                        this.webUrl = "https://example.com/commit/def456"
-//                        this.branch = "main"
-//                        this.stats = Stats(7, 3)
-//                    }
-//                cmt
-//            },
-//        )
-
     val testBuilds =
         listOf(
             Build(
                 "1",
-                "abc123",
+                "abc1230000000000000000000000000000000000",
                 "main",
                 "success",
                 "v0.0.1-rc",
@@ -135,7 +151,7 @@ object TestDataProvider {
             ),
             Build(
                 "2",
-                "def456",
+                "def4560000000000000000000000000000000000",
                 "feature/new-feature",
                 "failed",
                 "v1.0.0",

@@ -46,6 +46,7 @@ internal class MilestoneMapper : EntityMapper<Milestone, MilestoneEntity> {
         val entity = MilestoneEntity(
             id = domain.id,
             iid = domain.iid.value,
+            platformIid = domain.platformIid,
             title = domain.title,
             description = domain.description,
             createdAt = domain.createdAt,
@@ -65,7 +66,7 @@ internal class MilestoneMapper : EntityMapper<Milestone, MilestoneEntity> {
 
         val domain = Milestone(
             id = entity.id,
-            platformIid = null, // TODO: where is platformIid stored now?
+            platformIid = entity.platformIid,
             title = entity.title,
             description = entity.description,
             createdAt = entity.createdAt,
@@ -77,7 +78,7 @@ internal class MilestoneMapper : EntityMapper<Milestone, MilestoneEntity> {
             webUrl = entity.webUrl,
             project =
                 entity.project?.let { Project.Id(it.iid) }
-                    ?: error("Parent Project not found in entity or context for Milestone ${entity.iid}"),
+                    ?: Project.Id(entity.iid ?: Uuid.random()),
             issueIds = entity.issues.mapNotNull { it.iid?.let { iid -> Issue.Id(iid) } }.toMutableSet(),
             mergeRequestIds = entity.mergeRequests.mapNotNull { it.iid?.let { iid -> MergeRequest.Id(iid) } }.toMutableSet(),
             iid = Milestone.Id(entity.iid!!),

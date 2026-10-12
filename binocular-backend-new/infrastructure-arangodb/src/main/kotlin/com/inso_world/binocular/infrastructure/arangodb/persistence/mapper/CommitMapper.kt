@@ -105,6 +105,15 @@ internal class CommitMapper : EntityMapper<Commit, CommitEntity> {
             iid = Commit.Id(entity.iid)
         ).apply {
             this.id = entity.id
+            this.webUrl = entity.webUrl
+            this.branch = entity.branch
+            this.stats = entity.stats?.let {
+                com.inso_world.binocular.model.Stats(
+                    additions = it.additions,
+                    deletions = it.deletions,
+                    kind = it.kind ?: com.inso_world.binocular.model.Stats.StatsKind.MODIFICATION
+                )
+            }
         }
 
         return domain

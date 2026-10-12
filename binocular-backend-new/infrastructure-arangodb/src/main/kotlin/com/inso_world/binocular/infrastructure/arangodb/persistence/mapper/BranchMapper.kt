@@ -73,6 +73,8 @@ internal class BranchMapper : EntityMapper<Branch, BranchEntity> {
             iid = Reference.Id(entity.iid)
         ).apply {
             this.id = entity.id
+            this.active = entity.active
+            this.tracksFileRenames = entity.tracksFileRenames
         }
         return domain
     }

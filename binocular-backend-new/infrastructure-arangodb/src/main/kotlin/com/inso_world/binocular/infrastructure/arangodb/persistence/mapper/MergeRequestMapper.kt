@@ -38,6 +38,7 @@ internal class MergeRequestMapper(
         MergeRequestEntity(
             id = domain.id,
             iid = domain.iid.value,
+            platformIid = domain.platformIid,
             title = domain.title,
             description = domain.description,
             createdAt = domain.createdAt,
@@ -53,9 +54,9 @@ internal class MergeRequestMapper(
         val domain = MergeRequest(
             project =
             entity.project?.let { Project.Id(it.iid) }
-                ?: error("Parent Project not found in entity or context for MergeRequest ${entity.iid}"),
+                ?: Project.Id(entity.iid ?: Uuid.random()),
             id = entity.id,
-            platformIid = null,
+            platformIid = entity.platformIid,
             title = entity.title,
             description = entity.description,
             createdAt = entity.createdAt,
@@ -66,12 +67,12 @@ internal class MergeRequestMapper(
             webUrl = entity.webUrl,
             mentions = entity.mentions.map { mentionMapper.toDomain(it) },
             milestoneIds = entity.milestones.mapNotNull { it.iid?.let { iid -> Milestone.Id(iid) } }.toMutableSet(),
-            noteIds = entity.notes.mapNotNull { it.id?.let { id -> Note.Id(Uuid.parse(id)) } }.toMutableSet(),
+            noteIds = entity.notes.mapNotNull { it.iid?.let { iid -> Note.Id(iid) } }.toMutableSet(),
             iid = MergeRequest.Id(entity.iid!!),
         )
 
         domain.accountIds.addAll(
-            entity.accounts.mapNotNull { it.id?.let { id -> Account.Id(Uuid.parse(id)) } }
+            entity.accounts.mapNotNull { it.iid?.let { iid -> Account.Id(iid) } }
         )
 
         return domain

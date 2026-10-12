@@ -44,6 +44,7 @@ internal class BranchDao(
 
         val mappedEntity = branchMapper.toEntity(entity, owner, head)
         val savedEntity = branchRepository.save(mappedEntity)
+        branchMapper.refreshDomain(entity, savedEntity)
         return branchMapper.toDomain(savedEntity)
     }
 

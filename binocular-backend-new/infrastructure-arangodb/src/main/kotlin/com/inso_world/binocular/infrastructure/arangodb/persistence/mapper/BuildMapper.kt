@@ -125,6 +125,7 @@ internal class BuildMapper
                     duration = entity.duration,
                     jobs = entity.jobs.map { jobMapper.toDomain(it) },
                     webUrl = entity.webUrl,
+                    commitIds = (entity.commits ?: emptyList()).map { com.inso_world.binocular.model.Commit.Id(it.iid) },
                     commits =
                         proxyFactory.createLazyList {
                             (entity.commits ?: emptyList()).map { commitEntity ->

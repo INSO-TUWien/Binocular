@@ -66,7 +66,7 @@ internal class UserMapper : EntityMapper<User, UserEntity> {
     override fun toDomain(entity: UserEntity): User {
         val domain = User(
             name = entity.name,
-            repositoryId = Repository.Id(entity.repository.iid),
+            repositoryId = entity.repository?.let { Repository.Id(it.iid) } ?: Repository.Id(entity.iid),
             iid = User.Id(entity.iid)
         ).apply {
             this.id = entity.id

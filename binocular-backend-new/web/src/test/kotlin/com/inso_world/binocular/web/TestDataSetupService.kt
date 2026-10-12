@@ -57,17 +57,6 @@ internal class TestDataSetupService(
      * are handled by the infrastructure implementation based on the entity data.
      */
     fun setupTestData() {
-        commitRepository.saveAll(TestDataProvider.testCommits)
-        accountRepository.saveAll(TestDataProvider.testAccounts)
-        branchRepository.saveAll(TestDataProvider.testBranches)
-        buildRepository.saveAll(TestDataProvider.testBuilds)
-        fileRepository.saveAll(TestDataProvider.testFiles)
-        issueRepository.saveAll(TestDataProvider.testIssues)
-        mergeRequestRepository.saveAll(TestDataProvider.testMergeRequests)
-        milestoneRepository.saveAll(TestDataProvider.testMilestones)
-        moduleRepository.saveAll(TestDataProvider.testModules)
-        noteRepository.saveAll(TestDataProvider.testNotes)
-        userRepository?.saveAll(TestDataProvider.testUsers)
         infrastructureDataSetup.setup()
     }
 }

@@ -47,6 +47,7 @@ internal class AccountMapper : EntityMapper<Account, AccountEntity> {
     override fun toEntity(domain: Account): AccountEntity =
         AccountEntity(
             id = domain.id,
+            iid = domain.iid.value,
             gid = domain.gid,
             platform = toPlatformEntity(domain.platform),
             login = domain.login,
@@ -71,6 +72,7 @@ internal class AccountMapper : EntityMapper<Account, AccountEntity> {
             gid = entity.gid,
             platform = toPlatform(entity.platform) ?: Platform.GitHub, // Default to GitHub if unknown
             login = entity.login,
+            iid = entity.iid?.let { Account.Id(it) } ?: Account.Id(Uuid.random()),
         ).apply {
             this.id = entity.id
             this.name = entity.name
@@ -80,15 +82,15 @@ internal class AccountMapper : EntityMapper<Account, AccountEntity> {
         }
 
         domain.issueIds.addAll(
-            entity.issues.mapNotNull { it.id?.let { id -> Issue.Id(Uuid.parse(id)) } }
+            entity.issues.mapNotNull { it.iid?.let { iid -> Issue.Id(iid) } }
         )
 
         domain.mergeRequestIds.addAll(
-            entity.mergeRequests.mapNotNull { it.id?.let { id -> MergeRequest.Id(Uuid.parse(id)) } }
+            entity.mergeRequests.mapNotNull { it.iid?.let { iid -> MergeRequest.Id(iid) } }
         )
 
         domain.noteIds.addAll(
-            entity.notes.mapNotNull { it.id?.let { id -> Note.Id(Uuid.parse(id)) } }
+            entity.notes.mapNotNull { it.iid?.let { iid -> Note.Id(iid) } }
         )
 
         return domain

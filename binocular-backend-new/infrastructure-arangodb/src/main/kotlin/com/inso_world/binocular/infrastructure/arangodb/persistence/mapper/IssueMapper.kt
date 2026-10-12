@@ -46,6 +46,7 @@ internal class IssueMapper(
         IssueEntity(
             id = domain.id,
             iid = domain.iid.value,
+            platformIid = domain.platformIid,
             title = domain.title,
             description = domain.description,
             createdAt = domain.createdAt?.let { java.util.Date.from(it.toInstant(java.time.ZoneOffset.UTC)) },
@@ -58,12 +59,11 @@ internal class IssueMapper(
             mentions = domain.mentions.map { m -> this.mentionMapper.toEntity(m) },
         )
 
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toDomain(entity: IssueEntity): Issue {
         val domain =
             Issue(
                 id = entity.id,
-                platformIid = null,
+                platformIid = entity.platformIid,
                 gid = entity.gid,
                 title = entity.title,
                 description = entity.description,
@@ -88,11 +88,11 @@ internal class IssueMapper(
                 mentions = entity.mentions.map { me -> this.mentionMapper.toDomain(me) },
                 project =
                 entity.project?.let { p -> Project.Id(p.iid) }
-                    ?: error("Parent Project not found in entity for Issue ${entity.iid}"),
-                accountIds = entity.accounts.mapNotNull { a -> a.id?.let { id -> Account.Id(Uuid.parse(id)) } }.toSet(),
+                    ?: Project.Id(entity.iid ?: Uuid.random()),
+                accountIds = entity.accounts.mapNotNull { a -> a.iid?.let { iid -> Account.Id(iid) } }.toSet(),
                 commitIds = entity.commits.mapNotNull { c -> c.iid?.let { iid -> Commit.Id(iid) } }.toSet(),
                 milestoneIds = entity.milestones.mapNotNull { ms -> ms.iid?.let { iid -> Milestone.Id(iid) } }.toSet(),
-                noteIds = entity.notes.mapNotNull { n -> n.id?.let { id -> Note.Id(Uuid.parse(id)) } }.toSet(),
+                noteIds = entity.notes.mapNotNull { n -> n.iid?.let { iid -> Note.Id(iid) } }.toSet(),
                 developerIds = entity.users.mapNotNull { u -> u.iid?.let { iid -> Developer.Id(iid) } }.toSet(),
                 iid = Issue.Id(entity.iid!!),
             )

@@ -27,6 +27,7 @@ data class IssueEntity(
     @Field("iid")
     @PersistentIndexed(unique = true)
     var iid: Uuid? = null,
+    var platformIid: Int? = null,
     val gid: String,
     var title: String? = null,
     var description: String? = null,

@@ -10,12 +10,21 @@ import kotlin.uuid.Uuid
  */
 @OptIn(ExperimentalUuidApi::class)
 data class Module(
+    @Deprecated("Avoid using database specific id, use business key", ReplaceWith("iid"))
     var id: String? = null,
     var path: String,
     // Relationships
+    var commitIds: List<Commit.Id> = emptyList(),
+    var fileIds: List<File.Id> = emptyList(),
+    var childModuleIds: List<Module.Id> = emptyList(),
+    var parentModuleIds: List<Module.Id> = emptyList(),
+    @Deprecated("Use commitIds instead")
     var commits: List<Commit> = emptyList(),
+    @Deprecated("Use fileIds instead")
     var files: List<File> = emptyList(),
+    @Deprecated("Use childModuleIds instead")
     var childModules: List<Module> = emptyList(),
+    @Deprecated("Use parentModuleIds instead")
     var parentModules: List<Module> = emptyList(),
     override val iid: Module.Id = Id(Uuid.random()),
 ): AbstractDomainObject<Module.Id, Module.Key>(

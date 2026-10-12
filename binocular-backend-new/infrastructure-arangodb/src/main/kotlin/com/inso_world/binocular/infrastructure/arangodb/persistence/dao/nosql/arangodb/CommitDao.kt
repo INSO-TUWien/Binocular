@@ -37,6 +37,7 @@ internal class CommitDao(
 
         val mappedEntity = commitMapper.toEntity(entity, owner, author, committer)
         val savedEntity = commitRepository.save(mappedEntity)
+        commitMapper.refreshDomain(entity, savedEntity)
         return commitMapper.toDomain(savedEntity)
     }
 

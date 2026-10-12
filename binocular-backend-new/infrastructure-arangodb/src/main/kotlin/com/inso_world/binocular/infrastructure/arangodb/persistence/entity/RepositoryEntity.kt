@@ -37,10 +37,10 @@ data class RepositoryEntity(
     var iid: Uuid,
     var localPath: String,
     @Ref(lazy = true)
-    val project: ProjectEntity
+    var project: ProjectEntity? = null
 ) {
     init {
-        this.project.repository = this
+        this.project?.repository = this
     }
 
     @Ref
@@ -69,7 +69,7 @@ data class RepositoryEntity(
     fun toDomain(): Repository =
         Repository(
             localPath = this.localPath.trim(),
-            projectId = Project.Id(this.project.iid),
+            projectId = this.project?.let { Project.Id(it.iid) } ?: Project.Id(this.iid),
         ).apply {
             this.id = this@RepositoryEntity.id
         }

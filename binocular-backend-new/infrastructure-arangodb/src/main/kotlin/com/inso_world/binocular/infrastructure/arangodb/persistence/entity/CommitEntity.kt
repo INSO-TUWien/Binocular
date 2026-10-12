@@ -169,6 +169,7 @@ internal fun Commit.toArangoEntity(
         commitDateTime = this.committerSignature.timestamp,
         message = this.message,
         webUrl = this.webUrl,
+        branch = this.branch,
         repository = repository,
         author = author,
         committer = committer,

@@ -41,7 +41,7 @@ data class UserEntity(
     var iid: Uuid,
     var gitSignature: String,
     @Ref(lazy = true)
-    var repository: RepositoryEntity,
+    var repository: RepositoryEntity? = null,
     @Relations(
         edges = [CommitUserConnectionEntity::class],
         lazy = true,
@@ -100,7 +100,7 @@ data class UserEntity(
     fun toDomain(): User =
         User(
             name = this.name,
-            repositoryId = Repository.Id(this.repository.iid),
+            repositoryId = repository?.let { Repository.Id(it.iid) } ?: Repository.Id(this.iid),
         ).apply {
             this.email = this@UserEntity.email
             this.id = this@UserEntity.id

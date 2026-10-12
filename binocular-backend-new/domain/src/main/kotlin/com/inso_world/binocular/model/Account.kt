@@ -22,9 +22,10 @@ data class Account(
     val login: String,
     @field:NotNull
     val projectIds: MutableSet<Project.Id> = mutableSetOf(),
+    override val iid: Account.Id = Id(Uuid.random()),
 
 ) : AbstractDomainObject<Account.Id, Account.Key>(
-    Id(Uuid.random())
+    iid
 ) {
     var name: String? = null
     var avatarUrl: String? = null

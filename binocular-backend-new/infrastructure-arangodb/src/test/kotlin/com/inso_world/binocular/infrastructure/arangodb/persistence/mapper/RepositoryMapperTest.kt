@@ -33,7 +33,7 @@ internal class RepositoryMapperTest : BaseMapperTest() {
             assertAll(
                 { assertThat(entity.id).isEqualTo("r-10") },
                 { assertThat(entity.localPath).isEqualTo(domain.localPath) },
-                { assertThat(entity.project.name).isEqualTo(project.name) },
+                { assertThat(entity.project?.name).isEqualTo(project.name) },
                 { assertThat(entity.iid).isEqualTo(domain.iid.value) }
             )
         }

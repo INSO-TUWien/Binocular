@@ -85,7 +85,7 @@ internal class NoteMapper : EntityMapper<Note, NoteEntity> {
         )
 
         domain.accountIds.addAll(
-            entity.accounts.mapNotNull { it.id?.let { id -> Account.Id(Uuid.parse(id)) } }
+            entity.accounts.mapNotNull { it.iid?.let { iid -> Account.Id(iid) } }
         )
 
         return domain

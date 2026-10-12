@@ -91,7 +91,7 @@ internal class RepositoryMapper : EntityMapper<Repository, RepositoryEntity> {
     override fun toDomain(entity: RepositoryEntity): Repository {
         val domain = Repository(
             localPath = entity.localPath,
-            projectId = Project.Id(entity.project.iid),
+            projectId = entity.project?.let { Project.Id(it.iid) } ?: Project.Id(entity.iid),
             iid = Repository.Id(entity.iid),
         ).apply {
             this.id = entity.id

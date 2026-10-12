@@ -69,10 +69,10 @@ internal class RepositoryDao @Autowired constructor(
         entity.files.forEach { fileRepository.save(it) }
         entity.revisions.forEach { revisionRepository.save(it) }
 
-        if (!skipProjectCheck) {
-            val existingProject = this.projectDao.findByName(entity.project.name)
+        if (!skipProjectCheck && entity.project != null) {
+            val existingProject = this.projectDao.findByName(entity.project!!.name)
             if (existingProject == null) {
-                this.projectDao.create(entity.project.toDomain())
+                this.projectDao.create(entity.project!!.toDomain())
             }
         }
 

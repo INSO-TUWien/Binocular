@@ -87,18 +87,14 @@ internal data class AccountEntity(
         gid = this.gid,
         platform = this.platform,
         login = this.login,
-        projectIds = this.projects.map { it.iid }.toMutableSet()
+        projectIds = this.projects.map { it.iid }.toMutableSet(),
+        iid = this.iid,
     ).apply {
         this.id = this@AccountEntity.id?.toString()
         this.name = this@AccountEntity.name
         this.avatarUrl = this@AccountEntity.avatarUrl
         this.url = this@AccountEntity.url
         this.issueIds.addAll(this@AccountEntity.issues.map { it.iid })
-        setField(
-            Account::class.java.superclass.getDeclaredField("iid"),
-            this,
-            this@AccountEntity.iid,
-        )
     }
 
         // Use direct entity relationships and map them to domain objects using the new createLazyMappedList method

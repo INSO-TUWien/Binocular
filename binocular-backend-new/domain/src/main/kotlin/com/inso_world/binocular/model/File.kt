@@ -32,6 +32,9 @@ data class File(
     lateinit var webUrl: String
 
     @Deprecated("legacy")
+    var maxLength: Long = Int.MIN_VALUE.toLong()
+
+    @Deprecated("legacy")
     var modules: List<Module.Id> = emptyList()
 
     override val uniqueKey: Key

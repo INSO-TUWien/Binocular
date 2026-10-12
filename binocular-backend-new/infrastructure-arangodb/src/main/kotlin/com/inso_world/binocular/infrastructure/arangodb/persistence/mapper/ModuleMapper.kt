@@ -76,6 +76,10 @@ internal class ModuleMapper
                 id = entity.id,
                 path = entity.path,
                 iid = Module.Id(entity.iid),
+                commitIds = (entity.commits ?: emptyList()).map { com.inso_world.binocular.model.Commit.Id(it.iid) },
+                fileIds = (entity.files ?: emptyList()).map { com.inso_world.binocular.model.File.Id(it.iid) },
+                childModuleIds = (entity.childModules ?: emptyList()).map { Module.Id(it.iid) },
+                parentModuleIds = (entity.parentModules ?: emptyList()).map { Module.Id(it.iid) },
                 commits =
                     proxyFactory.createLazyList {
                         (entity.commits ?: emptyList()).map { commitEntity ->

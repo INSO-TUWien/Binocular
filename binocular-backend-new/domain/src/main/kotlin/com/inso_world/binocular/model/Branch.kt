@@ -60,6 +60,7 @@ class Branch(
 
     data class Key(val repositoryId: Repository.Id, val name: String)
     
+    @Deprecated("Use headSha and commit traversal via repository/service instead")
     val commits: Set<Commit>
         get() = head?.let { h ->
             val result = mutableSetOf<Commit>()

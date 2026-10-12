@@ -68,9 +68,9 @@ internal class IssueControllerWebTest : BaseIntegrationTest() {
                     },
                     {
                         assertEquals(
-                            expectedIssue.iid,
+                            expectedIssue.platformIid,
                             actualIssue.get("iid").asInt(),
-                            "Issue IID mismatch: expected ${expectedIssue.iid}, got ${actualIssue.get("iid").asInt()}",
+                            "Issue IID mismatch: expected ${expectedIssue.platformIid}, got ${actualIssue.get("iid").asInt()}",
                         )
                     },
                     {
@@ -144,9 +144,9 @@ internal class IssueControllerWebTest : BaseIntegrationTest() {
                 },
                 {
                     assertEquals(
-                        expectedIssue.iid,
+                        expectedIssue.platformIid,
                         result.get("iid").asInt(),
-                        "Issue IID mismatch: expected ${expectedIssue.iid}, got ${result.get("iid").asInt()}",
+                        "Issue IID mismatch: expected ${expectedIssue.platformIid}, got ${result.get("iid").asInt()}",
                     )
                 },
                 {
@@ -236,9 +236,9 @@ internal class IssueControllerWebTest : BaseIntegrationTest() {
                 },
                 {
                     assertEquals(
-                        expectedIssue.iid,
+                        expectedIssue.platformIid,
                         actualIssue.get("iid").asInt(),
-                        "Issue IID mismatch: expected ${expectedIssue.iid}, got ${actualIssue.get("iid").asInt()}",
+                        "Issue IID mismatch: expected ${expectedIssue.platformIid}, got ${actualIssue.get("iid").asInt()}",
                     )
                 },
                 {
@@ -360,9 +360,9 @@ internal class IssueControllerWebTest : BaseIntegrationTest() {
                 },
                 {
                     assertEquals(
-                        expectedIssue.iid,
+                        expectedIssue.platformIid,
                         actualIssue.get("iid").asInt(),
-                        "Issue IID mismatch: expected ${expectedIssue.iid}, got ${actualIssue.get("iid").asInt()}",
+                        "Issue IID mismatch: expected ${expectedIssue.platformIid}, got ${actualIssue.get("iid").asInt()}",
                     )
                 },
                 {

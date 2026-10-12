@@ -13,6 +13,7 @@ import com.inso_world.binocular.model.Reference
 import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.vcs.ReferenceCategory
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Transient
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -49,6 +50,7 @@ data class BranchEntity(
     var tracksFileRenames: Boolean = false,
     @Deprecated("Use head.sha instead")
     var latestCommit: String? = null,
+    var branch: String? = null,
     @Ref(lazy = false)
     val repository: RepositoryEntity,
     @Ref(lazy = false)
@@ -61,9 +63,6 @@ data class BranchEntity(
     )
     var files: Set<FileEntity> = emptySet(),
 ) {
-
-    @Deprecated("Legacy", replaceWith = ReplaceWith("fullName"))
-    val branch = fullName
 
     /**
      * Converts this BranchEntity to a Branch domain object.
@@ -105,6 +104,7 @@ internal fun Branch.toArangoEntity(repository: RepositoryEntity, head: CommitEnt
         active = this.active,
         tracksFileRenames = this.tracksFileRenames,
         latestCommit = this.headSha,
+        branch = this.name,
         repository = repository,
         head = head,
     )

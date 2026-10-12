@@ -67,6 +67,7 @@ data class Commit(
     val repositoryId: Repository.Id,
     @Deprecated("Use repositoryId instead")
     var repository: Repository? = null,
+    @Deprecated("Use parentShas instead")
     val parents: MutableSet<Commit> = mutableSetOf(),
     override val iid: Commit.Id = Id(Uuid.random()),
 ) : AbstractDomainObject<Commit.Id, Commit.Key>(

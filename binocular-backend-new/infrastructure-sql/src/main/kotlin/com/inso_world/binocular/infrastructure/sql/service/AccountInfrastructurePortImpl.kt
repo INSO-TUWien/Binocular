@@ -55,12 +55,18 @@ import org.springframework.validation.annotation.Validated
         TODO("Not yet implemented")
     }
 
+    @Transactional
     override fun create(value: Account): @Valid Account {
-        TODO("Not yet implemented")
+        val entity = accountMapper.toEntity(value)
+        val created = accountDao.create(entity)
+        return accountMapper.toDomain(created)
     }
 
+    @Transactional
     override fun update(value: Account): @Valid Account {
-        TODO("Not yet implemented")
+        val entity = accountMapper.toEntity(value)
+        val updated = accountDao.update(entity)
+        return accountMapper.toDomain(updated)
     }
 
     override fun findUsersByAccountId(accountId: String): List<User> {

@@ -60,7 +60,7 @@ internal class DeveloperMapper : EntityMapper<Developer, DeveloperEntity> {
         val domain = Developer(
             name = entity.name,
             email = entity.email,
-            repositoryId = Repository.Id(entity.repository.iid),
+            repositoryId = entity.repository?.let { Repository.Id(it.iid) } ?: Repository.Id(entity.iid.value),
             iid = entity.iid
         ).apply {
             this.id = entity.id

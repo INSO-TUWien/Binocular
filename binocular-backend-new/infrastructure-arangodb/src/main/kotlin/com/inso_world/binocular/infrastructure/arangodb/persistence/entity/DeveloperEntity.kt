@@ -31,7 +31,7 @@ data class DeveloperEntity(
     var gitSignature: String,
     val iid: Developer.Id,
     @Ref(lazy = true)
-    var repository: RepositoryEntity,
+    var repository: RepositoryEntity? = null,
     @Relations(
         edges = [CommitUserConnectionEntity::class],
         lazy = true,
@@ -85,7 +85,7 @@ data class DeveloperEntity(
      * Business key for entity lookups.
      */
     val uniqueKey: Key
-        get() = Key(repositoryId = repository.id, email = email)
+        get() = Key(repositoryId = repository?.id, email = email)
 
     /**
      * Converts this entity to a domain Developer object.
@@ -97,7 +97,8 @@ data class DeveloperEntity(
         Developer(
             name = this.name,
             email = this.email,
-            repositoryId = Repository.Id(this.repository.iid),
+            repositoryId = this.repository?.let { Repository.Id(it.iid) } ?: Repository.Id(this.iid.value),
+            iid = this.iid,
         ).apply {
             this.id = this@DeveloperEntity.id
         }

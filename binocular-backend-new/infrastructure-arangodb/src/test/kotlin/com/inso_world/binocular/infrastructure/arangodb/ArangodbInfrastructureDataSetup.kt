@@ -43,6 +43,7 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfac
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.edge.IModuleFileConnectionDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.edge.IModuleModuleConnectionDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.edge.INoteAccountConnectionDao
+import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.node.IDeveloperDao
 import com.inso_world.binocular.infrastructure.arangodb.service.AccountInfrastructurePortImpl
 import com.inso_world.binocular.infrastructure.arangodb.service.BranchInfrastructurePortImpl
 import com.inso_world.binocular.infrastructure.arangodb.service.BuildInfrastructurePortImpl
@@ -75,6 +76,7 @@ internal class ArangodbInfrastructureDataSetup(
     @Autowired private val milestoneRepository: MilestoneInfrastructurePortImpl,
     @Autowired private val projectRepository: ProjectInfrastructurePortImpl,
     @Autowired private val repositoryRepository: RepositoryInfrastructurePortImpl,
+    @Autowired private val developerDao: IDeveloperDao,
 ) : InfrastructureDataSetup {
     companion object {
         private val logger by logger()
@@ -143,9 +145,10 @@ internal class ArangodbInfrastructureDataSetup(
         logger.info(">>> ArangodbInfrastructureDataSetup setup")
         this.mockTestData = MockTestDataProvider()
         // order: create parents first where necessary
-        projectRepository.saveAll(mockTestData.testProjects)
+        projectRepository.saveAll(listOf(TestDataProvider.project) + mockTestData.testProjects)
         val project = mockTestData.projectsByName.getValue("proj-for-repos")
-        repositoryRepository.saveAll(mockTestData.testRepositories)
+        repositoryRepository.saveAll(listOf(TestDataProvider.repository) + mockTestData.testRepositories)
+        developerDao.saveAll(TestDataProvider.testDevelopers)
 
         commitRepository.saveAll(TestDataProvider.testCommits)
         accountRepository.saveAll(TestDataProvider.testAccounts)
@@ -187,6 +190,7 @@ internal class ArangodbInfrastructureDataSetup(
         noteAccountConnectionRepository.deleteAll()
 
         // entities
+        developerDao.deleteAll()
         commitRepository.deleteAllEntities()
         accountRepository.deleteAllEntities()
         branchRepository.deleteAllEntities()

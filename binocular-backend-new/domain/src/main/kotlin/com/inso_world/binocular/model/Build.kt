@@ -11,6 +11,7 @@ import kotlin.uuid.Uuid
  */
 @OptIn(ExperimentalUuidApi::class)
 data class Build(
+    @Deprecated("Avoid using database specific id, use business key", ReplaceWith("iid"))
     var id: String? = null,
     var sha: String? = null,
     var ref: String? = null,
@@ -27,6 +28,8 @@ data class Build(
     var jobs: List<Job> = emptyList(),
     var webUrl: String? = null,
     // Relationships
+    var commitIds: List<Commit.Id> = emptyList(),
+    @Deprecated("Use commitIds instead")
     var commits: List<Commit> = emptyList(),
     override val iid: Build.Id = Id(Uuid.random()),
 ) : AbstractDomainObject<Build.Id, Build.Key>(

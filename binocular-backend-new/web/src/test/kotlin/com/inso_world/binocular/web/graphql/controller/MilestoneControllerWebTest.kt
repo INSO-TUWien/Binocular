@@ -74,9 +74,9 @@ internal class MilestoneControllerWebTest : BaseIntegrationTest() {
                     },
                     {
                         assertEquals(
-                            expectedMilestone?.iid,
+                            expectedMilestone?.platformIid,
                             node.get("iid").asInt(),
-                            "Milestone iid mismatch: expected ${expectedMilestone?.iid}, got ${node.get("iid").asInt()}",
+                            "Milestone iid mismatch: expected ${expectedMilestone?.platformIid}, got ${node.get("iid").asInt()}",
                         )
                     },
                     {
@@ -201,9 +201,9 @@ internal class MilestoneControllerWebTest : BaseIntegrationTest() {
                 },
                 {
                     assertEquals(
-                        expectedMilestone.iid,
+                        expectedMilestone.platformIid,
                         result.get("iid").asInt(),
-                        "Milestone iid mismatch: expected ${expectedMilestone.iid}, got ${result.get("iid").asInt()}",
+                        "Milestone iid mismatch: expected ${expectedMilestone.platformIid}, got ${result.get("iid").asInt()}",
                     )
                 },
                 {
@@ -342,9 +342,9 @@ internal class MilestoneControllerWebTest : BaseIntegrationTest() {
                 },
                 {
                     assertEquals(
-                        expectedMilestone.iid,
+                        expectedMilestone.platformIid,
                         actualMilestone.get("iid").asInt(),
-                        "Milestone iid mismatch: expected ${expectedMilestone.iid}, got ${actualMilestone.get("iid").asInt()}",
+                        "Milestone iid mismatch: expected ${expectedMilestone.platformIid}, got ${actualMilestone.get("iid").asInt()}",
                     )
                 },
                 {
@@ -520,9 +520,9 @@ internal class MilestoneControllerWebTest : BaseIntegrationTest() {
                 },
                 {
                     assertEquals(
-                        expectedMilestone.iid,
+                        expectedMilestone.platformIid,
                         actualMilestone.get("iid").asInt(),
-                        "Milestone iid mismatch: expected ${expectedMilestone.iid}, got ${actualMilestone.get("iid").asInt()}",
+                        "Milestone iid mismatch: expected ${expectedMilestone.platformIid}, got ${actualMilestone.get("iid").asInt()}",
                     )
                 },
                 {

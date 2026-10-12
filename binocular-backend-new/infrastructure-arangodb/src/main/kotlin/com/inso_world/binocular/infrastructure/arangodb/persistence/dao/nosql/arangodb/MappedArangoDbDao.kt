@@ -94,7 +94,13 @@ open class MappedArangoDbDao<D : Any, E : Any, I : Serializable>(
     override fun create(entity: D): D {
         val mappedEntity = mapper.toEntity(entity)
         val savedEntity = repository.save(mappedEntity)
-        return mapper.toDomain(savedEntity)
+        val domain = mapper.toDomain(savedEntity)
+        try {
+            val idProp = entity::class.java.getMethod("setId", String::class.java)
+            val getIdProp = savedEntity::class.java.getMethod("getId")
+            idProp.invoke(entity, getIdProp.invoke(savedEntity))
+        } catch (_: Exception) {}
+        return domain
     }
 
     /**

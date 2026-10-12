@@ -23,6 +23,7 @@ data class MilestoneEntity(
     @Field("iid")
     @PersistentIndexed(unique = true)
     var iid: Uuid? = null,
+    var platformIid: Int? = null,
     var title: String? = null,
     var description: String? = null,
     var createdAt: String? = null,

@@ -37,14 +37,7 @@ package com.inso_world.binocular.infrastructure.sql.mapper
          */
         @Transactional(readOnly = true)
         override fun toDomain(entity: AccountEntity): Account {
-            val domain = entity.toDomain()
-            setField(
-                domain.javaClass.superclass.getDeclaredField("iid"),
-                domain,
-                entity.iid
-            )
-
-            return domain
+            return entity.toDomain()
         }
 
         /**

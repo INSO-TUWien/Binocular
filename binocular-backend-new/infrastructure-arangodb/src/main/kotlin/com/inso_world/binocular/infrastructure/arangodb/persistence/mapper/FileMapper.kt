@@ -48,7 +48,7 @@ internal class FileMapper : EntityMapper<File, FileEntity> {
                 iid = domain.iid.value,
                 path = domain.path,
                 webUrl = domain.webUrl,
-                maxLength = 0,
+                maxLength = domain.maxLength,
             )
 
         return entity
@@ -74,6 +74,7 @@ internal class FileMapper : EntityMapper<File, FileEntity> {
             ).apply {
                 id = entity.id
                 webUrl = entity.webUrl
+                maxLength = entity.maxLength ?: Int.MIN_VALUE.toLong()
             }
 
         return domain

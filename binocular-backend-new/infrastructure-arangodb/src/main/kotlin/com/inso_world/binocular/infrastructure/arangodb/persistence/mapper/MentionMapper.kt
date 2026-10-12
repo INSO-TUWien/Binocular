@@ -63,7 +63,7 @@ internal class MentionMapper : EntityMapper<Mention, MentionEntity> {
                     ?.atZone(ZoneOffset.UTC)
                     ?.toLocalDateTime(),
             closes = entity.closes,
-            actorId = entity.actor?.id?.let { Account.Id(Uuid.parse(it)) }
+            actorId = entity.actor?.iid?.let { Account.Id(it) }
         )
     }
 }

@@ -75,7 +75,7 @@ internal class ProjectMapper : EntityMapper<Project, ProjectEntity> {
         domain.issueIds.addAll(entity.issues.mapNotNull { it.iid?.let { iid -> Issue.Id(iid) } })
         domain.mergeRequestIds.addAll(entity.mergeRequests.mapNotNull { it.iid?.let { iid -> MergeRequest.Id(iid) } })
         domain.milestoneIds.addAll(entity.milestones.mapNotNull { it.iid?.let { iid -> Milestone.Id(iid) } })
-        domain.accountIds.addAll(entity.accounts.mapNotNull { it.id?.let { id -> Account.Id(Uuid.parse(id)) } })
+        domain.accountIds.addAll(entity.accounts.mapNotNull { it.iid?.let { iid -> Account.Id(iid) } })
 
         return domain
     }

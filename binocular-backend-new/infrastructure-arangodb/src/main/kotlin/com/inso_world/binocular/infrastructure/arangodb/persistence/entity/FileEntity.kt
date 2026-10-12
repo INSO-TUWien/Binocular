@@ -26,7 +26,7 @@ data class FileEntity(
     var iid: Uuid = Uuid.random(),
     var path: String,
     var webUrl: String,
-    var maxLength: Int? = null,
+    var maxLength: Long? = null,
     @Relations(
         edges = [CommitFileConnectionEntity::class],
         lazy = true,
