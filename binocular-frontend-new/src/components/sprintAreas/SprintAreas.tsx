@@ -44,7 +44,7 @@ export const SprintAreas: React.FC<{
         const yEnd = 0;
 
         return (
-          <g key={s.id}>
+          <g key={s.id} style={{ pointerEvents: 'none' }}>
             <g>
               <line x1={xStart} y1={yStart} x2={xStart} y2={height - bottomMargin * 2} width={1} stroke={'var(--color-success)'} />
               <path
@@ -66,7 +66,7 @@ export const SprintAreas: React.FC<{
               />
             </g>
 
-            <g onClick={onClick?.(s)} className={classes['sprint-area']}>
+            <g onClick={onClick?.(s)} className={classes['sprint-area']} style={{ pointerEvents: onClick ? 'auto' : 'none' }}>
               <rect
                 x={xStart}
                 y={Math.max(0, height - bottomMargin * 2 - rectHeight)}
