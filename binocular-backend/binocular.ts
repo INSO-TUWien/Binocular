@@ -697,6 +697,7 @@ function runBackend() {
     await Issue.deleteMentionsAttribute();
   }
 
+  // Currently only works for GitHub. To support GitLab, the _.pick() of the merge request DTO in GitLabITSIndexer.js has to be updated
   async function connectMergeRequestsAndCommits() {
     const issues = await MergeRequest.findAll();
     const commits = await Commit.findAll();
@@ -707,6 +708,8 @@ function runBackend() {
       let matched = false;
       if (issue.data.commits) {
         for (const mention of issue.data.commits) {
+          // .filter scans all commits for every lookup so a Map keyed by sha would be faster,
+          // but this backend will be replaced, so it is kept consistent with connectIssuesAndCommits
           const commit = commits.filter((c: any) => c.data.sha === mention);
           if (commit && commit[0]) {
             await MergeRequestCommitConnection.ensure({ closes: false }, { from: issue, to: commit[0] });
@@ -725,6 +728,7 @@ function runBackend() {
     await MergeRequest.deleteMentionsAttribute();
   }
 
+  // Currently only works for GitHub. To support GitLab, the _.pick() of the merge request DTO in GitLabITSIndexer.js has to be updated
   async function connectMergeRequestsAndIssues() {
     const mergeRequests = await MergeRequest.findAll();
     const issues = await Issue.findAll();
@@ -735,6 +739,8 @@ function runBackend() {
       //some mergeRequests are not mentioned by any issues
       if (!mergeRequest.data.closingIssues) continue;
       for (const closingIssue of mergeRequest.data.closingIssues) {
+        // .filter scans all issues for every lookup; a Map keyed by id would be faster,
+        // but this backend will be replaced, so it is kept as is
         const issue = issues.filter((c: any) => c.data.id === closingIssue);
         if (issue && issue[0]) {
           await IssueMergeRequestConnection.ensure({}, { from: issue[0], to: mergeRequest });
