@@ -1,7 +1,10 @@
 import { GraphQL, traversePages } from '../utils.ts';
-import type { DataPluginIssue, DataPluginIssues } from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
+import type {
+  DataPluginIssue,
+  DataPluginIssueCommitStats,
+  DataPluginIssues,
+} from '../../../../interfaces/dataPluginInterfaces/dataPluginIssues.ts';
 import { gql } from '@apollo/client';
-import type { DataPluginStats } from '../../../../interfaces/dataPluginInterfaces/dataPluginCommits.ts';
 
 export default class Issues implements DataPluginIssues {
   private graphQl;
@@ -69,9 +72,26 @@ export default class Issues implements DataPluginIssues {
                 }
                 commits {
                   data {
+                    sha
+                    date
                     stats {
                       additions
                       deletions
+                    }
+                  }
+                }
+                mergeRequests {
+                  data {
+                    iid
+                    commits {
+                      data {
+                        sha
+                        date
+                        stats {
+                          additions
+                          deletions
+                        }
+                      }
                     }
                   }
                 }
@@ -87,11 +107,17 @@ export default class Issues implements DataPluginIssues {
       getIssuesPage(from, to, sort),
       ({
         commits,
+        mergeRequests,
         ...issue
-      }: Omit<DataPluginIssue, 'commits'> & {
-        commits: { data: { stats: DataPluginStats }[] };
+      }: Omit<DataPluginIssue, 'commits' | 'mergeRequests'> & {
+        commits: { data: DataPluginIssueCommitStats[] };
+        mergeRequests: { data: { iid: number; commits: { data: DataPluginIssueCommitStats[] } }[] };
       }) => {
-        issues.push({ ...issue, commits: commits.data.flatMap((d) => d.stats) });
+        issues.push({
+          ...issue,
+          commits: commits.data,
+          mergeRequests: mergeRequests.data.map((mr) => ({ iid: mr.iid, commits: mr.commits.data })),
+        });
       },
     );
     return issues;

@@ -64,4 +64,34 @@ export default class MergeRequests {
       return mergeRequestList;
     });
   }
+
+  static async getCommitsForMergeRequest(iid) {
+    return graphQl
+      .query(
+        `query{
+           mergeRequest (iid: ${iid}){
+            commits {
+              count
+              data {
+                sha
+                 shortSha
+                 message
+                 messageHeader
+                 signature
+                 branch
+                 parents
+                 date
+                 webUrl
+                 stats {
+                   additions
+                   deletions
+                 }
+              }
+            }
+           }
+         }`,
+        { iid },
+      )
+      .then((resp) => resp.mergeRequest.commits.data);
+  }
 }

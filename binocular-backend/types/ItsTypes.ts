@@ -51,3 +51,11 @@ export interface ItsIssueReaction {
   rocket: number;
   eyes: number;
 }
+
+export interface ItsMergeRequestCommit {
+  commit: { oid: string };
+}
+
+export interface ItsMergeRequestClosingIssue {
+  id: number;
+}

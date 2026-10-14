@@ -88,10 +88,10 @@ export const DetailDialogIssue: React.FC<{
         <em>Linked Commits:</em> {i?.commits.length}
       </p>
       <p>
-        <em>Additions:</em> {i?.commits.reduce((acc, { additions }) => acc + additions, 0)}
+        <em>Additions:</em> {i?.commits.reduce((acc, { stats }) => acc + stats.additions, 0)}
       </p>
       <p>
-        <em>Deletions:</em> {i?.commits.reduce((acc, { deletions }) => acc + deletions, 0)}
+        <em>Deletions:</em> {i?.commits.reduce((acc, { stats }) => acc + stats.deletions, 0)}
       </p>
 
       <div className={'divider'} />

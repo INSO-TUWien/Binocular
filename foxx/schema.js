@@ -275,6 +275,26 @@ const queryType = new gql.GraphQLObjectType({
             RETURN mergeRequest`;
         },
       }),
+      mergeRequest: {
+        type: require('./types/mergeRequest.js'),
+        args: {
+          iid: {
+            description: 'Project-Internal merge request number',
+            type: new gql.GraphQLNonNull(gql.GraphQLInt),
+          },
+        },
+        resolve(root, args) {
+          return db
+            ._query(
+              aql`FOR mergeRequest
+                  IN
+                  ${mergeRequests}
+                  FILTER mergeRequest.iid == ${args.iid}
+                    RETURN mergeRequest`
+            )
+            .toArray()[0];
+        },
+      },
       milestones: paginated({
         type: require('./types/milestone.js'),
         args: {

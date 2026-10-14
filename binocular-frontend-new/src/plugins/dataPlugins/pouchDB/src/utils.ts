@@ -730,6 +730,14 @@ export function findIssueCommitConnections(relations: PouchDB.Database) {
   return findAll(relations, 'issues-commits');
 }
 
+export function findIssueMergeRequestConnections(relations: PouchDB.Database) {
+  return findAll(relations, 'issues-mergeRequests');
+}
+
+export function findMergeRequestCommitConnections(relations: PouchDB.Database) {
+  return findAll(relations, 'mergeRequests-commits');
+}
+
 export function findCommitBuildConnections(relations: PouchDB.Database) {
   return findAll(relations, 'commits-builds');
 }

@@ -25,6 +25,7 @@ export default class Issues {
                 closedAt
                 webUrl
                 state
+                labels
                 author{
                   login
                   name
@@ -216,5 +217,76 @@ export default class Issues {
       `,
       { file: file },
     );
+  }
+
+  static async getCommitsForIssues(issueIds) {
+    const allCommits = [];
+
+    for (const issueId of issueIds) {
+      try {
+        const commits = await this.getCommitsForIssue(issueId);
+        allCommits.push(...commits);
+      } catch (error) {
+        console.error(`Error fetching commits for issue ${issueId}:`, error);
+      }
+    }
+
+    return allCommits;
+  }
+
+  static async getMergeRequestsForIssues(issueIds) {
+    const allMergeRequests = [];
+
+    for (const issueId of issueIds) {
+      try {
+        const mergeRequests = await this.getMergeRequestsForIssue(issueId);
+        allMergeRequests.push(...mergeRequests);
+      } catch (error) {
+        console.error(`Error fetching merge requests for issue ${issueId}:`, error);
+      }
+    }
+
+    return allMergeRequests;
+  }
+
+  static async getMergeRequestsForIssue(iid) {
+    return graphQl
+      .query(
+        `query{
+             issue (iid: ${iid}){
+              mergeRequests {
+                count
+                data {
+                  id
+                  iid
+                  title
+                  state
+                  webUrl
+                  sourceBranch
+                  targetBranch
+                  createdAt
+                  author {
+                    login
+                    name
+                  }
+                  assignees {
+                    login
+                    name
+                  }
+                  assignee {
+                    login
+                    name
+                  }
+                }
+              }
+             }
+           }`,
+        { iid },
+      )
+      .then((resp) => resp.issue.mergeRequests.data)
+      .catch((error) => {
+        console.error(`Error fetching merge requests for issue ${iid}:`, error);
+        return [];
+      });
   }
 }

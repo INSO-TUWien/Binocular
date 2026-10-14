@@ -53,6 +53,7 @@ function makeNote(body: string, issueId?: string, issueIid?: number, issueTitle?
           assignees: [],
           notes: [],
           commits: [],
+          mergeRequests: [],
         } satisfies DataPluginIssue)
       : null,
     mergeRequest: null,

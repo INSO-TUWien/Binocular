@@ -108,6 +108,9 @@ export const pullRequestsWithEvents = [
     milestone: null,
     author: { login: 'tester1' },
     assignees: { nodes: [{ login: 'tester2' }] },
+    closingIssuesReferences: { nodes: [{ id: '0' }] },
+    commits: { nodes: [{ commit: { oid: '1234567890' } }] },
+    mergeCommit: { oid: '1234567890' },
     timelineItems: {
       nodes: [
         {
@@ -135,6 +138,9 @@ export const pullRequestsWithEvents = [
     milestone: null,
     author: { login: 'tester2' },
     assignees: { nodes: [{ login: 'tester1' }, { login: 'tester2' }] },
+    closingIssuesReferences: { nodes: [] },
+    commits: { nodes: [] },
+    mergeCommit: null,
     timelineItems: {
       nodes: [
         {

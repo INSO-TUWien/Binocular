@@ -324,6 +324,10 @@ export function findIssueCommitConnections(relations) {
   return findAll(relations, 'issues-commits');
 }
 
+export function findMergeRequestCommitConnections(relations) {
+  return findAll(relations, 'mergeRequests-commits');
+}
+
 export function findCommitBuildConnections(relations) {
   return findAll(relations, 'commits-builds');
 }

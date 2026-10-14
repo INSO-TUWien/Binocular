@@ -6,6 +6,18 @@ export interface DataPluginIssues {
   getAll: (from: string, to: string) => Promise<DataPluginIssue[]>;
 }
 
+// A commit as referenced from an issue or merge request
+export interface DataPluginIssueCommitStats {
+  sha: string;
+  date: string;
+  stats: DataPluginStats;
+}
+
+export interface DataPluginIssueMergeRequest {
+  iid: number;
+  commits: DataPluginIssueCommitStats[];
+}
+
 export interface DataPluginIssue {
   id: string;
   iid: number;
@@ -20,5 +32,6 @@ export interface DataPluginIssue {
   assignee: DataPluginAccount | null;
   assignees: DataPluginAccount[];
   notes: DataPluginNote[];
-  commits: DataPluginStats[];
+  commits: DataPluginIssueCommitStats[];
+  mergeRequests: DataPluginIssueMergeRequest[];
 }

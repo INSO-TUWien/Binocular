@@ -134,6 +134,14 @@ export default class Database {
     }
   }
 
+  static async getCommitsForIssues(issueIds) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitsForIssues(issueIds);
+    } else {
+      return LocalDB.getCommitsForIssues(issueIds);
+    }
+  }
+
   static async issueImpactQuery(iid, since, until) {
     if (await this.checkBackendConnection()) {
       return ServerDB.issueImpactQuery(iid, since, until);
@@ -166,6 +174,22 @@ export default class Database {
       return ServerDB.getMergeRequestData(mergeRequestSpan, significantSpan);
     } else {
       return LocalDB.getMergeRequestData(mergeRequestSpan, significantSpan);
+    }
+  }
+
+  static async getMergeRequestsForIssues(issueIds) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getMergeRequestsForIssues(issueIds);
+    } else {
+      return LocalDB.getMergeRequestsForIssues(issueIds);
+    }
+  }
+
+  static async getCommitsForMergeRequest(iid) {
+    if (await this.checkBackendConnection()) {
+      return ServerDB.getCommitsForMergeRequest(iid);
+    } else {
+      return LocalDB.getCommitsForMergeRequest(iid);
     }
   }
 

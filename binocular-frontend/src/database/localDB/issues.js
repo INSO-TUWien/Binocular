@@ -143,4 +143,30 @@ export default class Issues {
       return { issues: { data: issues } };
     });
   }
+
+  static async getCommitsForIssues(db, tripleStore, issueIds) {
+    const commits = [];
+    for (const issueId of issueIds) {
+      const issueCommits = await this.getCommitsForIssue(db, tripleStore, issueId);
+      commits.push(...issueCommits);
+    }
+    return [...new Set(commits)]; // Remove duplicates
+  }
+
+  static async getMergeRequestsForIssues(db, tripleStore, issueIds) {
+    const results = await tripleStore.allDocs({
+      include_docs: true,
+      startkey: 'issues-mergeRequests/',
+      endkey: 'issues-mergeRequests/\ufff0',
+    });
+
+    const mrIds = results.rows.filter((row) => issueIds.includes(row.doc.from.split('/')[1])).map((row) => row.doc.to.split('/')[1]);
+
+    const mergeRequests = await db.allDocs({
+      include_docs: true,
+      keys: mrIds.map((id) => `mergeRequests/${id}`),
+    });
+
+    return mergeRequests.rows.filter((row) => row.doc).map((row) => row.doc);
+  }
 }

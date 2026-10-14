@@ -5,10 +5,11 @@ const arangodb = require('@arangodb');
 const Timestamp = require('./Timestamp');
 const db = arangodb.db;
 const aql = arangodb.aql;
-const mergeRequestsToAccounts = db._collection('mergeRequests-accounts')
+const mergeRequestsToAccounts = db._collection('mergeRequests-accounts');
 const mergeRequestsToMilestones = db._collection('mergeRequests-milestones');
 const mergeRequestsToNotes = db._collection('mergeRequests-notes');
-
+const mergeRequestsToCommits = db._collection('mergeRequests-commits');
+const paginated = require('./paginated.js');
 
 module.exports = new gql.GraphQLObjectType({
   name: 'mergeRequest',
@@ -145,6 +146,30 @@ module.exports = new gql.GraphQLObjectType({
             .toArray();
         },
       },
+      commits: paginated({
+        type: require('./commit.js'),
+        description: 'All commits in this merge request',
+        args: {
+          since: { type: Timestamp, required: false },
+          until: { type: Timestamp, required: false },
+        },
+        query: (mr, args, limit) => {
+          let query = aql`
+            FOR commit, edge IN
+            OUTBOUND ${mr} ${mergeRequestsToCommits}`;
+
+          if (args.since !== undefined) {
+            query = aql`${query} FILTER DATE_TIMESTAMP(commit.date) >= DATE_TIMESTAMP(${args.since})`;
+          }
+
+          if (args.until !== undefined) {
+            query = aql`${query} FILTER DATE_TIMESTAMP(commit.date) <= DATE_TIMESTAMP(${args.until})`;
+          }
+
+          query = aql`${query} ${limit} RETURN commit`;
+          return query;
+        },
+      }),
     };
   },
 });

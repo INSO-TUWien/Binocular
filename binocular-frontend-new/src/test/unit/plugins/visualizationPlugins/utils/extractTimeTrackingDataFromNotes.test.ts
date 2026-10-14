@@ -26,6 +26,7 @@ function makeIssue(id: string): DataPluginIssue {
     assignees: [],
     notes: [],
     commits: [],
+    mergeRequests: [],
   };
 }
 

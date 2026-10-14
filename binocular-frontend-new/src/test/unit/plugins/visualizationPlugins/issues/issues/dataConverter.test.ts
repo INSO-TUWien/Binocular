@@ -45,6 +45,7 @@ function makeIssue(overrides: Partial<DataPluginIssue> = {}): DataPluginIssue {
     assignees: [],
     notes: [],
     commits: [],
+    mergeRequests: [],
     ...overrides,
   };
 }

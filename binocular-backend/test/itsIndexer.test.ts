@@ -387,6 +387,14 @@ describe('its', function () {
     // atm, PRs and Issue mock data is the same
     const expectDefaultMergeRequests = (collections) => {
       expectDefaultIssues(collections, 'mergeRequests');
+
+      const [mr0, mr1] = collections['mergeRequests'];
+      expect(mr0.commits).to.deep.equal(['1234567890']);
+      expect(mr0.closingIssues).to.deep.equal(['0']);
+      expect(mr0.mergeCommitSha).to.equal('1234567890');
+      expect(mr1.commits).to.deep.equal([]);
+      expect(mr1.closingIssues).to.deep.equal([]);
+      expect(mr1.mergeCommitSha).to.equal(null);
     };
     const expectDefaultAccounts = (collections) => {
       expect(collections['accounts'].length).to.equal(2);

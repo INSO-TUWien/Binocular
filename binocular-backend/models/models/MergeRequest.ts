@@ -1,6 +1,7 @@
 'use strict';
 
 import _ from 'lodash';
+import { aql } from 'arangojs';
 import Model from '../Model';
 import Mention from '../../types/supportingTypes/Mention';
 import MergeRequestDto from '../../types/dtos/MergeRequestDto';
@@ -17,6 +18,9 @@ export interface MergeRequestDataType {
   state: string;
   webUrl: string;
   mentions: Mention[];
+  commits: string[];
+  closingIssues: string[];
+  mergeCommitSha: string | null;
 }
 
 class MergeRequest extends Model<MergeRequestDataType> {
@@ -35,6 +39,17 @@ class MergeRequest extends Model<MergeRequestDataType> {
     delete mergeRequestData.projectId;
 
     return this.ensureByExample({ id: mergeRequestData.id }, mergeRequestData, {});
+  }
+
+  deleteMentionsAttribute() {
+    if (this.rawDb === undefined) {
+      throw Error('Database undefined!');
+    }
+    return this.rawDb.query(
+      aql`
+    FOR i IN mergeRequests
+    REPLACE i WITH UNSET(i, "mentions") IN mergeRequests`,
+    );
   }
 }
 

@@ -42,6 +42,8 @@ import MergeRequest from './models/models/MergeRequest.ts';
 import Milestone from './models/models/Milestone.ts';
 import CommitUserConnection from './models/connections/CommitUserConnection.ts';
 import IssueCommitConnection from './models/connections/IssueCommitConnection.ts';
+import MergeRequestCommitConnection from './models/connections/MergeRequestCommitConnection.ts';
+import IssueMergeRequestConnection from './models/connections/IssueMergeRequestConnection.ts';
 import CommitCommitConnection from './models/connections/CommitCommitConnection.ts';
 import CommitModuleConnection from './models/connections/CommitModuleConnection.ts';
 import ModuleModuleConnection from './models/connections/ModuleModuleConnection.ts';
@@ -399,6 +401,8 @@ function runBackend() {
       // This is why we connect them here and then delete the temporary references in the collections themselves
       // (like the `mentions` field in issues).
       await connectIssuesAndCommits();
+      await connectMergeRequestsAndCommits();
+      await connectMergeRequestsAndIssues();
       await connectCommitsAndBuilds();
       await connectAccountsAndUsers();
       const endTime = Moment.now();
@@ -600,6 +604,8 @@ function runBackend() {
           CommitBuildConnection.ensureCollection(),
           CommitUserConnection.ensureCollection(),
           IssueCommitConnection.ensureCollection(),
+          MergeRequestCommitConnection.ensureCollection(),
+          IssueMergeRequestConnection.ensureCollection(),
           IssueNoteConnection.ensureCollection(),
           MergeRequestNoteConnection.ensureCollection(),
           NoteAccountConnection.ensureCollection(),
@@ -689,6 +695,58 @@ function runBackend() {
     }
     //remove the temporary `mentions` attribute since we have the connections now
     await Issue.deleteMentionsAttribute();
+  }
+
+  // Currently only works for GitHub. To support GitLab, the _.pick() of the merge request DTO in GitLabITSIndexer.js has to be updated
+  async function connectMergeRequestsAndCommits() {
+    const issues = await MergeRequest.findAll();
+    const commits = await Commit.findAll();
+    for (const issue of issues) {
+      if (issue === null) {
+        continue;
+      }
+      let matched = false;
+      if (issue.data.commits) {
+        for (const mention of issue.data.commits) {
+          // .filter scans all commits for every lookup so a Map keyed by sha would be faster,
+          // but this backend will be replaced, so it is kept consistent with connectIssuesAndCommits
+          const commit = commits.filter((c: any) => c.data.sha === mention);
+          if (commit && commit[0]) {
+            await MergeRequestCommitConnection.ensure({ closes: false }, { from: issue, to: commit[0] });
+            matched = true;
+          }
+        }
+      }
+      if (!matched && issue.data.mergeCommitSha) {
+        const commit = commits.filter((c: any) => c.data.sha === issue.data.mergeCommitSha);
+        if (commit && commit[0]) {
+          await MergeRequestCommitConnection.ensure({ closes: false }, { from: issue, to: commit[0] });
+        }
+      }
+    }
+    //remove the temporary `mentions` attribute since we have the connections now
+    await MergeRequest.deleteMentionsAttribute();
+  }
+
+  // Currently only works for GitHub. To support GitLab, the _.pick() of the merge request DTO in GitLabITSIndexer.js has to be updated
+  async function connectMergeRequestsAndIssues() {
+    const mergeRequests = await MergeRequest.findAll();
+    const issues = await Issue.findAll();
+    for (const mergeRequest of mergeRequests) {
+      if (mergeRequest === null) {
+        continue;
+      }
+      //some mergeRequests are not mentioned by any issues
+      if (!mergeRequest.data.closingIssues) continue;
+      for (const closingIssue of mergeRequest.data.closingIssues) {
+        // .filter scans all issues for every lookup; a Map keyed by id would be faster,
+        // but this backend will be replaced, so it is kept as is
+        const issue = issues.filter((c: any) => c.data.id === closingIssue);
+        if (issue && issue[0]) {
+          await IssueMergeRequestConnection.ensure({}, { from: issue[0], to: mergeRequest });
+        }
+      }
+    }
   }
 
   async function connectCommitsAndBuilds() {

@@ -173,6 +173,9 @@ class GitHub {
    * Currently the number of timeline items is fixed to 200 items.
    * This could improve in the future through nested pagination.
    * Nested pagination is not possible with @octokit/plugin-paginate-graphql
+   *
+   * For the same reason, the commits and closing issue references of each pull request are not paginated.
+   * Instead, they are fixed to 250 commits and 100 closingIssuesReferences
    */
   getPullRequestsWithEvents(repositoryOwner: string, repositoryName: string) {
     return this.githubGraphQL.graphql
@@ -223,6 +226,21 @@ class GitHub {
                           nodes {
                               login
                           }
+                      }
+                      closingIssuesReferences (first: 100) {
+                        nodes {
+                          id
+                        }
+                      }
+                      commits (first: 250) {
+                        nodes{
+                          commit{
+                            oid
+                          }
+                        }
+                      }
+                      mergeCommit {
+                        oid
                       }
                       timelineItems(first: 200, itemTypes: [CLOSED_EVENT, REFERENCED_EVENT]) {
                           totalCount

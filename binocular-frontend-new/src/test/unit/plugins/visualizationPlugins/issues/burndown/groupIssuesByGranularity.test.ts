@@ -19,6 +19,7 @@ function makeIssue(createdAt: string, closedAt?: string): MappedIssue {
     assignees: [],
     notes: [],
     commits: [],
+    mergeRequests: [],
   };
 }
 

@@ -160,6 +160,18 @@ export default class LocalDB {
     return Issues.getCommitsForIssue(db, tripleStore, iid);
   }
 
+  static getCommitsForIssues(issueIds) {
+    return Issues.getCommitsForIssues(db, tripleStore, issueIds);
+  }
+
+  static getMergeRequestsForIssues(issueIds) {
+    return Issues.getMergeRequestsForIssues(db, tripleStore, issueIds);
+  }
+
+  static getCommitsForMergeRequest(iid) {
+    return MergeRequests.getCommitsForMergeRequest(db, tripleStore, iid);
+  }
+
   static getMergeRequestData(mergeRequestSpan, significantSpan) {
     return MergeRequests.getMergeRequestData(db, tripleStore, mergeRequestSpan, significantSpan);
   }

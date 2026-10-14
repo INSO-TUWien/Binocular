@@ -8,7 +8,7 @@ import MergeRequest, { MergeRequestDataType } from '../../models/models/MergeReq
 import Mention from '../../types/supportingTypes/Mention';
 import GitHub from '../../core/provider/github';
 import ProgressReporter from '../../utils/progress-reporter.ts';
-import { ItsIssueEvent } from '../../types/ItsTypes';
+import { ItsIssueEvent, ItsMergeRequestCommit, ItsMergeRequestClosingIssue } from '../../types/ItsTypes';
 import Account, { AccountDataType } from '../../models/models/Account.ts';
 import { Entry } from '../../models/Model.ts';
 import IssueAccountConnection, { IssueAccountConnectionDataType } from '../../models/connections/IssueAccountConnection.ts';
@@ -85,15 +85,28 @@ GitHubITSIndexer.prototype.index = async function () {
               webUrl: issue.url,
             };
 
-            // mentions attribute is only relevant for issues, not for merge requests
-            if (targetCollection === Issue) {
-              toBePersisted.mentions = issue.timelineItems.nodes.map((event: ItsIssueEvent) => {
-                return {
-                  commit: event.commit ? event.commit.oid : null,
-                  createdAt: event.createdAt,
-                  closes: event.commit === undefined,
-                } as Mention;
+            toBePersisted.mentions = issue.timelineItems.nodes.map((event: ItsIssueEvent) => {
+              return {
+                commit: event.commit ? event.commit.oid : null,
+                createdAt: event.createdAt,
+                closes: event.commit === undefined,
+              } as Mention;
+            });
+
+            if (targetCollection === MergeRequest) {
+              toBePersisted.commits = issue.commits.nodes.map((event: ItsMergeRequestCommit) => {
+                return event.commit ? event.commit.oid : null;
               });
+            }
+
+            if (targetCollection === MergeRequest) {
+              toBePersisted.closingIssues = issue.closingIssuesReferences.nodes.map((event: ItsMergeRequestClosingIssue) => {
+                return event.id;
+              });
+            }
+
+            if (targetCollection === MergeRequest) {
+              toBePersisted.mergeCommitSha = issue.mergeCommit ? issue.mergeCommit.oid : null;
             }
 
             return targetCollection.persist(toBePersisted).then(([persistedIssue, wasCreated]) => {

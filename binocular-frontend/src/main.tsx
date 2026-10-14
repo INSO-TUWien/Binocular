@@ -39,6 +39,7 @@ import codeOwnership from './visualizations/code-ownership';
 import distributionDials from './visualizations/distribution-dials';
 import changeFrequency from './visualizations/change-frequency/index.ts';
 import RootOffline from './components/RootOffline';
+import issueLabels from './visualizations/issue-labels';
 
 const visualizationModules = [
   dashboard,
@@ -55,6 +56,7 @@ const visualizationModules = [
   changes,
   dataExport,
   changeFrequency,
+  issueLabels,
 ];
 
 Database.checkBackendConnection().then(async (connection) => {

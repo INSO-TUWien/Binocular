@@ -36,6 +36,18 @@ export default class ServerDB {
     return Issues.getCommitsForIssue(iid);
   }
 
+  static getCommitsForIssues(issueIds) {
+    return Issues.getCommitsForIssues(issueIds);
+  }
+
+  static getMergeRequestsForIssues(issueIds) {
+    return Issues.getMergeRequestsForIssues(issueIds);
+  }
+
+  static getCommitsForMergeRequest(iid) {
+    return MergeRequests.getCommitsForMergeRequest(iid);
+  }
+
   static getMergeRequestData(mergeRequestSpan, significantSpan) {
     return MergeRequests.getMergeRequestData(mergeRequestSpan, significantSpan);
   }

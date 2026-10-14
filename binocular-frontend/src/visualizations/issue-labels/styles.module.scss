@@ -1,0 +1,89 @@
+@import 'bulma/bulma.sass';
+;
+
+.configContainer {
+  width: 100%;
+
+  form {
+    width: 100%;
+
+    #select {
+      width: 100%;
+    }
+
+  }
+}
+
+.chartContainer{
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  padding: 5px;
+  justify-content: center;
+
+  .chart{
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    display: flex;
+
+    .messageContainer{
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+.labelSelector {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    margin-bottom: 1rem;
+    color: #333;
+  }
+}
+
+.labelGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.labelItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #e9ecef;
+  }
+
+  &.selected {
+    background: #007bff;
+    color: white;
+  }
+}
+
+.labelName {
+  font-weight: 500;
+}
+
+.labelStats {
+  font-size: 0.9em;
+  color: inherit;
+  opacity: 0.8;
+}
