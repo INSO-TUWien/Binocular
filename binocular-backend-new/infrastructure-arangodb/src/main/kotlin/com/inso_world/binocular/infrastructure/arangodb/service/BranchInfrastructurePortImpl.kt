@@ -16,13 +16,14 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
-internal class BranchInfrastructurePortImpl : BranchInfrastructurePort,
-    AbstractInfrastructurePort<Branch, String>() {
-
+internal class BranchInfrastructurePortImpl :
+    AbstractInfrastructurePort<Branch, String>(),
+    BranchInfrastructurePort {
     @PostConstruct
     fun init() {
         super.dao = branchDao
     }
+
     @Autowired private lateinit var branchDao: IBranchDao
 
     @Autowired private lateinit var branchFileConnectionRepository: IBranchFileConnectionDao

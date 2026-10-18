@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.entity
 
 import com.arangodb.springframework.annotation.Document
@@ -9,7 +10,6 @@ import com.arangodb.springframework.annotation.Relations
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.MergeRequestAccountConnectionEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.MergeRequestMilestoneConnectionEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.MergeRequestNoteConnectionEntity
-import com.inso_world.binocular.model.Mention
 import org.springframework.data.annotation.Id
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -35,10 +35,8 @@ data class MergeRequestEntity(
     var state: String? = null,
     var webUrl: String? = null,
     var mentions: List<MentionEntity> = emptyList(),
-
     @Ref
     var project: ProjectEntity? = null,
-
     @Relations(
         edges = [MergeRequestAccountConnectionEntity::class],
         lazy = true,

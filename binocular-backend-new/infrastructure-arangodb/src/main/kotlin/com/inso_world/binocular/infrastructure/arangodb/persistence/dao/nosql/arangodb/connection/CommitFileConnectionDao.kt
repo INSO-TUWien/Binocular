@@ -41,7 +41,10 @@ internal class CommitFileConnectionDao
     ) : ICommitFileConnectionDao {
         @Autowired private lateinit var commitMapper: CommitMapper
 
-        override fun findFileOwnershipByCommitAndFile(commitId: String, fileId: String): List<FileOwnership> {
+        override fun findFileOwnershipByCommitAndFile(
+            commitId: String,
+            fileId: String
+        ): List<FileOwnership> {
             val rows = repository.findOwnershipByCommitAndFile(commitId, fileId)
             if (rows.isEmpty()) return emptyList()
 
@@ -50,18 +53,20 @@ internal class CommitFileConnectionDao
             rows.forEach { row ->
                 val userId = row["userId"]?.toString() ?: return@forEach
                 val hunksRaw = row["hunks"] as? List<*> ?: emptyList<Any?>()
-                val hunks = hunksRaw.mapNotNull { hunkAny ->
-                    val hunkMap = hunkAny as? Map<*, *> ?: return@mapNotNull null
-                    val originalCommit = hunkMap["originalCommit"]?.toString()
-                    val linesRaw = hunkMap["lines"] as? List<*> ?: emptyList<Any?>()
-                    val lines = linesRaw.mapNotNull { lineAny ->
-                        val lineMap = lineAny as? Map<*, *> ?: return@mapNotNull null
-                        val from = (lineMap["from"] as? Number)?.toInt() ?: return@mapNotNull null
-                        val to = (lineMap["to"] as? Number)?.toInt() ?: return@mapNotNull null
-                        OwnershipLine(from = from, to = to)
+                val hunks =
+                    hunksRaw.mapNotNull { hunkAny ->
+                        val hunkMap = hunkAny as? Map<*, *> ?: return@mapNotNull null
+                        val originalCommit = hunkMap["originalCommit"]?.toString()
+                        val linesRaw = hunkMap["lines"] as? List<*> ?: emptyList<Any?>()
+                        val lines =
+                            linesRaw.mapNotNull { lineAny ->
+                                val lineMap = lineAny as? Map<*, *> ?: return@mapNotNull null
+                                val from = (lineMap["from"] as? Number)?.toInt() ?: return@mapNotNull null
+                                val to = (lineMap["to"] as? Number)?.toInt() ?: return@mapNotNull null
+                                OwnershipLine(from = from, to = to)
+                            }
+                        OwnershipHunk(originalCommit = originalCommit, lines = lines)
                     }
-                    OwnershipHunk(originalCommit = originalCommit, lines = lines)
-                }
                 val list = byUser.getOrPut(userId) { mutableListOf() }
                 list.addAll(hunks)
             }
@@ -85,9 +90,12 @@ internal class CommitFileConnectionDao
         }
 
         /**
-        * Find all files connected to a commit with pagination support.
-        */
-        override fun findFilesByCommitPaged(commitId: String, pageable: Pageable): Page<File> {
+         * Find all files connected to a commit with pagination support.
+         */
+        override fun findFilesByCommitPaged(
+            commitId: String,
+            pageable: Pageable
+        ): Page<File> {
             val offset = pageable.offset.toInt()
             val limit = pageable.pageSize
             val total = repository.countFilesByCommit(commitId).firstOrNull() ?: 0L
@@ -105,9 +113,12 @@ internal class CommitFileConnectionDao
         }
 
         /**
-        * Find all commits connected to a file with pagination support.
-        */
-        override fun findCommitsByFilePaged(fileId: String, pageable: Pageable): Page<Commit> {
+         * Find all commits connected to a file with pagination support.
+         */
+        override fun findCommitsByFilePaged(
+            fileId: String,
+            pageable: Pageable
+        ): Page<Commit> {
             val offset = pageable.offset.toInt()
             val limit = pageable.pageSize
             val total = repository.countCommitsByFile(fileId).firstOrNull() ?: 0L
@@ -117,11 +128,12 @@ internal class CommitFileConnectionDao
         }
 
         /**
-        * Find aggregated stats for a commit
-        */
+         * Find aggregated stats for a commit
+         */
         override fun findCommitStatsByCommit(commitId: String): Stats {
-            val row = repository.findCommitStats(commitId).firstOrNull()
-                ?: return Stats(additions = 0, deletions = 0)
+            val row =
+                repository.findCommitStats(commitId).firstOrNull()
+                    ?: return Stats(additions = 0, deletions = 0)
 
             return Stats(
                 additions = (row["additions"] as? Number)?.toLong() ?: 0L,
@@ -130,14 +142,15 @@ internal class CommitFileConnectionDao
         }
 
         /**
-        * Find stats per file for a commit
-        */
+         * Find stats per file for a commit
+         */
         override fun findFileStatsByCommit(commitId: String): Map<String, Stats> {
             val rows = repository.findFileStatsByCommit(commitId)
 
             return rows.associate { row ->
-                val fileId = row["fileId"]?.toString()
-                    ?: error("Missing fileId in commit file stats row: $row")
+                val fileId =
+                    row["fileId"]?.toString()
+                        ?: error("Missing fileId in commit file stats row: $row")
 
                 val additions = (row["additions"] as? Number)?.toLong() ?: 0L
                 val deletions = (row["deletions"] as? Number)?.toLong() ?: 0L
@@ -149,8 +162,9 @@ internal class CommitFileConnectionDao
         override fun findFileActionsByCommit(commitId: String): Map<String, String?> {
             val rows = repository.findFileActionsByCommit(commitId)
             return rows.associate { row ->
-                val fileId = row["fileId"]?.toString()
-                    ?: error("Missing fileId in commit file actions row: $row")
+                val fileId =
+                    row["fileId"]?.toString()
+                        ?: error("Missing fileId in commit file actions row: $row")
                 val action = row["action"]?.toString()
                 fileId to action
             }

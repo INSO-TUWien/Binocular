@@ -3,7 +3,6 @@ package com.inso_world.binocular.web.graphql.resolver
 import com.fasterxml.jackson.databind.JsonNode
 import com.inso_world.binocular.web.graphql.base.GraphQlControllerTest
 import com.inso_world.binocular.web.graphql.model.NoteDto
-import java.time.Instant
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
 
 /**
  * Test class for verifying the Note resolver functionality.
@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 internal class NoteResolverTest : GraphQlControllerTest() {
     @Autowired
     private lateinit var noteResolver: NoteResolver
+
     @Nested
     inner class BasicFunctionality {
         @Test

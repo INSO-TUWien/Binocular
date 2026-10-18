@@ -1,15 +1,15 @@
 package com.inso_world.binocular.web.graphql.integration.realdata.visualizations
 
+import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 import com.inso_world.binocular.web.graphql.integration.realdata.base.BaseGraphQlCompatibilityIT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 
 internal class CommitsChangesVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
-
     @Test
     fun `commits query returns expected real data snapshot for first item`() {
-        val query = $$"""
+        val query =
+            $$"""
             query ($page: Int, $perPage: Int, $since: Timestamp, $until: Timestamp, $sort: Sort) {
               commits(
                 page: $page
@@ -53,15 +53,16 @@ internal class CommitsChangesVisualizationRealDataIT : BaseGraphQlCompatibilityI
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1,
-            "since" to "2024-08-08T03:00",
-            "until" to "2025-12-08T12:00:26",
-            "sort" to "ASC",
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1,
+                "since" to "2024-08-08T03:00",
+                "until" to "2025-12-08T12:00:26",
+                "sort" to "ASC",
+            )
 
         val data = client.execute(query, variables)
         val commits = data.get("commits")
@@ -90,7 +91,11 @@ internal class CommitsChangesVisualizationRealDataIT : BaseGraphQlCompatibilityI
         assertEquals("e6c685f88ddf315c7081f9b17d9dbc680437a491", parents.get(0).asText(), "parents[0]")
 
         assertIsoInstantEquals(first.get("date").asText(), "2024-08-08T14:21:21.000Z", "date")
-        assertEquals("https://github.com/INSO-World/Binocular/commit/c44daad5df789734ed8d3867c24bf5ad06152268", first.get("webUrl").asText(), "webUrl")
+        assertEquals(
+            "https://github.com/INSO-World/Binocular/commit/c44daad5df789734ed8d3867c24bf5ad06152268",
+            first.get("webUrl").asText(),
+            "webUrl"
+        )
 
         val stats = first.get("stats")
         assertEquals(75, stats.get("additions").asInt(), "stats.additions")
@@ -115,7 +120,11 @@ internal class CommitsChangesVisualizationRealDataIT : BaseGraphQlCompatibilityI
 
         val file1 = filesData.get(1)
         val file1File = file1.get("file")
-        assertEquals("binocular-frontend/src/visualizations/code-review-metrics/chart/chart.tsx", file1File.get("path").asText(), "files.data[1].file.path")
+        assertEquals(
+            "binocular-frontend/src/visualizations/code-review-metrics/chart/chart.tsx",
+            file1File.get("path").asText(),
+            "files.data[1].file.path"
+        )
         assertEquals("File", file1File.get("__typename").asText(), "files.data[1].file.__typename")
         val file1Stats = file1.get("stats")
         assertEquals(0, file1Stats.get("additions").asInt(), "files.data[1].stats.additions")
@@ -127,5 +136,4 @@ internal class CommitsChangesVisualizationRealDataIT : BaseGraphQlCompatibilityI
 
         assertEquals("PaginatedCommit", commits.get("__typename").asText(), "commits.__typename")
     }
-
 }

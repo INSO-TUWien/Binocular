@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.dao.nosql.arangodb
 
 import com.arangodb.springframework.repository.ArangoRepository
@@ -6,7 +7,6 @@ import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.core.persistence.model.Page
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.IDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.repository.TechnicalIdentifiableRepository
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import java.io.Serializable
 import java.util.stream.Stream
@@ -45,7 +45,6 @@ open class MappedArangoDbDao<D : Any, E : Any, I : Serializable>(
     protected val repository: ArangoRepository<E, I>,
     protected val mapper: EntityMapper<D, E>,
 ) : IDao<D, I> {
-
     /**
      * Converts a list of database entities to a list of domain models
      */
@@ -99,7 +98,8 @@ open class MappedArangoDbDao<D : Any, E : Any, I : Serializable>(
             val idProp = entity::class.java.getMethod("setId", String::class.java)
             val getIdProp = savedEntity::class.java.getMethod("getId")
             idProp.invoke(entity, getIdProp.invoke(savedEntity))
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
         return domain
     }
 
@@ -163,25 +163,23 @@ open class MappedArangoDbDao<D : Any, E : Any, I : Serializable>(
 
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun findByIid(iid: Any): D? {
-        val uIid = when (iid) {
-            is java.util.UUID -> iid.toKotlinUuid()
-            is kotlin.uuid.Uuid -> iid
-            is String -> kotlin.uuid.Uuid.parse(iid)
-            is com.inso_world.binocular.model.DomainId -> iid.value
-            else -> null
-        } ?: return null
+        val uIid =
+            when (iid) {
+                is java.util.UUID -> iid.toKotlinUuid()
+                is kotlin.uuid.Uuid -> iid
+                is String -> kotlin.uuid.Uuid.parse(iid)
+                is com.inso_world.binocular.model.DomainId -> iid.value
+                else -> null
+            } ?: return null
 
         val techRepo = repository as? TechnicalIdentifiableRepository<E>
         val entity = techRepo?.findByIid(uIid) ?: return null
         return mapper.toDomain(entity)
     }
 
-    override fun findByIids(iids: Collection<Any>): List<D> {
-        return iids.mapNotNull { findByIid(it) }
-    }
+    override fun findByIids(iids: Collection<Any>): List<D> = iids.mapNotNull { findByIid(it) }
 
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-    private fun java.util.UUID.toKotlinUuid(): kotlin.uuid.Uuid {
-        return kotlin.uuid.Uuid.fromLongs(this.mostSignificantBits, this.leastSignificantBits)
-    }
+    private fun java.util.UUID.toKotlinUuid(): kotlin.uuid.Uuid =
+        kotlin.uuid.Uuid.fromLongs(this.mostSignificantBits, this.leastSignificantBits)
 }

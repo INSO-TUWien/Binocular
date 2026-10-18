@@ -1,15 +1,12 @@
 package com.inso_world.binocular.cli
 
 import com.inso_world.binocular.core.delegates.logger
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.boot.WebApplicationType
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.FilterType
 import org.springframework.shell.command.annotation.CommandScan
 
 @SpringBootApplication

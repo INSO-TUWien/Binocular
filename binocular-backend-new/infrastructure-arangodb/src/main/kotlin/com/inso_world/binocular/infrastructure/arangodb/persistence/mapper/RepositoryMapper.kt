@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -61,20 +62,21 @@ internal class RepositoryMapper : EntityMapper<Repository, RepositoryEntity> {
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toEntity(domain: Repository): RepositoryEntity {
         // Find project or create a placeholder if it doesn't exist yet
-        val owner = domain.project?.let {
-            ProjectEntity(
-                id = it.id,
-                name = it.name,
-                iid = it.iid.value
+        val owner =
+            domain.project?.let {
+                ProjectEntity(
+                    id = it.id,
+                    name = it.name,
+                    iid = it.iid.value
+                )
+            } ?: if (::projectRepository.isInitialized) {
+                projectRepository.findByIid(domain.projectId.value)
+            } else {
+                null
+            } ?: ProjectEntity(
+                iid = domain.projectId.value,
+                name = "Unknown Project"
             )
-        } ?: if (::projectRepository.isInitialized) {
-            projectRepository.findByIid(domain.projectId.value)
-        } else {
-            null
-        } ?: ProjectEntity(
-            iid = domain.projectId.value,
-            name = "Unknown Project"
-        )
 
         val entity = domain.toArangoEntity(owner)
 
@@ -89,13 +91,14 @@ internal class RepositoryMapper : EntityMapper<Repository, RepositoryEntity> {
      */
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toDomain(entity: RepositoryEntity): Repository {
-        val domain = Repository(
-            localPath = entity.localPath,
-            projectId = entity.project?.let { Project.Id(it.iid) } ?: Project.Id(entity.iid),
-            iid = Repository.Id(entity.iid),
-        ).apply {
-            this.id = entity.id
-        }
+        val domain =
+            Repository(
+                localPath = entity.localPath,
+                projectId = entity.project?.let { Project.Id(it.iid) } ?: Project.Id(entity.iid),
+                iid = Repository.Id(entity.iid),
+            ).apply {
+                this.id = entity.id
+            }
 
         return domain
     }

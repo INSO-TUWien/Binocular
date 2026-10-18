@@ -1,8 +1,8 @@
 package com.inso_world.binocular.infrastructure.sql.integration.service.base
 
 import com.inso_world.binocular.core.integration.base.BaseIntegrationTest
-import com.inso_world.binocular.infrastructure.sql.SqlTestConfig
 import com.inso_world.binocular.infrastructure.sql.SqlInfrastructureDataSetup
+import com.inso_world.binocular.infrastructure.sql.SqlTestConfig
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.junit.jupiter.api.AfterEach

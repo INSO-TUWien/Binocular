@@ -20,12 +20,14 @@ class GraphQlClient(
         variables: Map<String, Any?> = emptyMap(),
         responseType: Class<T>,
     ): Mono<T> {
-        val request = mapOf(
-            "query" to query,
-            "variables" to variables,
-        )
+        val request =
+            mapOf(
+                "query" to query,
+                "variables" to variables,
+            )
 
-        return webClient.post()
+        return webClient
+            .post()
             .uri("https://api.github.com/graphql")
             .header("Authorization", "Bearer ${configLoader.loadGitHubToken()}")
             .bodyValue(request)
@@ -35,8 +37,7 @@ class GraphQlClient(
                 response.bodyToMono(String::class.java).map { body ->
                     ServiceException("GitHub API error ${response.statusCode()}: $body")
                 }
-            }
-            .bodyToMono(responseType)
+            }.bodyToMono(responseType)
             .timeout(Duration.ofSeconds(90)) // to prevent time out for answer
     }
 }

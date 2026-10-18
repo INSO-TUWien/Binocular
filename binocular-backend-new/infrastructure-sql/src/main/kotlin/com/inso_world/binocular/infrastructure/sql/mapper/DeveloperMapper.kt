@@ -6,8 +6,6 @@ import com.inso_world.binocular.infrastructure.sql.persistence.entity.DeveloperE
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.RepositoryEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.toSqlEntity
 import com.inso_world.binocular.model.Developer
-import com.inso_world.binocular.model.Repository
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.util.ReflectionUtils.setField
 import org.springframework.stereotype.Component
 
@@ -19,18 +17,17 @@ import org.springframework.stereotype.Component
  */
 @Component
 internal class DeveloperMapper : EntityMapper<Developer, DeveloperEntity> {
-
     companion object {
         private val logger by logger()
     }
 
-    override fun toEntity(domain: Developer): DeveloperEntity {
+    override fun toEntity(domain: Developer): DeveloperEntity =
         throw UnsupportedOperationException("Mapping to entity now requires explicit repository entity.")
-    }
 
-    fun toEntity(domain: Developer, repository: RepositoryEntity): DeveloperEntity {
-        return domain.toSqlEntity(repository)
-    }
+    fun toEntity(
+        domain: Developer,
+        repository: RepositoryEntity
+    ): DeveloperEntity = domain.toSqlEntity(repository)
 
     override fun toDomain(entity: DeveloperEntity): Developer {
         val domain = entity.toDomain()

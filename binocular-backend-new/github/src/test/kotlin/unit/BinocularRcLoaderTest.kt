@@ -13,27 +13,28 @@ import kotlin.test.assertEquals
  * Currently, the loader can only parse correctly formatted (aka from the old backend setup) files.
  */
 class BinocularRcLoaderTest {
-
     @Test
-    fun `should load GitHub token from binocularrc`(@TempDir tempDir: File) {
+    fun `should load GitHub token from binocularrc`(
+        @TempDir tempDir: File
+    ) {
         // create temp .binocularrc for testing
         val rcFile = File(tempDir, ".binocularrc")
         rcFile.writeText(
             """
-        {
-            "gitlab": {"url": "", "project": "", "token": ""},
-            "github": {
-                "auth": {
-                    "type": "token",
-                    "username": "user",
-                    "password": "",
-                    "token": "TEST_TOKEN_123"
-                }
-            },
-            "arango": {"host": "127.0.0.1", "port": 8529, "user": "root", "password": ""},
-            "indexers": {"its": "github", "ci": "github"}
-        }
-    """.trimIndent()
+            {
+                "gitlab": {"url": "", "project": "", "token": ""},
+                "github": {
+                    "auth": {
+                        "type": "token",
+                        "username": "user",
+                        "password": "",
+                        "token": "TEST_TOKEN_123"
+                    }
+                },
+                "arango": {"host": "127.0.0.1", "port": 8529, "user": "root", "password": ""},
+                "indexers": {"its": "github", "ci": "github"}
+            }
+            """.trimIndent()
         )
 
         // load token
@@ -45,66 +46,69 @@ class BinocularRcLoaderTest {
     }
 
     @Test
-    fun `should throw exception when missing binocularrc` (@TempDir tempDir: File) {
+    fun `should throw exception when missing binocularrc`(
+        @TempDir tempDir: File
+    ) {
         val rcFile = File(tempDir, ".binocularrc")
 
         // load token
         val loader = BinocularRcLoader(rcFile.absolutePath)
-        assertThrows<FileNotFoundException>{ loader.loadGitHubToken() }
+        assertThrows<FileNotFoundException> { loader.loadGitHubToken() }
     }
 
     @Test
-    fun `should throw exception when blank token` (@TempDir tempDir: File) {
+    fun `should throw exception when blank token`(
+        @TempDir tempDir: File
+    ) {
         val rcFile = File(tempDir, ".binocularrc")
         rcFile.writeText(
             """
-        {
-            "gitlab": {"url": "", "project": "", "token": ""},
-            "github": {
-                "auth": {
-                    "type": "token",
-                    "username": "user",
-                    "password": "",
-                    "token": ""
-                }
-            },
-            "arango": {"host": "127.0.0.1", "port": 8529, "user": "root", "password": ""},
-            "indexers": {"its": "github", "ci": "github"}
-        }
-    """.trimIndent()
+            {
+                "gitlab": {"url": "", "project": "", "token": ""},
+                "github": {
+                    "auth": {
+                        "type": "token",
+                        "username": "user",
+                        "password": "",
+                        "token": ""
+                    }
+                },
+                "arango": {"host": "127.0.0.1", "port": 8529, "user": "root", "password": ""},
+                "indexers": {"its": "github", "ci": "github"}
+            }
+            """.trimIndent()
         )
 
         // load token
         val loader = BinocularRcLoader(rcFile.absolutePath)
-        assertThrows<IllegalStateException>{ loader.loadGitHubToken() }
+        assertThrows<IllegalStateException> { loader.loadGitHubToken() }
     }
 
     @Test
-    fun `should throw exception when binocularrc has invalid format` (@TempDir tempDir: File) {
+    fun `should throw exception when binocularrc has invalid format`(
+        @TempDir tempDir: File
+    ) {
         val rcFile = File(tempDir, ".binocularrc")
         rcFile.writeText(
             """
-        {
-            "gitab": {"url": "", "project": "", "token": ""},
-            "gitub": {
-                "test": {
-                    "type": "token",
-                    "username": "user",
-                    "password": "",
-                    "test3": ""
-                }
-            },
-            "test2": {"host": "127.0.0.1", "port": 8529, "user": "root", "password": ""},
-            "indexers": {"its": "github", "ci": "github"}
-        }
-    """.trimIndent()
+            {
+                "gitab": {"url": "", "project": "", "token": ""},
+                "gitub": {
+                    "test": {
+                        "type": "token",
+                        "username": "user",
+                        "password": "",
+                        "test3": ""
+                    }
+                },
+                "test2": {"host": "127.0.0.1", "port": 8529, "user": "root", "password": ""},
+                "indexers": {"its": "github", "ci": "github"}
+            }
+            """.trimIndent()
         )
 
         // load token
         val loader = BinocularRcLoader(rcFile.absolutePath)
-        assertThrows<IllegalArgumentException>{ loader.loadGitHubToken() }
+        assertThrows<IllegalArgumentException> { loader.loadGitHubToken() }
     }
 }
-
-
-

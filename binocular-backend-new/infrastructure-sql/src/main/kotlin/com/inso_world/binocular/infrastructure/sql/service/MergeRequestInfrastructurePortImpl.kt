@@ -31,9 +31,7 @@ internal class MergeRequestInfrastructurePortImpl(
     private val noteDao: NoteDao,
     private val mrMapper: MergeRequestMapper,
     private val noteMapper: NoteMapper,
-) :
-    MergeRequestInfrastructurePort {
-
+) : MergeRequestInfrastructurePort {
     private fun resolveMergeRequestEntity(mergeRequestId: String): MergeRequestEntity? {
         val longId = mergeRequestId.toLongOrNull()
         if (longId != null) {
@@ -65,11 +63,18 @@ internal class MergeRequestInfrastructurePortImpl(
 
     override fun findByIid(iid: MergeRequest.Id): @Valid MergeRequest? = mrDao.findByIid(iid)?.let { mrMapper.toDomain(it) }
 
-    override fun findByIids(iids: Collection<MergeRequest.Id>): List<@Valid MergeRequest> = mrDao.findByIids(iids).map { mrMapper.toDomain(it) }
+    override fun findByIids(iids: Collection<MergeRequest.Id>): List<@Valid MergeRequest> =
+        mrDao.findByIids(iids).map { mrMapper.toDomain(it) }
 
     override fun create(value: MergeRequest): MergeRequest = mrMapper.toDomain(mrDao.create(mrMapper.toEntity(value)))
 
-    override fun saveAll(values: Collection<MergeRequest>): Iterable<MergeRequest> = mrDao.saveAll(values.map { mrMapper.toEntity(it) }).map { mrMapper.toDomain(it) }
+    override fun saveAll(values: Collection<MergeRequest>): Iterable<MergeRequest> =
+        mrDao
+            .saveAll(
+                values.map {
+                    mrMapper.toEntity(it)
+                }
+            ).map { mrMapper.toDomain(it) }
 
     override fun findAll(): Iterable<MergeRequest> = mrDao.findAll().map { mrMapper.toDomain(it) }
 
@@ -86,9 +91,11 @@ internal class MergeRequestInfrastructurePortImpl(
      * [com.inso_world.binocular.infrastructure.sql.service.IssueInfrastructurePortImpl.findAll]
      * (date filtering exists only in ArangoDB DAOs).
      */
-    override fun findAll(pageable: Pageable, since: Long?, until: Long?): Page<MergeRequest> {
-        return findAll(pageable)
-    }
+    override fun findAll(
+        pageable: Pageable,
+        since: Long?,
+        until: Long?
+    ): Page<MergeRequest> = findAll(pageable)
 
     override fun update(value: MergeRequest): MergeRequest = mrMapper.toDomain(mrDao.update(mrMapper.toEntity(value)))
 

@@ -6,12 +6,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class GraphQlUserMapper {
-    fun toDto(user: User): UserDto {
-        return UserDto(
+    fun toDto(user: User): UserDto =
+        UserDto(
             id = user.id,
             name = user.name,
             email = user.email,
             gitSignature = user.gitSignature
         )
-    }
 }

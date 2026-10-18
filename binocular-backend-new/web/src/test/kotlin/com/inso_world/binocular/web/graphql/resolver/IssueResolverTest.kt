@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 internal class IssueResolverTest : GraphQlControllerTest() {
     @Autowired
     private lateinit var issueResolver: IssueResolver
+
     @Nested
     inner class BasicFunctionality {
         @Test
@@ -151,7 +152,12 @@ internal class IssueResolverTest : GraphQlControllerTest() {
             val commit = commits.get(0)
             assertAll(
                 { assertEquals("1", commit.get("id").asText(), "Commit ID mismatch") },
-                { assertTrue(commit.get("sha").asText().startsWith("abc1230000000000000000000000000000000000"), "Commit SHA should start with short hash prefix") },
+                {
+                    assertTrue(
+                        commit.get("sha").asText().startsWith("abc1230000000000000000000000000000000000"),
+                        "Commit SHA should start with short hash prefix"
+                    )
+                },
                 { assertEquals("First commit", commit.get("message").asText(), "Commit message mismatch") },
             )
         }

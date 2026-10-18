@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.entity
 
 import com.arangodb.springframework.annotation.Document
@@ -13,7 +14,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.CommitUserConnectionEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.IssueCommitConnectionEntity
 import com.inso_world.binocular.model.Commit
-import com.inso_world.binocular.model.Developer
 import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.Signature
 import org.springframework.data.annotation.Id
@@ -137,13 +137,14 @@ data class CommitEntity(
         ).apply {
             this.id = this@CommitEntity.id
             this.webUrl = this@CommitEntity.webUrl
-            this.stats = this@CommitEntity.stats?.let {
-                com.inso_world.binocular.model.Stats(
-                    additions = it.additions,
-                    deletions = it.deletions,
-                    kind = it.kind ?: com.inso_world.binocular.model.Stats.StatsKind.MODIFICATION
-                )
-            }
+            this.stats =
+                this@CommitEntity.stats?.let {
+                    com.inso_world.binocular.model.Stats(
+                        additions = it.additions,
+                        deletions = it.deletions,
+                        kind = it.kind ?: com.inso_world.binocular.model.Stats.StatsKind.MODIFICATION
+                    )
+                }
         }
     }
 }
@@ -173,13 +174,14 @@ internal fun Commit.toArangoEntity(
         repository = repository,
         author = author,
         committer = committer,
-        stats = this.stats?.let {
-            StatsEntity(
-                additions = it.additions.toLong(),
-                deletions = it.deletions.toLong(),
-                kind = it.kind
-            )
-        }
+        stats =
+            this.stats?.let {
+                StatsEntity(
+                    additions = it.additions.toLong(),
+                    deletions = it.deletions.toLong(),
+                    kind = it.kind
+                )
+            }
     ).apply {
         this.id = this@toArangoEntity.id?.trim()
     }

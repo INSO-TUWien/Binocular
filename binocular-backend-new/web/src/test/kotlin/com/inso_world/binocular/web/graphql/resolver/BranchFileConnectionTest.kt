@@ -86,7 +86,14 @@ internal class BranchFileConnectionTest : GraphQlControllerTest() {
             assertEquals(2, files.size(), "Should have 2 files")
 
             // Create a list of file IDs from the result
-            val fileIds = (0 until files.size()).map { files.get(it).get("file").get("id").asText() }
+            val fileIds =
+                (0 until files.size()).map {
+                    files
+                        .get(it)
+                        .get("file")
+                        .get("id")
+                        .asText()
+                }
 
             // Verify that the file IDs match the expected file IDs
             assertAll(

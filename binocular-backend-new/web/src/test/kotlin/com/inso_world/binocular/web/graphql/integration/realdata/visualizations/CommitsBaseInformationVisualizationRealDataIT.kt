@@ -1,15 +1,15 @@
 package com.inso_world.binocular.web.graphql.integration.realdata.visualizations
 
+import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 import com.inso_world.binocular.web.graphql.integration.realdata.base.BaseGraphQlCompatibilityIT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 
 internal class CommitsBaseInformationVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
-
     @Test
     fun `commits base info returns earliest date when ascending by default`() {
-        val query = """
+        val query =
+            """
             {
               commits(page: 1, perPage: 1) {
                 data {
@@ -19,7 +19,7 @@ internal class CommitsBaseInformationVisualizationRealDataIT : BaseGraphQlCompat
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val root = client.execute(query)
         val commits = root.get("commits")
@@ -35,7 +35,8 @@ internal class CommitsBaseInformationVisualizationRealDataIT : BaseGraphQlCompat
 
     @Test
     fun `commits base info returns latest date when sorted descending`() {
-        val query = """
+        val query =
+            """
             {
               commits(page: 1, perPage: 1, sort: "desc") {
                 data {
@@ -45,7 +46,7 @@ internal class CommitsBaseInformationVisualizationRealDataIT : BaseGraphQlCompat
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val root = client.execute(query)
         val commits = root.get("commits")
@@ -54,9 +55,8 @@ internal class CommitsBaseInformationVisualizationRealDataIT : BaseGraphQlCompat
         assertEquals(1, data.size(), "commits.data should contain exactly one item when perPage=1")
 
         val first = data.get(0)
-        assertIsoInstantEquals( first.get("date").asText(), "2025-11-14T12:09:10.000Z", "first commit date (descending)")
+        assertIsoInstantEquals(first.get("date").asText(), "2025-11-14T12:09:10.000Z", "first commit date (descending)")
         assertEquals("Commit", first.get("__typename").asText(), "first item __typename")
         assertEquals("PaginatedCommit", commits.get("__typename").asText(), "container __typename")
     }
-
 }

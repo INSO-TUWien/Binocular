@@ -5,7 +5,6 @@ import com.arangodb.springframework.annotation.Field
 import com.arangodb.springframework.annotation.PersistentIndexed
 import com.arangodb.springframework.annotation.Relations
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.CommitBuildConnectionEntity
-import com.inso_world.binocular.model.Job
 import org.springframework.data.annotation.Id
 import java.util.*
 import kotlin.uuid.ExperimentalUuidApi

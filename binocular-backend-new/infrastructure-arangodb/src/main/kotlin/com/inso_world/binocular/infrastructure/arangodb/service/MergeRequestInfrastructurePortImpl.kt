@@ -23,13 +23,14 @@ import org.springframework.stereotype.Service
  * This service is database-agnostic and works with both ArangoDB and SQL implementations.
  */
 @Service
-internal class MergeRequestInfrastructurePortImpl : MergeRequestInfrastructurePort,
-    AbstractInfrastructurePort<MergeRequest, String>() {
-
+internal class MergeRequestInfrastructurePortImpl :
+    AbstractInfrastructurePort<MergeRequest, String>(),
+    MergeRequestInfrastructurePort {
     @PostConstruct
     fun init() {
         super.dao = mergeRequestDao
     }
+
     @Autowired private lateinit var mergeRequestDao: IMergeRequestDao
 
     @Autowired private lateinit var mergeRequestAccountConnectionRepository: IMergeRequestAccountConnectionDao

@@ -1,16 +1,16 @@
 package com.inso_world.binocular.web.graphql.integration.realdata.visualizations
 
+import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 import com.inso_world.binocular.web.graphql.integration.realdata.base.BaseGraphQlCompatibilityIT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 
 internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
-
     @Test
     fun `branches sorted ascending returns expected snapshot for first items`() {
-        val query = """
+        val query =
+            """
             {
               branches(sort: "ASC") {
                 data {
@@ -23,7 +23,7 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val root = client.execute(query)
         val branches = root.get("branches")
@@ -60,7 +60,8 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
 
     @Test
     fun `full commits ascending returns expected earliest commit snapshot including files`() {
-        val query = $$"""
+        val query =
+            $$"""
             query (
               $page: Int,
               $perPage: Int,
@@ -102,15 +103,16 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1000,
-            "since" to "1970-01-01T00:00:00.000Z",
-            "until" to "2025-12-17T21:50:38.008Z",
-            "sort" to "ASC",
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1000,
+                "since" to "1970-01-01T00:00:00.000Z",
+                "until" to "2025-12-17T21:50:38.008Z",
+                "sort" to "ASC",
+            )
 
         val root = client.execute(query, variables)
         val commits = root.get("commits")
@@ -125,7 +127,11 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
         val first = data.get(0)
         assertEquals("945935697466022f2ddf7b1ea4f8cf9587b12a18", first.get("sha").asText(), "commit.sha")
         assertEquals("9459356", first.get("shortSha").asText(), "commit.shortSha")
-        assertEquals("Initial commit\n\nBasic setup for:\n * basic npm skeleton\n * gitignore\n * linters (jscs, jshint)\n * nvm\n\nIssue: #1\n", first.get("message").asText(), "commit.message")
+        assertEquals(
+            "Initial commit\n\nBasic setup for:\n * basic npm skeleton\n * gitignore\n * linters (jscs, jshint)\n * nvm\n\nIssue: #1\n",
+            first.get("message").asText(),
+            "commit.message"
+        )
         assertEquals("Initial commit", first.get("messageHeader").asText(), "commit.messageHeader")
 
         val user = first.get("user")
@@ -136,7 +142,11 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
         assertEquals("main", first.get("branch").asText(), "commit.branch")
         assertEquals(0, first.get("parents").size(), "commit.parents should be empty for initial commit")
         assertIsoInstantEquals(first.get("date").asText(), "2016-11-16T13:22:07.000Z", "commit.date")
-        assertEquals("https://github.com/INSO-World/Binocular/commit/945935697466022f2ddf7b1ea4f8cf9587b12a18", first.get("webUrl").asText(), "commit.webUrl")
+        assertEquals(
+            "https://github.com/INSO-World/Binocular/commit/945935697466022f2ddf7b1ea4f8cf9587b12a18",
+            first.get("webUrl").asText(),
+            "commit.webUrl"
+        )
 
         val stats = first.get("stats")
         assertEquals(197, stats.get("additions").asInt(), "commit.stats.additions")
@@ -148,21 +158,23 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
         val fdata = files.get("data")
         assertEquals(7, fdata.size(), "commit.files.data size should be 7 for snapshot")
 
-        val filesByPath = fdata.associateBy {
-            it.get("file").get("path").asText()
-        }
+        val filesByPath =
+            fdata.associateBy {
+                it.get("file").get("path").asText()
+            }
 
         assertEquals(7, filesByPath.size, "commit.files.data size")
 
-        val expectedPaths = setOf(
-            ".nvmrc",
-            "pupil.js",
-            "package.json",
-            ".jshintrc",
-            ".editorconfig",
-            ".gitignore",
-            ".jscsrc",
-        )
+        val expectedPaths =
+            setOf(
+                ".nvmrc",
+                "pupil.js",
+                "package.json",
+                ".jshintrc",
+                ".editorconfig",
+                ".gitignore",
+                ".jscsrc",
+            )
 
         assertEquals(expectedPaths, filesByPath.keys, "commit.files paths")
 
@@ -171,8 +183,9 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
             add: Int,
             del: Int,
         ) {
-            val item = filesByPath[path]
-                ?: error("Missing file in commit snapshot: $path")
+            val item =
+                filesByPath[path]
+                    ?: error("Missing file in commit snapshot: $path")
 
             val file = item.get("file")
             assertEquals("File", file.get("__typename").asText(), "file.__typename")
@@ -199,7 +212,8 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
 
     @Test
     fun `branch by name returns files including newly added tests`() {
-        val query = """
+        val query =
+            """
             {
               branch(branchName: "feature/363_add_tests_wip") {
                 files {
@@ -212,7 +226,7 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val root = client.execute(query)
         val branch = root.get("branch")
@@ -225,13 +239,15 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
         assertTrue(data.size() >= 2, "branch.files.data should contain at least two items for snapshot checks")
 
         // order should not matter
-        val filesByPath = data.associateBy {
-            it.get("file").get("path").asText()
-        }
+        val filesByPath =
+            data.associateBy {
+                it.get("file").get("path").asText()
+            }
 
         fun assertFile(path: String) {
-            val item = filesByPath[path]
-                ?: error("Missing expected file in branch snapshot: $path")
+            val item =
+                filesByPath[path]
+                    ?: error("Missing expected file in branch snapshot: $path")
 
             val file = item.get("file")
             assertEquals("File", file.get("__typename").asText(), "file.__typename for $path")
@@ -249,7 +265,8 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
 
     @Test
     fun `commit ownership returns expected snapshot for known sha`() {
-        val query = """
+        val query =
+            """
             query {
               commit(sha: "ec1444a4e2f37a0bdffca6c67d0bb9c8d696704d") {
                 files {
@@ -271,15 +288,16 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val root = client.execute(query)
         val commit = root.get("commit")
         val files = commit.get("files").get("data")
 
         val filesByPath = files.associateBy { it.get("file").get("path").asText() }
-        val contributing = filesByPath["docs/CONTRIBUTING.md"]
-            ?: error("Missing docs/CONTRIBUTING.md in commit files")
+        val contributing =
+            filesByPath["docs/CONTRIBUTING.md"]
+                ?: error("Missing docs/CONTRIBUTING.md in commit files")
 
         val ownership = contributing.get("ownership")
         assertTrue(ownership.isArray(), "ownership field should be an array for docs/CONTRIBUTING.md")
@@ -300,10 +318,10 @@ internal class OwnerShipVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
             }
         }
 
-        val gqlFile = filesByPath["lib/endpoints/graphQl.js"]
-            ?: error("Missing lib/endpoints/graphQl.js in commit files")
+        val gqlFile =
+            filesByPath["lib/endpoints/graphQl.js"]
+                ?: error("Missing lib/endpoints/graphQl.js in commit files")
         val gqlOwnership = gqlFile.get("ownership")
         assertTrue(gqlOwnership.isArray(), "ownership field should be an array for lib/endpoints/graphQl.js")
     }
-
 }

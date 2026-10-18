@@ -1,6 +1,5 @@
 package com.inso_world.binocular.core.integration.base
 
-import com.inso_world.binocular.domain.data.MockTestDataProvider
 import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.model.Branch
 import com.inso_world.binocular.model.Build
@@ -36,62 +35,80 @@ object TestDataProvider {
     val project = Project(name = "proj-pg-0")
     val repository = Repository(localPath = "repo-pg-0", projectId = project.iid).apply { this.project = project }
 
-    val developer1 = Developer(name = "Dev One", email = "dev1@test.com", repositoryId = repository.iid).apply {
-        this.id = "1"
-    }
-    val developer2 = Developer(name = "Dev Two", email = "dev2@test.com", repositoryId = repository.iid).apply {
-        this.id = "2"
-    }
+    val developer1 =
+        Developer(name = "Dev One", email = "dev1@test.com", repositoryId = repository.iid).apply {
+            this.id = "1"
+        }
+    val developer2 =
+        Developer(name = "Dev Two", email = "dev2@test.com", repositoryId = repository.iid).apply {
+            this.id = "2"
+        }
     val testDevelopers = listOf(developer1, developer2)
 
-    val mainBranch = Branch(
-        name = "main",
-        fullName = "refs/heads/main",
-        headSha = "abc1230000000000000000000000000000000000",
-        repositoryId = repository.iid,
-        category = com.inso_world.binocular.model.vcs.ReferenceCategory.LOCAL_BRANCH
-    ).apply {
-        active = true
-        tracksFileRenames = true
-        this.id = "1"
-    }
-    val newFeatureBranch = Branch(
-        name = "feature/new-feature",
-        fullName = "refs/heads/feature/new-feature",
-        headSha = "def4560000000000000000000000000000000000",
-        repositoryId = repository.iid,
-        category = com.inso_world.binocular.model.vcs.ReferenceCategory.LOCAL_BRANCH
-    ).apply {
-        active = true
-        tracksFileRenames = false
-        this.id = "2"
-    }
+    val mainBranch =
+        Branch(
+            name = "main",
+            fullName = "refs/heads/main",
+            headSha = "abc1230000000000000000000000000000000000",
+            repositoryId = repository.iid,
+            category = com.inso_world.binocular.model.vcs.ReferenceCategory.LOCAL_BRANCH
+        ).apply {
+            active = true
+            tracksFileRenames = true
+            this.id = "1"
+        }
+    val newFeatureBranch =
+        Branch(
+            name = "feature/new-feature",
+            fullName = "refs/heads/feature/new-feature",
+            headSha = "def4560000000000000000000000000000000000",
+            repositoryId = repository.iid,
+            category = com.inso_world.binocular.model.vcs.ReferenceCategory.LOCAL_BRANCH
+        ).apply {
+            active = true
+            tracksFileRenames = false
+            this.id = "2"
+        }
     val testBranches = listOf(mainBranch, newFeatureBranch)
 
-    val commit1 = Commit(
-        sha = "abc1230000000000000000000000000000000000",
-        authorSignature = com.inso_world.binocular.model.Signature(developerId = developer1.iid, timestamp = LocalDateTime.now()),
-        committerSignature = com.inso_world.binocular.model.Signature(developerId = developer1.iid, timestamp = LocalDateTime.now()),
-        message = "First commit",
-        repositoryId = repository.iid
-    ).apply {
-        this.id = "1"
-        this.webUrl = "https://example.com/commit/abc1230000000000000000000000000000000000"
-        this.branch = "main"
-        this.stats = com.inso_world.binocular.model.Stats(10, 5)
-    }
-    val commit2 = Commit(
-        sha = "def4560000000000000000000000000000000000",
-        authorSignature = com.inso_world.binocular.model.Signature(developerId = developer2.iid, timestamp = LocalDateTime.now()),
-        committerSignature = com.inso_world.binocular.model.Signature(developerId = developer2.iid, timestamp = LocalDateTime.now()),
-        message = "Second commit",
-        repositoryId = repository.iid
-    ).apply {
-        this.id = "2"
-        this.webUrl = "https://example.com/commit/def4560000000000000000000000000000000000"
-        this.branch = "main"
-        this.stats = com.inso_world.binocular.model.Stats(7, 3)
-    }
+    val commit1 =
+        Commit(
+            sha = "abc1230000000000000000000000000000000000",
+            authorSignature =
+                com.inso_world.binocular.model
+                    .Signature(developerId = developer1.iid, timestamp = LocalDateTime.now()),
+            committerSignature =
+                com.inso_world.binocular.model
+                    .Signature(developerId = developer1.iid, timestamp = LocalDateTime.now()),
+            message = "First commit",
+            repositoryId = repository.iid
+        ).apply {
+            this.id = "1"
+            this.webUrl = "https://example.com/commit/abc1230000000000000000000000000000000000"
+            this.branch = "main"
+            this.stats =
+                com.inso_world.binocular.model
+                    .Stats(10, 5)
+        }
+    val commit2 =
+        Commit(
+            sha = "def4560000000000000000000000000000000000",
+            authorSignature =
+                com.inso_world.binocular.model
+                    .Signature(developerId = developer2.iid, timestamp = LocalDateTime.now()),
+            committerSignature =
+                com.inso_world.binocular.model
+                    .Signature(developerId = developer2.iid, timestamp = LocalDateTime.now()),
+            message = "Second commit",
+            repositoryId = repository.iid
+        ).apply {
+            this.id = "2"
+            this.webUrl = "https://example.com/commit/def4560000000000000000000000000000000000"
+            this.branch = "main"
+            this.stats =
+                com.inso_world.binocular.model
+                    .Stats(7, 3)
+        }
     val testCommits = listOf(commit1, commit2)
 
     val testAccounts =
@@ -262,13 +279,14 @@ object TestDataProvider {
                 labels = listOf("feature", "security"),
                 state = "open",
                 webUrl = "https://example.com/merge_requests/201",
-                mentions = listOf(
-                    Mention(
-                        "abc123",
-                        LocalDateTime.now(),
-                        false,
+                mentions =
+                    listOf(
+                        Mention(
+                            "abc123",
+                            LocalDateTime.now(),
+                            false,
+                        ),
                     ),
-                ),
             ),
             MergeRequest(
                 project = project.iid,
@@ -282,13 +300,14 @@ object TestDataProvider {
                 labels = listOf("bug", "ui"),
                 state = "merged",
                 webUrl = "https://example.com/merge_requests/202",
-                mentions = listOf(
-                    Mention(
-                        "def456",
-                        LocalDateTime.now(),
-                        true,
+                mentions =
+                    listOf(
+                        Mention(
+                            "def456",
+                            LocalDateTime.now(),
+                            true,
+                        ),
                     ),
-                ),
             ),
         )
 

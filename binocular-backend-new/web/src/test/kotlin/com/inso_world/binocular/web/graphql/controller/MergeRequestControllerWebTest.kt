@@ -70,7 +70,9 @@ internal class MergeRequestControllerWebTest : BaseIntegrationTest() {
                         assertEquals(
                             expectedMergeRequest.platformIid,
                             actualMergeRequest.get("iid").asInt(),
-                            "MergeRequest IID mismatch: expected ${expectedMergeRequest.platformIid}, got ${actualMergeRequest.get("iid").asInt()}",
+                            "MergeRequest IID mismatch: expected ${expectedMergeRequest.platformIid}, got ${actualMergeRequest.get(
+                                "iid"
+                            ).asInt()}",
                         )
                     },
                     {
@@ -246,7 +248,9 @@ internal class MergeRequestControllerWebTest : BaseIntegrationTest() {
                     assertEquals(
                         expectedMergeRequest.platformIid,
                         actualMergeRequest.get("iid").asInt(),
-                        "MergeRequest IID mismatch: expected ${expectedMergeRequest.platformIid}, got ${actualMergeRequest.get("iid").asInt()}",
+                        "MergeRequest IID mismatch: expected ${expectedMergeRequest.platformIid}, got ${actualMergeRequest.get(
+                            "iid"
+                        ).asInt()}",
                     )
                 },
                 {
@@ -378,7 +382,9 @@ internal class MergeRequestControllerWebTest : BaseIntegrationTest() {
                     assertEquals(
                         expectedMergeRequest.platformIid,
                         actualMergeRequest.get("iid").asInt(),
-                        "MergeRequest IID mismatch: expected ${expectedMergeRequest.platformIid}, got ${actualMergeRequest.get("iid").asInt()}",
+                        "MergeRequest IID mismatch: expected ${expectedMergeRequest.platformIid}, got ${actualMergeRequest.get(
+                            "iid"
+                        ).asInt()}",
                     )
                 },
                 {

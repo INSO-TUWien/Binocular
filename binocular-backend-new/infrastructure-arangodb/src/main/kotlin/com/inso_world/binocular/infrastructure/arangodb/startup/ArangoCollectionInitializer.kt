@@ -78,7 +78,10 @@ class ArangoCollectionInitializer(
         ensureEdgeCollection(dbName, "notes-accounts")
     }
 
-    private fun ensureDocumentCollection(dbName: String, name: String) {
+    private fun ensureDocumentCollection(
+        dbName: String,
+        name: String
+    ) {
         try {
             val arango = arangodbAppConfig.arango().build()
             val db = arango.db(dbName)
@@ -94,7 +97,10 @@ class ArangoCollectionInitializer(
         }
     }
 
-    private fun ensureEdgeCollection(dbName: String, name: String) {
+    private fun ensureEdgeCollection(
+        dbName: String,
+        name: String
+    ) {
         try {
             val arango = arangodbAppConfig.arango().build()
             val db = arango.db(dbName)

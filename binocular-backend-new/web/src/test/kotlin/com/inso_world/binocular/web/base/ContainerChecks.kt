@@ -16,4 +16,3 @@ internal class ContainerChecks : AbstractWebIntegrationTest() {
         assertTrue(ArangodbTestConfig.adbContainer.isRunning)
     }
 }
-

@@ -3,7 +3,6 @@ package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.StatsEntity
 import com.inso_world.binocular.model.Stats
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 /**
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Component
  */
 @Component
 internal class StatsMapper : EntityMapper<Stats, StatsEntity> {
-
     /**
      * Converts a Stats value object to StatsEntity.
      *

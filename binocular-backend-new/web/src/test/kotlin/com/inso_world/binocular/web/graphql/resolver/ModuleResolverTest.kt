@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 internal class ModuleResolverTest : GraphQlControllerTest() {
     @Autowired
     private lateinit var moduleResolver: ModuleResolver
+
     @Nested
     inner class BasicFunctionality {
         @Test

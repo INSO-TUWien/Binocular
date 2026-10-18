@@ -9,7 +9,6 @@ import com.inso_world.binocular.core.service.ProjectInfrastructurePort
 import com.inso_world.binocular.core.service.RepositoryInfrastructurePort
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertTimeout
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -98,8 +97,7 @@ internal class IndexCommandsTest : PerformanceTest() {
             `test commit idx, without validation`(branch, headSha, expectedCommits)
         } catch (e: Exception) {
         }
-        assertTimeout(Duration.ofMillis(600))
-        { `test commit idx, without validation`(branch, headSha, expectedCommits) }
+        assertTimeout(Duration.ofMillis(600)) { `test commit idx, without validation`(branch, headSha, expectedCommits) }
 
         assertThat(projectPort.findAll()).hasSize(1)
         assertThat(

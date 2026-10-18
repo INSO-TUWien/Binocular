@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.repository
 
 import com.arangodb.springframework.annotation.Query
@@ -9,7 +10,9 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Repository
-interface FileRepository : ArangoRepository<FileEntity, String>, TechnicalIdentifiableRepository<FileEntity> {
+interface FileRepository :
+    ArangoRepository<FileEntity, String>,
+    TechnicalIdentifiableRepository<FileEntity> {
     @OptIn(ExperimentalUuidApi::class)
     override fun findByIid(iid: Uuid): FileEntity?
 
@@ -22,5 +25,4 @@ interface FileRepository : ArangoRepository<FileEntity, String>, TechnicalIdenti
         """
     )
     fun findByPath(path: String): FileEntity?
-
 }

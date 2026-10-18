@@ -14,19 +14,19 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
 internal class RepositoryMapperTest : BaseMapperTest() {
-
     @Nested
     inner class ToEntity {
         @Test
         fun `toEntity maps domain object to entity`() {
             val project = Project(name = "test-project")
-            val domain = Repository(
-                localPath = "/tmp/repo",
-                projectId = project.iid
-            ).apply {
-                id = "r-10"
-                this.project = project
-            }
+            val domain =
+                Repository(
+                    localPath = "/tmp/repo",
+                    projectId = project.iid
+                ).apply {
+                    id = "r-10"
+                    this.project = project
+                }
 
             val entity = repositoryMapper.toEntity(domain)
 
@@ -44,17 +44,19 @@ internal class RepositoryMapperTest : BaseMapperTest() {
         @Test
         fun `toDomain maps entity to domain object`() {
             val uuid = Uuid.random()
-            val projectEntity = ProjectEntity(
-                name = "test-project",
-                iid = Uuid.random()
-            )
-            val entity = RepositoryEntity(
-                localPath = "/tmp/repo",
-                project = projectEntity,
-                iid = uuid
-            ).apply {
-                id = "r-10"
-            }
+            val projectEntity =
+                ProjectEntity(
+                    name = "test-project",
+                    iid = Uuid.random()
+                )
+            val entity =
+                RepositoryEntity(
+                    localPath = "/tmp/repo",
+                    project = projectEntity,
+                    iid = uuid
+                ).apply {
+                    id = "r-10"
+                }
 
             val domain = repositoryMapper.toDomain(entity)
 

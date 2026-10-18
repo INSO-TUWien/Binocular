@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class GraphQlBranchMapper {
-    fun toDto(branch: Branch): BranchDto {
-        return BranchDto(
+    fun toDto(branch: Branch): BranchDto =
+        BranchDto(
             id = branch.id,
             name = branch.name,
             branch = branch.name,
@@ -15,5 +15,4 @@ class GraphQlBranchMapper {
             tracksFileRenames = branch.tracksFileRenames,
             latestCommit = branch.latestCommit
         )
-    }
 }

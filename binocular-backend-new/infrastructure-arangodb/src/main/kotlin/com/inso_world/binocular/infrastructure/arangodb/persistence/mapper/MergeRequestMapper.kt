@@ -1,13 +1,11 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
-import com.inso_world.binocular.core.delegates.logger
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.MergeRequestEntity
-import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.ProjectEntity
 import com.inso_world.binocular.model.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -33,7 +31,6 @@ import kotlin.uuid.Uuid
 internal class MergeRequestMapper(
     @org.springframework.beans.factory.annotation.Autowired private val mentionMapper: MentionMapper,
 ) : EntityMapper<MergeRequest, MergeRequestEntity> {
-
     override fun toEntity(domain: MergeRequest): MergeRequestEntity =
         MergeRequestEntity(
             id = domain.id,
@@ -51,25 +48,26 @@ internal class MergeRequestMapper(
         )
 
     override fun toDomain(entity: MergeRequestEntity): MergeRequest {
-        val domain = MergeRequest(
-            project =
-            entity.project?.let { Project.Id(it.iid) }
-                ?: Project.Id(entity.iid ?: Uuid.random()),
-            id = entity.id,
-            platformIid = entity.platformIid,
-            title = entity.title,
-            description = entity.description,
-            createdAt = entity.createdAt,
-            closedAt = entity.closedAt,
-            updatedAt = entity.updatedAt,
-            labels = entity.labels,
-            state = entity.state,
-            webUrl = entity.webUrl,
-            mentions = entity.mentions.map { mentionMapper.toDomain(it) },
-            milestoneIds = entity.milestones.mapNotNull { it.iid?.let { iid -> Milestone.Id(iid) } }.toMutableSet(),
-            noteIds = entity.notes.mapNotNull { it.iid?.let { iid -> Note.Id(iid) } }.toMutableSet(),
-            iid = MergeRequest.Id(entity.iid!!),
-        )
+        val domain =
+            MergeRequest(
+                project =
+                    entity.project?.let { Project.Id(it.iid) }
+                        ?: Project.Id(entity.iid ?: Uuid.random()),
+                id = entity.id,
+                platformIid = entity.platformIid,
+                title = entity.title,
+                description = entity.description,
+                createdAt = entity.createdAt,
+                closedAt = entity.closedAt,
+                updatedAt = entity.updatedAt,
+                labels = entity.labels,
+                state = entity.state,
+                webUrl = entity.webUrl,
+                mentions = entity.mentions.map { mentionMapper.toDomain(it) },
+                milestoneIds = entity.milestones.mapNotNull { it.iid?.let { iid -> Milestone.Id(iid) } }.toMutableSet(),
+                noteIds = entity.notes.mapNotNull { it.iid?.let { iid -> Note.Id(iid) } }.toMutableSet(),
+                iid = MergeRequest.Id(entity.iid!!),
+            )
 
         domain.accountIds.addAll(
             entity.accounts.mapNotNull { it.iid?.let { iid -> Account.Id(iid) } }
@@ -78,7 +76,5 @@ internal class MergeRequestMapper(
         return domain
     }
 
-    override fun toDomainList(entities: Iterable<MergeRequestEntity>): List<MergeRequest> {
-        return entities.map { this.toDomain(it) }
-    }
+    override fun toDomainList(entities: Iterable<MergeRequestEntity>): List<MergeRequest> = entities.map { this.toDomain(it) }
 }

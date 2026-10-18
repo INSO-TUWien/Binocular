@@ -95,10 +95,9 @@ internal class UserInfrastructurePortImpl(
         TODO("Not yet implemented")
     }
 
-    private fun DeveloperEntity.toLegacyUser(): User {
-        return User(name = this.name, repositoryId = this.repository.iid).apply {
+    private fun DeveloperEntity.toLegacyUser(): User =
+        User(name = this.name, repositoryId = this.repository.iid).apply {
             this.id = this@toLegacyUser.id?.toString()
             this.email = this@toLegacyUser.email
         }
-    }
 }

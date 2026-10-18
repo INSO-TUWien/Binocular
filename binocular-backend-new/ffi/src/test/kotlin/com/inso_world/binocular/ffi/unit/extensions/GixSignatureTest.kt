@@ -63,11 +63,12 @@ class GixSignatureTest : BaseUnitTest() {
     @Test
     fun `toDeveloper reuses existing developer by git signature`() {
         val existing =
-            com.inso_world.binocular.model.Developer(
-                name = "Existing Dev",
-                email = "existing@example.com",
-                repositoryId = repository.iid,
-            ).apply { this.repository = repository }
+            com.inso_world.binocular.model
+                .Developer(
+                    name = "Existing Dev",
+                    email = "existing@example.com",
+                    repositoryId = repository.iid,
+                ).apply { this.repository = repository }
 
         val ffiSig =
             GixSignature(

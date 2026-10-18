@@ -21,7 +21,10 @@ internal interface ICommitFileConnectionDao {
     /**
      * Find files connected to a commit paginated.
      */
-    fun findFilesByCommitPaged(commitId: String, pageable: Pageable): Page<File>
+    fun findFilesByCommitPaged(
+        commitId: String,
+        pageable: Pageable
+    ): Page<File>
 
     /**
      * Find all commits connected to a file
@@ -31,7 +34,10 @@ internal interface ICommitFileConnectionDao {
     /**
      * Find commits connected to a file paginated.
      */
-    fun findCommitsByFilePaged(fileId: String, pageable: Pageable): Page<Commit>
+    fun findCommitsByFilePaged(
+        fileId: String,
+        pageable: Pageable
+    ): Page<Commit>
 
     /**
      * Return stats (additions/deletions) for a given commit
@@ -46,7 +52,10 @@ internal interface ICommitFileConnectionDao {
     /**
      * Return ownership entries (user + hunks) for a given commit and file
      */
-    fun findFileOwnershipByCommitAndFile(commitId: String, fileId: String): List<FileOwnership>
+    fun findFileOwnershipByCommitAndFile(
+        commitId: String,
+        fileId: String
+    ): List<FileOwnership>
 
     /**
      * Return action per file for a given commit, keyed by file id

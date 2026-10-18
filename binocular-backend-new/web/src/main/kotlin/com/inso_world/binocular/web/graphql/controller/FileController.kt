@@ -1,7 +1,6 @@
 package com.inso_world.binocular.web.graphql.controller
 
 import com.inso_world.binocular.core.service.FileInfrastructurePort
-import com.inso_world.binocular.model.File
 import com.inso_world.binocular.web.graphql.error.GraphQLValidationUtils
 import com.inso_world.binocular.web.graphql.mapper.GraphQlMapper
 import com.inso_world.binocular.web.graphql.model.FileDto
@@ -40,12 +39,13 @@ internal class FileController(
     ): PageDto<FileDto> {
         logger.info("Getting all files...")
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = page,
-            size = perPage,
-            sort = sort ?: Sort.DESC,
-            sortBy = "path",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = page,
+                size = perPage,
+                sort = sort ?: Sort.DESC,
+                sortBy = "path",
+            )
 
         logger.debug(
             "Getting all files with properties page={}, perPage={}, sort={}",
@@ -85,5 +85,4 @@ internal class FileController(
         }
         throw IllegalArgumentException("Either id or path must be provided")
     }
-
 }

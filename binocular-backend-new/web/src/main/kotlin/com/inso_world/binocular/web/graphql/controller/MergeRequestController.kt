@@ -1,7 +1,6 @@
 package com.inso_world.binocular.web.graphql.controller
 
 import com.inso_world.binocular.core.service.MergeRequestInfrastructurePort
-import com.inso_world.binocular.model.MergeRequest
 import com.inso_world.binocular.web.graphql.error.GraphQLValidationUtils
 import com.inso_world.binocular.web.graphql.mapper.GraphQlMapper
 import com.inso_world.binocular.web.graphql.model.MergeRequestDto
@@ -11,7 +10,6 @@ import com.inso_world.binocular.web.util.PaginationUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Pageable
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SchemaMapping
@@ -45,12 +43,13 @@ internal class MergeRequestController(
     ): PageDto<MergeRequestDto> {
         logger.info("Getting all merge requests with since=$since, until=$until")
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = page,
-            size = perPage,
-            sort = sort ?: Sort.ASC,
-            sortBy = "createdAt",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = page,
+                size = perPage,
+                sort = sort ?: Sort.ASC,
+                sortBy = "createdAt",
+            )
 
         logger.debug(
             "Getting all merge requests with properties page={}, perPage={}, sort={}",
@@ -80,5 +79,4 @@ internal class MergeRequestController(
         logger.info("Getting merge request by id: $id")
         return mapper.toDto(GraphQLValidationUtils.requireEntityExists(mergeRequestService.findById(id), "MergeRequest", id))
     }
-
 }

@@ -1,7 +1,6 @@
 package com.inso_world.binocular.web.graphql.controller
 
 import com.inso_world.binocular.core.service.MilestoneInfrastructurePort
-import com.inso_world.binocular.model.Milestone
 import com.inso_world.binocular.web.graphql.error.GraphQLValidationUtils
 import com.inso_world.binocular.web.graphql.mapper.GraphQlMapper
 import com.inso_world.binocular.web.graphql.model.MilestoneDto
@@ -40,12 +39,13 @@ internal class MilestoneController(
     ): PageDto<MilestoneDto> {
         logger.info("Getting all milestones...")
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = page,
-            size = perPage,
-            sort = sort ?: Sort.DESC,
-            sortBy = "dueDate",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = page,
+                size = perPage,
+                sort = sort ?: Sort.DESC,
+                sortBy = "dueDate",
+            )
 
         logger.debug(
             "Getting all milestones with properties page={}, perPage={}, sort={}",
@@ -75,5 +75,4 @@ internal class MilestoneController(
         logger.info("Getting milestone by id: $id")
         return mapper.toDto(GraphQLValidationUtils.requireEntityExists(milestoneService.findById(id), "Milestone", id))
     }
-
 }

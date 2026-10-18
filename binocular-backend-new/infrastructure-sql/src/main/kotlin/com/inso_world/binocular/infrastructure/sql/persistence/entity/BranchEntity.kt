@@ -2,7 +2,6 @@ package com.inso_world.binocular.infrastructure.sql.persistence.entity
 
 import com.inso_world.binocular.infrastructure.sql.persistence.converter.KotlinUuidConverter
 import com.inso_world.binocular.model.Branch
-import com.inso_world.binocular.model.Commit
 import com.inso_world.binocular.model.Reference
 import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.vcs.ReferenceCategory
@@ -50,7 +49,10 @@ internal data class BranchEntity(
     @Convert(KotlinUuidConverter::class)
     val iid: Reference.Id
 ) : AbstractEntity<Long, BranchEntity.Key>() {
-    data class Key(val repositoryIid: Repository.Id, val name: String)
+    data class Key(
+        val repositoryIid: Repository.Id,
+        val name: String
+    )
 
     init {
         // removed circular registration
@@ -78,13 +80,17 @@ internal data class BranchEntity(
     override fun toString(): String = "BranchEntity(id=$id, name='$name', headId=${head.id})"
 
     override val uniqueKey: Key
-        get() = Key(
-            repository.iid,
-            name
-        )
+        get() =
+            Key(
+                repository.iid,
+                name
+            )
 }
 
-internal fun Branch.toSqlEntity(repository: RepositoryEntity, head: CommitEntity): BranchEntity =
+internal fun Branch.toSqlEntity(
+    repository: RepositoryEntity,
+    head: CommitEntity
+): BranchEntity =
     BranchEntity(
         iid = this.iid,
         name = this.name,

@@ -12,7 +12,10 @@ import org.springframework.stereotype.Repository
  * ArangoDB implementation of IDeveloperDao.
  */
 @Repository
-internal class DeveloperDao @Autowired constructor(
-    private val developerRepository: DeveloperRepository,
-    private val developerMapper: DeveloperMapper,
-) : MappedArangoDbDao<Developer, DeveloperEntity, String>(developerRepository, developerMapper), IDeveloperDao
+internal class DeveloperDao
+    @Autowired
+    constructor(
+        private val developerRepository: DeveloperRepository,
+        private val developerMapper: DeveloperMapper,
+    ) : MappedArangoDbDao<Developer, DeveloperEntity, String>(developerRepository, developerMapper),
+        IDeveloperDao

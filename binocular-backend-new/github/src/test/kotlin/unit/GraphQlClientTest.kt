@@ -12,7 +12,6 @@ import reactor.test.StepVerifier
 import kotlin.test.assertEquals
 
 class GraphQlClientTest {
-
     private lateinit var webClient: WebClient
     private lateinit var configLoader: BinocularRcLoader
     private lateinit var client: GraphQlClient
@@ -74,19 +73,25 @@ class GraphQlClientTest {
         val mono = client.execute(query, variables, Any::class.java)
 
         // assert that exception is thrown with correct messages
-        StepVerifier.create(mono)
+        StepVerifier
+            .create(mono)
             .expectErrorSatisfies { error ->
                 assert(error is ServiceException)
                 assert(error.message!!.contains("500"))
                 assert(error.message!!.contains("Internal Server Error"))
-            }
-            .verify()
+            }.verify()
     }
 
-
     // data classes for deserialization
-    data class GitHubViewerResponse(val data: ViewerData)
-    data class ViewerData(val viewer: Viewer)
-    data class Viewer(val login: String)
-}
+    data class GitHubViewerResponse(
+        val data: ViewerData
+    )
 
+    data class ViewerData(
+        val viewer: Viewer
+    )
+
+    data class Viewer(
+        val login: String
+    )
+}

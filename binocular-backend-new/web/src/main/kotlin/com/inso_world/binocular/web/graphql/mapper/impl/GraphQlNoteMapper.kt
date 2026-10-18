@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class GraphQlNoteMapper {
-    fun toDto(note: Note): NoteDto {
-        return NoteDto(
+    fun toDto(note: Note): NoteDto =
+        NoteDto(
             id = note.id,
             body = note.body,
             createdAt = note.createdAt,
@@ -19,5 +19,4 @@ class GraphQlNoteMapper {
             imported = note.imported,
             importedFrom = note.importedFrom
         )
-    }
 }

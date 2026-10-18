@@ -18,7 +18,10 @@ internal interface IIssueAccountConnectionDao {
     /**
      * Find all accounts connected to an issue with a specific role
      */
-    fun findAccountsByIssue(issueId: String, role: IssueAccountRole): List<Account>
+    fun findAccountsByIssue(
+        issueId: String,
+        role: IssueAccountRole
+    ): List<Account>
 
     /**
      * Find all issues connected to an account

@@ -4,8 +4,6 @@ import com.inso_world.binocular.core.data.MockTestDataProvider
 import com.inso_world.binocular.core.delegates.logger
 import com.inso_world.binocular.core.integration.base.InfrastructureDataSetup
 import com.inso_world.binocular.core.integration.base.TestDataProvider
-import com.inso_world.binocular.core.service.FileInfrastructurePort
-import com.inso_world.binocular.core.service.IssueInfrastructurePort
 import com.inso_world.binocular.infrastructure.arangodb.model.edge.BranchFileConnection
 import com.inso_world.binocular.infrastructure.arangodb.model.edge.CommitBuildConnection
 import com.inso_world.binocular.infrastructure.arangodb.model.edge.CommitCommitConnection

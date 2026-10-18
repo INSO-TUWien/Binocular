@@ -1,7 +1,7 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
-import com.inso_world.binocular.core.delegates.logger
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.CommitEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.DeveloperEntity
@@ -9,7 +9,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.Proje
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.RepositoryEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.toArangoEntity
 import com.inso_world.binocular.model.Commit
-import com.inso_world.binocular.model.Developer
 import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.Signature
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,7 +32,6 @@ import kotlin.uuid.ExperimentalUuidApi
  */
 @Component
 internal class CommitMapper : EntityMapper<Commit, CommitEntity> {
-
     @Autowired
     private lateinit var developerMapper: DeveloperMapper
 
@@ -46,23 +44,26 @@ internal class CommitMapper : EntityMapper<Commit, CommitEntity> {
     @OptIn(ExperimentalUuidApi::class)
     @Deprecated("Use toEntity(domain, repository, author, committer) instead")
     override fun toEntity(domain: Commit): CommitEntity {
-        val owner = RepositoryEntity(
-            iid = domain.repositoryId.value,
-            localPath = "",
-            project = ProjectEntity(iid = domain.repositoryId.value, name = "") // Dummy project
-        )
+        val owner =
+            RepositoryEntity(
+                iid = domain.repositoryId.value,
+                localPath = "",
+                project = ProjectEntity(iid = domain.repositoryId.value, name = "") // Dummy project
+            )
 
         // For author/committer, we construct dummy entities with correct iids
-        val authorEntity = DeveloperEntity(
-            iid = domain.authorSignature.developerId,
-            gitSignature = "",
-            repository = owner
-        )
-        val committerEntity = DeveloperEntity(
-            iid = domain.committerSignature.developerId,
-            gitSignature = "",
-            repository = owner
-        )
+        val authorEntity =
+            DeveloperEntity(
+                iid = domain.authorSignature.developerId,
+                gitSignature = "",
+                repository = owner
+            )
+        val committerEntity =
+            DeveloperEntity(
+                iid = domain.committerSignature.developerId,
+                gitSignature = "",
+                repository = owner
+            )
 
         val entity =
             domain.toArangoEntity(
@@ -74,13 +75,17 @@ internal class CommitMapper : EntityMapper<Commit, CommitEntity> {
         return entity
     }
 
-    fun toEntity(domain: Commit, repository: RepositoryEntity, author: DeveloperEntity, committer: DeveloperEntity): CommitEntity {
-        return domain.toArangoEntity(
+    fun toEntity(
+        domain: Commit,
+        repository: RepositoryEntity,
+        author: DeveloperEntity,
+        committer: DeveloperEntity
+    ): CommitEntity =
+        domain.toArangoEntity(
             repository = repository,
             author = author,
             committer = committer,
         )
-    }
 
     /**
      * Converts a CommitEntity to Commit domain object.
@@ -90,31 +95,35 @@ internal class CommitMapper : EntityMapper<Commit, CommitEntity> {
      */
     @OptIn(ExperimentalUuidApi::class)
     override fun toDomain(entity: CommitEntity): Commit {
-        val domain = Commit(
-            sha = entity.sha,
-            authorSignature = Signature(
-                developerId = entity.author.iid,
-                timestamp = entity.authorDateTime
-            ),
-            committerSignature = Signature(
-                developerId = entity.committer.iid,
-                timestamp = entity.commitDateTime
-            ),
-            message = entity.message,
-            repositoryId = Repository.Id(entity.repository.iid),
-            iid = Commit.Id(entity.iid)
-        ).apply {
-            this.id = entity.id
-            this.webUrl = entity.webUrl
-            this.branch = entity.branch
-            this.stats = entity.stats?.let {
-                com.inso_world.binocular.model.Stats(
-                    additions = it.additions,
-                    deletions = it.deletions,
-                    kind = it.kind ?: com.inso_world.binocular.model.Stats.StatsKind.MODIFICATION
-                )
+        val domain =
+            Commit(
+                sha = entity.sha,
+                authorSignature =
+                    Signature(
+                        developerId = entity.author.iid,
+                        timestamp = entity.authorDateTime
+                    ),
+                committerSignature =
+                    Signature(
+                        developerId = entity.committer.iid,
+                        timestamp = entity.commitDateTime
+                    ),
+                message = entity.message,
+                repositoryId = Repository.Id(entity.repository.iid),
+                iid = Commit.Id(entity.iid)
+            ).apply {
+                this.id = entity.id
+                this.webUrl = entity.webUrl
+                this.branch = entity.branch
+                this.stats =
+                    entity.stats?.let {
+                        com.inso_world.binocular.model.Stats(
+                            additions = it.additions,
+                            deletions = it.deletions,
+                            kind = it.kind ?: com.inso_world.binocular.model.Stats.StatsKind.MODIFICATION
+                        )
+                    }
             }
-        }
 
         return domain
     }

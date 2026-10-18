@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.persistence.dao
 
 import com.inso_world.binocular.core.persistence.exception.PersistenceException
@@ -6,11 +7,12 @@ import com.inso_world.binocular.infrastructure.sql.persistence.dao.interfaces.ID
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.DeveloperEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.RepositoryEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.repository.DeveloperRepository
-import com.inso_world.binocular.model.Repository as DomainRepository
+import com.inso_world.binocular.model.Developer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Repository
 import java.util.stream.Stream
+import com.inso_world.binocular.model.Repository as DomainRepository
 
 @Repository
 internal class DeveloperDao(
@@ -24,27 +26,28 @@ internal class DeveloperDao(
     }
 
     override fun findByIid(iid: Any): DeveloperEntity? {
-        val uIid: kotlin.uuid.Uuid = when (iid) {
-            is com.inso_world.binocular.model.Developer.Id -> iid.value
-            is kotlin.uuid.Uuid -> iid
-            is String -> kotlin.uuid.Uuid.parse(iid)
-            else -> throw IllegalArgumentException("Unsupported iid type: ${iid.javaClass}")
-        }
-        return this.repo.findByIid(uIid)
-    }
-
-    override fun findByIid(iid: com.inso_world.binocular.model.Developer.Id): DeveloperEntity? =
-        this.repo.findByIid(iid.value)
-
-    override fun findByIids(iids: Collection<Any>): List<DeveloperEntity> {
-        val uIids = iids.map { iid ->
+        val uIid: kotlin.uuid.Uuid =
             when (iid) {
-                is com.inso_world.binocular.model.Developer.Id -> iid.value
+                is Developer.Id -> iid.value
                 is kotlin.uuid.Uuid -> iid
                 is String -> kotlin.uuid.Uuid.parse(iid)
                 else -> throw IllegalArgumentException("Unsupported iid type: ${iid.javaClass}")
             }
-        }
+        return this.repo.findByIid(uIid)
+    }
+
+    override fun findByIid(iid: Developer.Id): DeveloperEntity? = this.repo.findByIid(iid.value)
+
+    override fun findByIids(iids: Collection<Any>): List<DeveloperEntity> {
+        val uIids =
+            iids.map { iid ->
+                when (iid) {
+                    is Developer.Id -> iid.value
+                    is kotlin.uuid.Uuid -> iid
+                    is String -> kotlin.uuid.Uuid.parse(iid)
+                    else -> throw IllegalArgumentException("Unsupported iid type: ${iid.javaClass}")
+                }
+            }
         return this.repo.findAllByIidIn(uIids)
     }
 
@@ -58,8 +61,7 @@ internal class DeveloperDao(
             }
     }
 
-    override fun findAllByGitSignatureIn(emails: Collection<String>): Stream<DeveloperEntity> =
-        repo.findAllByEmailIn(emails)
+    override fun findAllByGitSignatureIn(emails: Collection<String>): Stream<DeveloperEntity> = repo.findAllByEmailIn(emails)
 
     override fun findAll(repository: RepositoryEntity): Iterable<DeveloperEntity> =
         this.repo.findAll(

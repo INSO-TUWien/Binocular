@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -33,7 +34,6 @@ internal class ModuleMapper
         private val proxyFactory: RelationshipProxyFactory,
         @Lazy private val fileMapper: FileMapper,
     ) : EntityMapper<Module, ModuleEntity> {
-
         @Lazy
         @Autowired
         private lateinit var commitMapper: CommitMapper
@@ -76,8 +76,16 @@ internal class ModuleMapper
                 id = entity.id,
                 path = entity.path,
                 iid = Module.Id(entity.iid),
-                commitIds = (entity.commits ?: emptyList()).map { com.inso_world.binocular.model.Commit.Id(it.iid) },
-                fileIds = (entity.files ?: emptyList()).map { com.inso_world.binocular.model.File.Id(it.iid) },
+                commitIds =
+                    (entity.commits ?: emptyList()).map {
+                        com.inso_world.binocular.model.Commit
+                            .Id(it.iid)
+                    },
+                fileIds =
+                    (entity.files ?: emptyList()).map {
+                        com.inso_world.binocular.model.File
+                            .Id(it.iid)
+                    },
                 childModuleIds = (entity.childModules ?: emptyList()).map { Module.Id(it.iid) },
                 parentModuleIds = (entity.parentModules ?: emptyList()).map { Module.Id(it.iid) },
                 commits =

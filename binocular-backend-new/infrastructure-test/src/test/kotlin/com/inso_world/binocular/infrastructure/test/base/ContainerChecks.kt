@@ -25,4 +25,3 @@ internal class ContainerChecks : BaseInfrastructureSpringTest() {
         assertTrue(com.inso_world.binocular.infrastructure.sql.SqlTestConfig.pg.isRunning)
     }
 }
-

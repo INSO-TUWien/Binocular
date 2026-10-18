@@ -12,16 +12,16 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
 internal class ProjectMapperTest : BaseMapperTest() {
-
     @Nested
     inner class ToEntity {
         @Test
         fun `toEntity maps domain object to entity`() {
-            val domain = Project(
-                name = "test-project",
-            ).apply {
-                this.id = "p-42"
-            }
+            val domain =
+                Project(
+                    name = "test-project",
+                ).apply {
+                    this.id = "p-42"
+                }
 
             val entity = projectMapper.toEntity(domain)
 
@@ -38,12 +38,13 @@ internal class ProjectMapperTest : BaseMapperTest() {
         @Test
         fun `toDomain maps entity to domain object`() {
             val uuid = Uuid.random()
-            val entity = ProjectEntity(
-                name = "test-project",
-                iid = uuid
-            ).apply {
-                id = "p-42"
-            }
+            val entity =
+                ProjectEntity(
+                    name = "test-project",
+                    iid = uuid
+                ).apply {
+                    id = "p-42"
+                }
 
             val domain = projectMapper.toDomain(entity)
 
@@ -60,12 +61,13 @@ internal class ProjectMapperTest : BaseMapperTest() {
         @Test
         fun `refreshDomain updates domain id from entity`() {
             val domain = Project(name = "test-project")
-            val entity = ProjectEntity(
-                name = "test-project",
-                iid = domain.iid.value
-            ).apply {
-                id = "p-100"
-            }
+            val entity =
+                ProjectEntity(
+                    name = "test-project",
+                    iid = domain.iid.value
+                ).apply {
+                    id = "p-100"
+                }
 
             projectMapper.refreshDomain(domain, entity)
 

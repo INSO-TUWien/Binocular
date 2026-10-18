@@ -25,8 +25,11 @@ internal class IssueDao(
     @Autowired private val issueMapper: IssueMapper,
 ) : MappedArangoDbDao<Issue, IssueEntity, String>(issueRepository, issueMapper),
     IIssueDao {
-
-    override fun findAll(pageable: Pageable, since: Long?, until: Long?): Page<Issue> {
+    override fun findAll(
+        pageable: Pageable,
+        since: Long?,
+        until: Long?
+    ): Page<Issue> {
         if (since == null && until == null) {
             return super.findAll(pageable)
         }
@@ -35,31 +38,35 @@ internal class IssueDao(
         val firstOrder = pageable.sort.firstOrNull()
         val asc = firstOrder?.direction == Sort.Direction.ASC
 
-        val entities = when {
-            since != null && until != null -> if (asc) {
-                issueRepository.findAllBetweenAsc(offset, size, since, until)
-            } else {
-                issueRepository.findAllBetweenDesc(offset, size, since, until)
+        val entities =
+            when {
+                since != null && until != null ->
+                    if (asc) {
+                        issueRepository.findAllBetweenAsc(offset, size, since, until)
+                    } else {
+                        issueRepository.findAllBetweenDesc(offset, size, since, until)
+                    }
+                since != null ->
+                    if (asc) {
+                        issueRepository.findAllSinceAsc(offset, size, since)
+                    } else {
+                        issueRepository.findAllSinceDesc(offset, size, since)
+                    }
+                else ->
+                    if (asc) {
+                        issueRepository.findAllUntilAsc(offset, size, until!!)
+                    } else {
+                        issueRepository.findAllUntilDesc(offset, size, until!!)
+                    }
             }
-            since != null -> if (asc) {
-                issueRepository.findAllSinceAsc(offset, size, since)
-            } else {
-                issueRepository.findAllSinceDesc(offset, size, since)
-            }
-            else -> if (asc) {
-                issueRepository.findAllUntilAsc(offset, size, until!!)
-            } else {
-                issueRepository.findAllUntilDesc(offset, size, until!!)
-            }
-        }
 
         val content = entities.map { issueMapper.toDomain(it) }
-        val total = when {
-            since != null && until != null -> issueRepository.countAllBetween(since, until)
-            since != null -> issueRepository.countAllSince(since)
-            else -> issueRepository.countAllUntil(until!!)
-        }
+        val total =
+            when {
+                since != null && until != null -> issueRepository.countAllBetween(since, until)
+                since != null -> issueRepository.countAllSince(since)
+                else -> issueRepository.countAllUntil(until!!)
+            }
         return Page(content, total, pageable)
     }
-
 }

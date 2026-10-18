@@ -6,11 +6,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class GraphQlStatsMapper {
-    fun toDto(stats: Stats): StatsDto {
-        return StatsDto(
+    fun toDto(stats: Stats): StatsDto =
+        StatsDto(
             additions = stats.additions,
             deletions = stats.deletions,
             kind = stats.kind
         )
-    }
 }

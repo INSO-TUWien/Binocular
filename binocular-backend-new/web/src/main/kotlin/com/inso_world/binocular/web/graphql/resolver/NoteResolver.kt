@@ -84,5 +84,4 @@ class NoteResolver(
         val accounts = noteService.findAccountsByNoteId(id)
         return accounts.firstOrNull()?.let { mapper.toDto(it) }
     }
-
 }

@@ -6,10 +6,9 @@ import org.springframework.stereotype.Component
 
 @Component
 class GraphQlModuleMapper {
-    fun toDto(module: Module): ModuleDto {
-        return ModuleDto(
+    fun toDto(module: Module): ModuleDto =
+        ModuleDto(
             id = module.id,
             path = module.path
         )
-    }
 }

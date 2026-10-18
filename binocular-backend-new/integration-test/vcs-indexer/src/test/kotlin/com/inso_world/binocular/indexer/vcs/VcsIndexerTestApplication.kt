@@ -1,7 +1,6 @@
 package com.inso_world.binocular.indexer.vcs
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
 
 /**

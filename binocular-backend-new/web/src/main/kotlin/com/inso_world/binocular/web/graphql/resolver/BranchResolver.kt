@@ -7,8 +7,8 @@ import com.inso_world.binocular.web.util.PaginationUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.graphql.data.method.annotation.Argument
+import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.stereotype.Controller
 
 @Controller
@@ -28,23 +28,30 @@ class BranchResolver(
      * @return A PaginatedFileInBranchDto containing files associated with the branch
      */
     @SchemaMapping(typeName = "Branch", field = "files")
-    fun files(branch: BranchDto, @Argument page: Int?, @Argument perPage: Int?, @Argument sort: Sort?): PaginatedFileInBranchDto {
+    fun files(
+        branch: BranchDto,
+        @Argument page: Int?,
+        @Argument perPage: Int?,
+        @Argument sort: Sort?
+    ): PaginatedFileInBranchDto {
         val currentPage = (page ?: 1).coerceAtLeast(1)
         val pageSize = perPage ?: 1000
-        val id = branch.id ?: return PaginatedFileInBranchDto(
-            count = 0,
-            page = currentPage,
-            perPage = pageSize,
-            data = emptyList(),
-        )
+        val id =
+            branch.id ?: return PaginatedFileInBranchDto(
+                count = 0,
+                page = currentPage,
+                perPage = pageSize,
+                data = emptyList(),
+            )
         logger.info("Resolving files for branch: $id (page=$page, perPage=$perPage, sort=$sort)")
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = currentPage,
-            size = pageSize,
-            sort = sort ?: Sort.ASC,
-            sortBy = "path",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = currentPage,
+                size = pageSize,
+                sort = sort ?: Sort.ASC,
+                sortBy = "path",
+            )
         val pageResult = branchService.findFilesByBranchId(id, pageable)
         return PaginatedFileInBranchDto(
             count = pageResult.totalElements.toInt(),
@@ -53,5 +60,4 @@ class BranchResolver(
             data = pageResult.content.map { f -> FileInBranchDto(file = mapper.toDto(f)) }
         )
     }
-
 }

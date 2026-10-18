@@ -85,7 +85,7 @@ class AccountResolver(
         // Get account-to-user relation data
         return accountService
             .findUsersByAccountId(id)
-            .firstOrNull()?.let { mapper.toDto(it) }
+            .firstOrNull()
+            ?.let { mapper.toDto(it) }
     }
-
 }

@@ -29,7 +29,10 @@ internal interface IssueAccountConnectionRepository : ArangoRepository<IssueAcco
             RETURN a
 """,
     )
-    fun findAccountsByIssueAndRole(issueId: String, role: String): List<AccountEntity>
+    fun findAccountsByIssueAndRole(
+        issueId: String,
+        role: String
+    ): List<AccountEntity>
 
     @Query(
         """

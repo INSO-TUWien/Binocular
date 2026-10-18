@@ -77,9 +77,7 @@ internal abstract class AbstractInfrastructurePort<D : Any, E : Any, I : Seriali
     ): E = this.dao.create(value)
 
     @Transactional
-    internal fun saveAll(values: Collection<@Valid E>): Iterable<E> {
-        return this.dao.saveAll(values)
-    }
+    internal fun saveAll(values: Collection<@Valid E>): Iterable<E> = this.dao.saveAll(values)
 
     private fun read(value: String): I {
 //        val value: String = readLine()!!

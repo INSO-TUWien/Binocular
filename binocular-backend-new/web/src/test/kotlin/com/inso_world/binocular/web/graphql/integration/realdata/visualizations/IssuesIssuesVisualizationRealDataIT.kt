@@ -1,16 +1,16 @@
 package com.inso_world.binocular.web.graphql.integration.realdata.visualizations
 
+import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 import com.inso_world.binocular.web.graphql.integration.realdata.base.BaseGraphQlCompatibilityIT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 
 internal class IssuesIssuesVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
-
     @Test
     fun `issues query returns expected snapshot for first item`() {
-        val query = $$"""
+        val query =
+            $$"""
             query (
               $page: Int,
               $perPage: Int,
@@ -59,14 +59,15 @@ internal class IssuesIssuesVisualizationRealDataIT : BaseGraphQlCompatibilityIT(
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1000,
-            "since" to "2024-08-08T03:00",
-            "until" to "2025-12-08T12:00:26",
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1000,
+                "since" to "2024-08-08T03:00",
+                "until" to "2025-12-08T12:00:26",
+            )
 
         val root = client.execute(query, variables)
         val issues = root.get("issues")

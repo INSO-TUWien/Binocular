@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class GraphQlAccountMapper {
-    fun toDto(account: Account): AccountDto {
-        return AccountDto(
+    fun toDto(account: Account): AccountDto =
+        AccountDto(
             id = account.id,
             platform = account.platform,
             login = account.login,
@@ -15,5 +15,4 @@ class GraphQlAccountMapper {
             avatarUrl = account.avatarUrl,
             url = account.url
         )
-    }
 }

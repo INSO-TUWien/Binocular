@@ -1,16 +1,16 @@
 package com.inso_world.binocular.web.graphql.integration.realdata.visualizations
 
+import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 import com.inso_world.binocular.web.graphql.integration.realdata.base.BaseGraphQlCompatibilityIT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 
 internal class BuildsBuildVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
-
     @Test
     fun `builds query returns expected snapshot for first item`() {
-        val query = $$"""
+        val query =
+            $$"""
             query (
               $page: Int,
               $perPage: Int,
@@ -55,16 +55,17 @@ internal class BuildsBuildVisualizationRealDataIT : BaseGraphQlCompatibilityIT()
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1000,
-            // NOTE: For Builds, the provided snapshot uses epoch millis for Timestamp
-            "since" to 1723078800000,
-            "until" to 1765191626000,
-            "sort" to "ASC",
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1000,
+                // NOTE: For Builds, the provided snapshot uses epoch millis for Timestamp
+                "since" to 1723078800000,
+                "until" to 1765191626000,
+                "sort" to "ASC",
+            )
 
         val root = client.execute(query, variables)
         val builds = root.get("builds")

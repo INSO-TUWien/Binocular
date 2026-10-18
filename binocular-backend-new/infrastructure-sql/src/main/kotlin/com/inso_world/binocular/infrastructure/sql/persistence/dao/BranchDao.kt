@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.persistence.dao
 
 import com.inso_world.binocular.core.persistence.exception.PersistenceException
@@ -49,30 +50,31 @@ internal class BranchDao(
             Specification.allOf(BranchSpecification.hasRepository(repository)),
         )
 
-    override fun findByIid(iid: com.inso_world.binocular.model.Branch.Id): BranchEntity? =
-        findByIid(iid as Any)
+    override fun findByIid(iid: Branch.Id): BranchEntity? = findByIid(iid as Any)
 
     override fun findByIid(iid: Any): BranchEntity? {
-        val uIid: kotlin.uuid.Uuid = when (iid) {
-            is com.inso_world.binocular.model.Branch.Id -> iid.value
-            is com.inso_world.binocular.model.Reference.Id -> iid.value
-            is kotlin.uuid.Uuid -> iid
-            is String -> kotlin.uuid.Uuid.parse(iid)
-            else -> throw IllegalArgumentException("Unsupported iid type: ${iid.javaClass}")
-        }
-        return this.branchRepo.findByIid(uIid)
-    }
-
-    override fun findByIids(iids: Collection<Any>): List<BranchEntity> {
-        val uIids = iids.map { iid ->
+        val uIid: kotlin.uuid.Uuid =
             when (iid) {
-                is com.inso_world.binocular.model.Branch.Id -> iid.value
-                is com.inso_world.binocular.model.Reference.Id -> iid.value
+                is Branch.Id -> iid.value
+                is Reference.Id -> iid.value
                 is kotlin.uuid.Uuid -> iid
                 is String -> kotlin.uuid.Uuid.parse(iid)
                 else -> throw IllegalArgumentException("Unsupported iid type: ${iid.javaClass}")
             }
-        }
+        return this.branchRepo.findByIid(uIid)
+    }
+
+    override fun findByIids(iids: Collection<Any>): List<BranchEntity> {
+        val uIids =
+            iids.map { iid ->
+                when (iid) {
+                    is Branch.Id -> iid.value
+                    is Reference.Id -> iid.value
+                    is kotlin.uuid.Uuid -> iid
+                    is String -> kotlin.uuid.Uuid.parse(iid)
+                    else -> throw IllegalArgumentException("Unsupported iid type: ${iid.javaClass}")
+                }
+            }
         return this.branchRepo.findAllByIidIn(uIids)
     }
 }

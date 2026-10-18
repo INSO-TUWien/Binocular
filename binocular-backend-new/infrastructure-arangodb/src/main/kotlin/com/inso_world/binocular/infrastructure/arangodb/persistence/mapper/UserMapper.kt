@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -9,7 +10,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.UserE
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.toArangoEntity
 import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.User
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -33,7 +33,6 @@ import kotlin.uuid.ExperimentalUuidApi
 @Suppress("DEPRECATION")
 @Component
 internal class UserMapper : EntityMapper<User, UserEntity> {
-
     companion object {
         private val logger by logger()
     }
@@ -46,11 +45,12 @@ internal class UserMapper : EntityMapper<User, UserEntity> {
      */
     @OptIn(ExperimentalUuidApi::class)
     override fun toEntity(domain: User): UserEntity {
-        val owner = RepositoryEntity(
-            iid = domain.repositoryId.value,
-            localPath = "",
-            project = ProjectEntity(iid = domain.repositoryId.value, name = "")
-        )
+        val owner =
+            RepositoryEntity(
+                iid = domain.repositoryId.value,
+                localPath = "",
+                project = ProjectEntity(iid = domain.repositoryId.value, name = "")
+            )
 
         val entity = domain.toArangoEntity(owner)
         return entity
@@ -64,14 +64,15 @@ internal class UserMapper : EntityMapper<User, UserEntity> {
      */
     @OptIn(ExperimentalUuidApi::class)
     override fun toDomain(entity: UserEntity): User {
-        val domain = User(
-            name = entity.name,
-            repositoryId = entity.repository?.let { Repository.Id(it.iid) } ?: Repository.Id(entity.iid),
-            iid = User.Id(entity.iid)
-        ).apply {
-            this.id = entity.id
-            this.email = entity.email
-        }
+        val domain =
+            User(
+                name = entity.name,
+                repositoryId = entity.repository?.let { Repository.Id(it.iid) } ?: Repository.Id(entity.iid),
+                iid = User.Id(entity.iid)
+            ).apply {
+                this.id = entity.id
+                this.email = entity.email
+            }
 
         return domain
     }

@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class GraphQlJobMapper {
-    fun toDto(job: Job): JobDto {
-        return JobDto(
+    fun toDto(job: Job): JobDto =
+        JobDto(
             id = job.id,
             name = job.name,
             status = job.status,
@@ -16,5 +16,4 @@ class GraphQlJobMapper {
             finishedAt = job.finishedAt,
             webUrl = job.webUrl
         )
-    }
 }

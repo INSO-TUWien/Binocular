@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 internal class CommitResolverTest : GraphQlControllerTest() {
     @Autowired
     private lateinit var commitResolver: CommitResolver
+
     @Nested
     inner class BasicFunctionality {
         @Test
@@ -50,7 +51,13 @@ internal class CommitResolverTest : GraphQlControllerTest() {
                 { assertEquals("1", result.get("id").asText(), "Commit ID mismatch") },
                 { assertEquals("abc1230000000000000000000000000000000000", result.get("sha").asText(), "Commit SHA mismatch") },
                 { assertEquals("First commit", result.get("message").asText(), "Commit message mismatch") },
-                { assertEquals("https://example.com/commit/abc1230000000000000000000000000000000000", result.get("webUrl").asText(), "Commit webUrl mismatch") },
+                {
+                    assertEquals(
+                        "https://example.com/commit/abc1230000000000000000000000000000000000",
+                        result.get("webUrl").asText(),
+                        "Commit webUrl mismatch"
+                    )
+                },
                 { assertEquals("main", result.get("branch").asText(), "Commit branch mismatch") },
                 { assertEquals(10, result.get("stats").get("additions").asLong(), "Commit stats additions mismatch") },
                 { assertEquals(5, result.get("stats").get("deletions").asLong(), "Commit stats deletions mismatch") },
@@ -414,13 +421,11 @@ internal class CommitResolverTest : GraphQlControllerTest() {
                 }
             }
             """
-                )
-                .execute()
+                ).execute()
                 .errors()
                 .expect { error ->
                     error.message?.contains("Commit not found") == true
                 }
         }
-
     }
 }

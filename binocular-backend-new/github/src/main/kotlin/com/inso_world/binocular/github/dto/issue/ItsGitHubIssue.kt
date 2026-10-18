@@ -22,8 +22,7 @@ data class ItsGitHubIssue(
     val timelineItems: ItsTimelineItemWrapper?
 ) {
     fun toDomain(project: Project): Issue {
-        fun parseDateTime(dt: String): LocalDateTime =
-            OffsetDateTime.parse(dt).toLocalDateTime()
+        fun parseDateTime(dt: String): LocalDateTime = OffsetDateTime.parse(dt).toLocalDateTime()
 
         return Issue(
             gid = id,
@@ -41,4 +40,3 @@ data class ItsGitHubIssue(
         )
     }
 }
-

@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.entity
 
 import com.arangodb.springframework.annotation.Document
@@ -8,12 +9,9 @@ import com.arangodb.springframework.annotation.Ref
 import com.arangodb.springframework.annotation.Relations
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.BranchFileConnectionEntity
 import com.inso_world.binocular.model.Branch
-import com.inso_world.binocular.model.Commit
-import com.inso_world.binocular.model.Reference
 import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.vcs.ReferenceCategory
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.Transient
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -63,7 +61,6 @@ data class BranchEntity(
     )
     var files: Set<FileEntity> = emptySet(),
 ) {
-
     /**
      * Converts this BranchEntity to a Branch domain object.
      *
@@ -71,8 +68,8 @@ data class BranchEntity(
      * @param head The head commit domain object
      * @return Branch domain object
      */
-    fun toDomain(): Branch {
-        return Branch(
+    fun toDomain(): Branch =
+        Branch(
             name = this.name,
             fullName = this.fullName,
             category = ReferenceCategory.valueOf(this.category),
@@ -83,7 +80,6 @@ data class BranchEntity(
             this.active = this@BranchEntity.active
             this.tracksFileRenames = this@BranchEntity.tracksFileRenames
         }
-    }
 }
 
 /**
@@ -94,7 +90,10 @@ data class BranchEntity(
  * @return BranchEntity for persistence
  */
 @OptIn(ExperimentalUuidApi::class)
-internal fun Branch.toArangoEntity(repository: RepositoryEntity, head: CommitEntity): BranchEntity =
+internal fun Branch.toArangoEntity(
+    repository: RepositoryEntity,
+    head: CommitEntity
+): BranchEntity =
     BranchEntity(
         id = this.id,
         iid = this.iid.value,

@@ -6,11 +6,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class GraphQlMentionMapper {
-    fun toDto(mention: Mention): MentionDto {
-        return MentionDto(
+    fun toDto(mention: Mention): MentionDto =
+        MentionDto(
             commit = mention.commit,
             createdAt = mention.createdAt,
             closes = mention.closes
         )
-    }
 }

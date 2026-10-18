@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 internal class MergeRequestResolverTest : GraphQlControllerTest() {
     @Autowired
     private lateinit var mergeRequestResolver: MergeRequestResolver
+
     @Nested
     inner class BasicFunctionality {
         @Test

@@ -12,38 +12,42 @@ import java.time.format.DateTimeFormatter
 
 @Configuration
 class TimestampScalar {
-
     private val isoUtcMillis: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        DateTimeFormatter
+            .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             .withZone(ZoneOffset.UTC)
 
     @Bean
     fun timestampScalarConfigurer(): RuntimeWiringConfigurer {
-        val scalar = GraphQLScalarType.newScalar()
-            .name("Timestamp")
-            .description("ISO-8601 timestamp in UTC with milliseconds")
-            .coercing(object : Coercing<Any, String> {
+        val scalar =
+            GraphQLScalarType
+                .newScalar()
+                .name("Timestamp")
+                .description("ISO-8601 timestamp in UTC with milliseconds")
+                .coercing(
+                    object : Coercing<Any, String> {
+                        override fun serialize(dataFetcherResult: Any): String =
+                            isoUtcMillis.format(toInstant(dataFetcherResult, serialize = true))
 
-                override fun serialize(dataFetcherResult: Any): String =
-                    isoUtcMillis.format(toInstant(dataFetcherResult, serialize = true))
+                        override fun parseValue(input: Any): Instant = toInstant(input, serialize = false)
 
-                override fun parseValue(input: Any): Instant =
-                    toInstant(input, serialize = false)
-
-                override fun parseLiteral(input: Any): Instant =
-                    when (input) {
-                        is IntValue -> Instant.ofEpochMilli(input.value.toLong())
-                        is LongValue -> Instant.ofEpochMilli(input.value())
-                        is StringValue -> parseString(input.value)
-                        else -> literalError(input)
+                        override fun parseLiteral(input: Any): Instant =
+                            when (input) {
+                                is IntValue -> Instant.ofEpochMilli(input.value.toLong())
+                                is LongValue -> Instant.ofEpochMilli(input.value())
+                                is StringValue -> parseString(input.value)
+                                else -> literalError(input)
+                            }
                     }
-            })
-            .build()
+                ).build()
 
         return RuntimeWiringConfigurer { it.scalar(scalar) }
     }
 
-    private fun toInstant(value: Any, serialize: Boolean): Instant =
+    private fun toInstant(
+        value: Any,
+        serialize: Boolean
+    ): Instant =
         when (value) {
             is Instant -> value
             is LocalDateTime -> value.toInstant(ZoneOffset.UTC)

@@ -8,7 +8,7 @@ import org.springframework.data.annotation.Id
  * Stats entity for ArangoDB based on the domain model.
  */
 @Document("stats")
-data class StatsEntity (
+data class StatsEntity(
     @Id var id: String? = null,
     var additions: Long,
     var deletions: Long,

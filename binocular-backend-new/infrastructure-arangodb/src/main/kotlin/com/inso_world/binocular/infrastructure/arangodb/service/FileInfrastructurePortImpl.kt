@@ -8,7 +8,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfac
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.edge.ICommitFileUserConnectionDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.edge.IModuleFileConnectionDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.node.IFileDao
-import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.model.Branch
 import com.inso_world.binocular.model.Commit
 import com.inso_world.binocular.model.File
@@ -23,13 +22,14 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
-internal class FileInfrastructurePortImpl : FileInfrastructurePort,
-    AbstractInfrastructurePort<File, String>() {
-
+internal class FileInfrastructurePortImpl :
+    AbstractInfrastructurePort<File, String>(),
+    FileInfrastructurePort {
     @PostConstruct
     fun init() {
         super.dao = fileDao
     }
+
     @Autowired private lateinit var fileDao: IFileDao
 
     @Autowired private lateinit var branchFileConnectionRepository: IBranchFileConnectionDao

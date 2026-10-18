@@ -1,16 +1,16 @@
 package com.inso_world.binocular.web.graphql.integration.realdata.visualizations
 
+import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 import com.inso_world.binocular.web.graphql.integration.realdata.base.BaseGraphQlCompatibilityIT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 
 internal class CommitsCommitByFileCVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
-
     @Test
     fun `page 1 commits summary returns expected snapshot header items`() {
-        val query = $$"""
+        val query =
+            $$"""
             query ($page: Int, $perPage: Int) {
               commits(page: $page, perPage: $perPage) {
                 count
@@ -25,12 +25,13 @@ internal class CommitsCommitByFileCVisualizationRealDataIT : BaseGraphQlCompatib
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1000,
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1000,
+            )
 
         val root = client.execute(query, variables)
         val commits = root.get("commits")
@@ -71,7 +72,8 @@ internal class CommitsCommitByFileCVisualizationRealDataIT : BaseGraphQlCompatib
 
     @Test
     fun `page 2 commits summary returns expected first item`() {
-        val query = """
+        val query =
+            """
             query (${'$'}page: Int, ${'$'}perPage: Int) {
               commits(page: ${'$'}page, perPage: ${'$'}perPage) {
                 count
@@ -86,12 +88,13 @@ internal class CommitsCommitByFileCVisualizationRealDataIT : BaseGraphQlCompatib
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 2,
-            "perPage" to 1000,
-        )
+        val variables =
+            mapOf(
+                "page" to 2,
+                "perPage" to 1000,
+            )
 
         val root = client.execute(query, variables)
         val commits = root.get("commits")
@@ -114,7 +117,8 @@ internal class CommitsCommitByFileCVisualizationRealDataIT : BaseGraphQlCompatib
 
     @Test
     fun `GetCommitFiles returns expected files and pagination`() {
-        val query = $$"""
+        val query =
+            $$"""
             query GetCommitFiles($page: Int, $perPage: Int, $sha: String!) {
               commit(sha: $sha) {
                 files(page: $page, perPage: $perPage) {
@@ -131,13 +135,14 @@ internal class CommitsCommitByFileCVisualizationRealDataIT : BaseGraphQlCompatib
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "sha" to "aac5d1d489204b7963689ec2963ab39cceec45f2",
-            "page" to 1,
-            "perPage" to 1000,
-        )
+        val variables =
+            mapOf(
+                "sha" to "aac5d1d489204b7963689ec2963ab39cceec45f2",
+                "page" to 1,
+                "perPage" to 1000,
+            )
 
         val root = client.execute(query, variables)
         val commit = root.get("commit")
@@ -149,7 +154,11 @@ internal class CommitsCommitByFileCVisualizationRealDataIT : BaseGraphQlCompatib
         run {
             val item = data.get(0)
             val file = item.get("file")
-            assertEquals("binocular-frontend-new/src/components/infoTooltip/infoTooltip.module.scss", file.get("path").asText(), "data[0].file.path")
+            assertEquals(
+                "binocular-frontend-new/src/components/infoTooltip/infoTooltip.module.scss",
+                file.get("path").asText(),
+                "data[0].file.path"
+            )
             assertEquals("File", file.get("__typename").asText(), "data[0].file.__typename")
             val stats = item.get("stats")
             assertEquals(11, stats.get("additions").asInt(), "data[0].stats.additions")
@@ -161,7 +170,11 @@ internal class CommitsCommitByFileCVisualizationRealDataIT : BaseGraphQlCompatib
         run {
             val item = data.get(1)
             val file = item.get("file")
-            assertEquals("binocular-frontend-new/src/components/infoTooltip/infoTooltipHelper.ts", file.get("path").asText(), "data[1].file.path")
+            assertEquals(
+                "binocular-frontend-new/src/components/infoTooltip/infoTooltipHelper.ts",
+                file.get("path").asText(),
+                "data[1].file.path"
+            )
             assertEquals("File", file.get("__typename").asText(), "data[1].file.__typename")
             val stats = item.get("stats")
             assertEquals(17, stats.get("additions").asInt(), "data[1].stats.additions")

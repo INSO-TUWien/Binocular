@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.service
 
 import com.inso_world.binocular.core.delegates.logger
@@ -9,14 +10,10 @@ import com.inso_world.binocular.infrastructure.sql.mapper.AccountMapper
 import com.inso_world.binocular.infrastructure.sql.mapper.IssueMapper
 import com.inso_world.binocular.infrastructure.sql.mapper.ProjectMapper
 import com.inso_world.binocular.infrastructure.sql.persistence.dao.interfaces.IProjectDao
-import com.inso_world.binocular.infrastructure.sql.persistence.entity.AccountEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.ProjectEntity
 import com.inso_world.binocular.infrastructure.sql.service.AggregateFetchSupport.loadProjectEntities
-import com.inso_world.binocular.infrastructure.sql.persistence.entity.toSqlEntity
 import com.inso_world.binocular.model.Project
 import jakarta.annotation.PostConstruct
-import com.inso_world.binocular.infrastructure.sql.service.AggregateFetchSupport.loadProjectEntities
-import com.inso_world.binocular.model.Account
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Pageable
@@ -33,7 +30,6 @@ internal class ProjectInfrastructurePortImpl(
     @Autowired private val projectDao: IProjectDao,
 ) : AbstractInfrastructurePort<Project, ProjectEntity, Long>(Long::class),
     ProjectInfrastructurePort {
-
     companion object {
         private val logger by logger()
     }
@@ -97,15 +93,13 @@ internal class ProjectInfrastructurePortImpl(
      * @see findByIidInternal
      */
     @Transactional(readOnly = true)
-    override fun findByIid(iid: Project.Id): Project? {
-        return this.projectDao.findByIid(iid)?.let {
+    override fun findByIid(iid: Project.Id): Project? =
+        this.projectDao.findByIid(iid)?.let {
             projectMapper.toDomain(it)
         }
-    }
 
     @Transactional
     override fun update(value: Project): Project {
-
         // Get the project entity
         val managedEntity =
             this.projectDao.findByIid(value.iid)
@@ -177,8 +171,7 @@ internal class ProjectInfrastructurePortImpl(
     }
 
     @Transactional(readOnly = true)
-    override fun findAll(): Iterable<Project> =
-        loadProjectEntities(projectDao).map(projectMapper::toDomain)
+    override fun findAll(): Iterable<Project> = loadProjectEntities(projectDao).map(projectMapper::toDomain)
 
     @Transactional(readOnly = true)
     override fun findAll(pageable: Pageable): Page<Project> {
@@ -192,9 +185,7 @@ internal class ProjectInfrastructurePortImpl(
         )
     }
 
-    override fun findByIids(iids: Collection<Project.Id>): List<Project> {
-        return iids.mapNotNull { findByIid(it) }
-    }
+    override fun findByIids(iids: Collection<Project.Id>): List<Project> = iids.mapNotNull { findByIid(it) }
 
     @OptIn(ExperimentalUuidApi::class)
     @Transactional(readOnly = true)

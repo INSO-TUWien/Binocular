@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component
 class GraphQlCommitMapper(
     private val statsMapper: GraphQlStatsMapper
 ) {
-    fun toDto(commit: Commit): CommitDto {
-        return CommitDto(
+    fun toDto(commit: Commit): CommitDto =
+        CommitDto(
             id = commit.id,
             sha = commit.sha,
             authorDateTime = commit.authorDateTime,
@@ -19,5 +19,4 @@ class GraphQlCommitMapper(
             stats = commit.stats?.let { statsMapper.toDto(it) },
             branch = commit.branch
         )
-    }
 }

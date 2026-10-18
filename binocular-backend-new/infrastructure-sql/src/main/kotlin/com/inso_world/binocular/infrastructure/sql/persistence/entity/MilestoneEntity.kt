@@ -45,20 +45,21 @@ internal data class MilestoneEntity(
     @ManyToMany(mappedBy = "milestones")
     var issues: MutableList<IssueEntity> = mutableListOf(),
 ) {
-    fun toDomain(projectId: Project.Id = Project.Id(Uuid.parse("00000000-0000-0000-0000-000000000000"))): Milestone = Milestone(
-        id = this.id?.toString(),
-        platformIid = this.platformIid,
-        title = this.title,
-        description = this.description,
-        createdAt = this.createdAt,
-        updatedAt = this.updatedAt,
-        startDate = this.startDate,
-        dueDate = this.dueDate,
-        state = this.state,
-        expired = this.expired,
-        webUrl = this.webUrl,
-        project = projectId,
-        iid = this.iid,
-        issueIds = this.issues.map { it.iid }.toMutableSet()
-    )
+    fun toDomain(projectId: Project.Id = Project.Id(Uuid.parse("00000000-0000-0000-0000-000000000000"))): Milestone =
+        Milestone(
+            id = this.id?.toString(),
+            platformIid = this.platformIid,
+            title = this.title,
+            description = this.description,
+            createdAt = this.createdAt,
+            updatedAt = this.updatedAt,
+            startDate = this.startDate,
+            dueDate = this.dueDate,
+            state = this.state,
+            expired = this.expired,
+            webUrl = this.webUrl,
+            project = projectId,
+            iid = this.iid,
+            issueIds = this.issues.map { it.iid }.toMutableSet()
+        )
 }

@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Component
  */
 @Component
 internal class RevisionMapper : EntityMapper<Revision, RevisionEntity> {
-
     @Autowired
     @Lazy
     private lateinit var fileMapper: FileMapper
@@ -28,14 +28,15 @@ internal class RevisionMapper : EntityMapper<Revision, RevisionEntity> {
     }
 
     override fun toDomain(entity: RevisionEntity): Revision {
-        val domain = Revision(
-            content = entity.content ?: "",
-            commitSha = entity.commit.sha,
-            filePath = entity.file.path,
-            iid = Revision.Id(entity.iid)
-        ).apply {
-            id = entity.id
-        }
+        val domain =
+            Revision(
+                content = entity.content ?: "",
+                commitSha = entity.commit.sha,
+                filePath = entity.file.path,
+                iid = Revision.Id(entity.iid)
+            ).apply {
+                id = entity.id
+            }
 
         return domain
     }

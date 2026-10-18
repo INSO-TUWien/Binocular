@@ -6,7 +6,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfac
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.edge.IModuleFileConnectionDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.edge.IModuleModuleConnectionDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.node.IModuleDao
-import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.model.Commit
 import com.inso_world.binocular.model.File
 import com.inso_world.binocular.model.Module
@@ -23,13 +22,14 @@ import org.springframework.stereotype.Service
  * This service is database-agnostic and works with both ArangoDB and SQL implementations.
  */
 @Service
-internal class ModuleInfrastructurePortImpl : ModuleInfrastructurePort,
-    AbstractInfrastructurePort<Module, String>() {
-
+internal class ModuleInfrastructurePortImpl :
+    AbstractInfrastructurePort<Module, String>(),
+    ModuleInfrastructurePort {
     @PostConstruct
     fun init() {
         super.dao = moduleDao
     }
+
     @Autowired private lateinit var moduleDao: IModuleDao
 
     @Autowired private lateinit var commitModuleConnectionRepository: ICommitModuleConnectionDao

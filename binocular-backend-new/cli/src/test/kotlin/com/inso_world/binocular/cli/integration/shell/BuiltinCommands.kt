@@ -47,15 +47,15 @@ internal class BuiltinCommands
                     .build(),
             )
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted {
-            assertAll(
-                { ShellAssertions.assertThat(session.screen()).containsText("AVAILABLE COMMANDS") },
-                { ShellAssertions.assertThat(session.screen()).containsText("Index Commands") },
-                { ShellAssertions.assertThat(session.screen()).containsText("index commits") },
-                { ShellAssertions.assertThat(session.screen()).containsText("index blames") },
-                //{ ShellAssertions.assertThat(session.screen()).containsText("index diffs") },
-                { ShellAssertions.assertThat(session.screen()).containsText("index issues") },
-            )
+            Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted {
+                assertAll(
+                    { ShellAssertions.assertThat(session.screen()).containsText("AVAILABLE COMMANDS") },
+                    { ShellAssertions.assertThat(session.screen()).containsText("Index Commands") },
+                    { ShellAssertions.assertThat(session.screen()).containsText("index commits") },
+                    { ShellAssertions.assertThat(session.screen()).containsText("index blames") },
+                    // { ShellAssertions.assertThat(session.screen()).containsText("index diffs") },
+                    { ShellAssertions.assertThat(session.screen()).containsText("index issues") },
+                )
+            }
         }
     }
-}

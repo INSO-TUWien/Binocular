@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 internal class FileResolverTest : GraphQlControllerTest() {
     @Autowired
     private lateinit var fileResolver: FileResolver
+
     @Nested
     inner class BasicFunctionality {
         @Test
@@ -193,7 +194,12 @@ internal class FileResolverTest : GraphQlControllerTest() {
             assertNotNull(commit, "Commit payload should not be null in CommitInFile")
             assertAll(
                 { assertEquals("1", commit.get("id").asText(), "Commit ID mismatch") },
-                { assertTrue(commit.get("sha").asText().startsWith("abc1230000000000000000000000000000000000"), "Commit SHA should start with short hash prefix") },
+                {
+                    assertTrue(
+                        commit.get("sha").asText().startsWith("abc1230000000000000000000000000000000000"),
+                        "Commit SHA should start with short hash prefix"
+                    )
+                },
                 { assertEquals("First commit", commit.get("message").asText(), "Commit message mismatch") },
             )
         }

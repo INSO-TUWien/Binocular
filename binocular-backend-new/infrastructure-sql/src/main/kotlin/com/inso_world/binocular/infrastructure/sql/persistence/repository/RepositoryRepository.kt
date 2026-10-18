@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.persistence.repository
 
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.RepositoryEntity
@@ -11,21 +12,24 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Repository
-internal interface RepositoryRepository : JpaRepository<RepositoryEntity, Long>, JpaSpecificationExecutor<RepositoryEntity> {
+internal interface RepositoryRepository :
+    JpaRepository<RepositoryEntity, Long>,
+    JpaSpecificationExecutor<RepositoryEntity> {
     fun findByLocalPath(path: String): RepositoryEntity?
 
 //    @EntityGraph(
 //        attributePaths = [
-////            "commits",
-////            "commits.parents",
-////            "commits.children",
+// //            "commits",
+// //            "commits.parents",
+// //            "commits.children",
 //            "branches",
 //            "user"
 //        ]
 //    )
     @Query("select r from RepositoryEntity r where r.id = :id")
-    fun findByIdWithAllRelations(@Param("id") id: Long): RepositoryEntity?
-
+    fun findByIdWithAllRelations(
+        @Param("id") id: Long
+    ): RepositoryEntity?
 
     @OptIn(ExperimentalUuidApi::class)
     fun findByIid(iid: Uuid): RepositoryEntity?

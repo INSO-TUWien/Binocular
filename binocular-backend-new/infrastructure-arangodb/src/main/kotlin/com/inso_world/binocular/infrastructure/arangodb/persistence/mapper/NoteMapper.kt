@@ -1,15 +1,13 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
-import com.inso_world.binocular.core.delegates.logger
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.NoteEntity
 import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.model.Issue
 import com.inso_world.binocular.model.MergeRequest
 import com.inso_world.binocular.model.Note
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -31,7 +29,6 @@ import kotlin.uuid.Uuid
  */
 @Component
 internal class NoteMapper : EntityMapper<Note, NoteEntity> {
-
     /**
      * Converts a Note domain object to NoteEntity.
      *
@@ -67,22 +64,22 @@ internal class NoteMapper : EntityMapper<Note, NoteEntity> {
      */
     @OptIn(ExperimentalUuidApi::class)
     override fun toDomain(entity: NoteEntity): Note {
-
-        val domain = Note(
-            id = entity.id,
-            body = entity.body,
-            createdAt = entity.createdAt,
-            updatedAt = entity.updatedAt,
-            system = entity.system,
-            resolvable = entity.resolvable,
-            confidential = entity.confidential,
-            internal = entity.internal,
-            imported = entity.imported,
-            importedFrom = entity.importedFrom,
-            issueIds = entity.issues.mapNotNull { it.iid?.let { iid -> Issue.Id(iid) } }.toMutableSet(),
-            mergeRequestIds = entity.mergeRequests.mapNotNull { it.iid?.let { iid -> MergeRequest.Id(iid) } }.toMutableSet(),
-            iid = entity.iid?.let { Note.Id(it) } ?: Note.Id(Uuid.random()),
-        )
+        val domain =
+            Note(
+                id = entity.id,
+                body = entity.body,
+                createdAt = entity.createdAt,
+                updatedAt = entity.updatedAt,
+                system = entity.system,
+                resolvable = entity.resolvable,
+                confidential = entity.confidential,
+                internal = entity.internal,
+                imported = entity.imported,
+                importedFrom = entity.importedFrom,
+                issueIds = entity.issues.mapNotNull { it.iid?.let { iid -> Issue.Id(iid) } }.toMutableSet(),
+                mergeRequestIds = entity.mergeRequests.mapNotNull { it.iid?.let { iid -> MergeRequest.Id(iid) } }.toMutableSet(),
+                iid = entity.iid?.let { Note.Id(it) } ?: Note.Id(Uuid.random()),
+            )
 
         domain.accountIds.addAll(
             entity.accounts.mapNotNull { it.iid?.let { iid -> Account.Id(iid) } }

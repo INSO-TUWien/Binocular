@@ -14,9 +14,7 @@ private fun String.validateSha(): String {
     return this
 }
 
-internal fun GixCommit.toDomain(
-    repositoryId: Repository.Id,
-): Commit {
+internal fun GixCommit.toDomain(repositoryId: Repository.Id,): Commit {
     this.oid.validateSha()
 
     val authorSignature = this.author.toSignature(repositoryId)

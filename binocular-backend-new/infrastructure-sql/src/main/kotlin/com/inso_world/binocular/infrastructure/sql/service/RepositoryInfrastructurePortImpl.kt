@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.service
 
 import com.inso_world.binocular.core.delegates.logger
@@ -235,13 +236,12 @@ internal class RepositoryInfrastructurePortImpl :
     override fun findExistingCommits(
         repo: Repository,
         shas: Set<String>,
-    ): Sequence<Commit> {
-        return this.commitDao
+    ): Sequence<Commit> =
+        this.commitDao
             .findExistingSha(repo, shas)
             .map { commitEntity ->
                 commitMapper.toDomain(commitEntity)
             }.asSequence()
-    }
 
     @Transactional(readOnly = true)
     override fun findBranch(
@@ -250,12 +250,10 @@ internal class RepositoryInfrastructurePortImpl :
     ): Branch? =
         this.repositoryDao.findByIid(repository.iid)?.let { repoEntity ->
             this.branchDao.findByName(repoEntity, name)?.let { branchEntity ->
-                 // Using constructor for now as BranchMapper might not be ready/needed
-                 branchEntity.toDomain()
+                // Using constructor for now as BranchMapper might not be ready/needed
+                branchEntity.toDomain()
             }
         }
 
-    override fun findByIids(iids: Collection<Repository.Id>): List<Repository> {
-        return iids.mapNotNull { findByIid(it) }
-    }
+    override fun findByIids(iids: Collection<Repository.Id>): List<Repository> = iids.mapNotNull { findByIid(it) }
 }

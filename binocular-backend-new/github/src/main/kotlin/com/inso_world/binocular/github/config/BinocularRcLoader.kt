@@ -18,19 +18,19 @@ import java.io.FileNotFoundException
  * settings, tokens and credentials for indexers and GitHub/GitLab.
  */
 @Component
-class BinocularRcLoader (
+class BinocularRcLoader(
     private val configFilePath: String? = null // optional path
 ) {
-
     fun loadConfig(): BinocularRc {
         // take file from path or else find file
-        val file = configFilePath?.let { path ->
-            val f = File(path)
-            if (!f.exists()) {
-                throw FileNotFoundException(".binocularrc not found at given path: $path.")
-            }
-            f
-        } ?: findRcFile()
+        val file =
+            configFilePath?.let { path ->
+                val f = File(path)
+                if (!f.exists()) {
+                    throw FileNotFoundException(".binocularrc not found at given path: $path.")
+                }
+                f
+            } ?: findRcFile()
         val json = file.readText()
         val mapper = jacksonObjectMapper()
         try {
@@ -50,7 +50,6 @@ class BinocularRcLoader (
 
         return token
     }
-
 
     private fun findRcFile(): File {
         var current = File(System.getProperty("user.dir"))

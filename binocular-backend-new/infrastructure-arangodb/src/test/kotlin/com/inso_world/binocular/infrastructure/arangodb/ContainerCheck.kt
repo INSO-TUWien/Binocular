@@ -21,6 +21,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 internal class ContainerCheck : BaseIntegrationTest() {
     @Test
     fun `check if arangodb container is running`() {
-        assertTrue(ArangodbTestConfig.adbContainer.isRunning);
+        assertTrue(ArangodbTestConfig.adbContainer.isRunning)
     }
 }

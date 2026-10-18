@@ -3,7 +3,6 @@ package com.inso_world.binocular.infrastructure.sql.persistence.entity
 import com.inso_world.binocular.infrastructure.sql.persistence.converter.KotlinUuidConverter
 import com.inso_world.binocular.model.Mention
 import com.inso_world.binocular.model.MergeRequest
-import com.inso_world.binocular.model.Project
 import jakarta.persistence.Column
 import jakarta.persistence.Convert
 import jakarta.persistence.Entity
@@ -128,38 +127,40 @@ internal data class MergeRequestEntity(
 
     override fun hashCode(): Int = Objects.hash(id, iid, title, description, createdAt, closedAt, updatedAt, state, webUrl)
 
-    fun toDomain(): MergeRequest = MergeRequest(
-        project = this.project?.iid ?: error("Project not found for MergeRequest $iid"),
-        id = this.id?.toString(),
+    fun toDomain(): MergeRequest =
+        MergeRequest(
+            project = this.project?.iid ?: error("Project not found for MergeRequest $iid"),
+            id = this.id?.toString(),
+            platformIid = this.platformIid,
+            title = this.title,
+            description = this.description,
+            createdAt = this.createdAt,
+            closedAt = this.closedAt,
+            updatedAt = this.updatedAt,
+            labels = emptyList(), // labels missing in entity
+            state = this.state,
+            webUrl = this.webUrl,
+            mentions = emptyList(), // mentions need proper mapping if needed
+            iid = this.iid,
+        ).apply {
+            this.id = this@MergeRequestEntity.id?.toString()
+            noteIds.addAll(this@MergeRequestEntity.notes.map { it.iid })
+            milestoneIds.addAll(this@MergeRequestEntity.milestones.map { it.iid })
+            accountIds.addAll(this@MergeRequestEntity.accounts.map { it.iid })
+        }
+}
+
+internal fun MergeRequest.toSqlEntity(owner: ProjectEntity): MergeRequestEntity =
+    MergeRequestEntity(
+        id = this.id?.toLongOrNull(),
+        iid = this.iid,
         platformIid = this.platformIid,
         title = this.title,
         description = this.description,
         createdAt = this.createdAt,
         closedAt = this.closedAt,
         updatedAt = this.updatedAt,
-        labels = emptyList(), // labels missing in entity
         state = this.state,
         webUrl = this.webUrl,
-        mentions = emptyList(), // mentions need proper mapping if needed
-        iid = this.iid,
-    ).apply {
-        this.id = this@MergeRequestEntity.id?.toString()
-        noteIds.addAll(this@MergeRequestEntity.notes.map { it.iid })
-        milestoneIds.addAll(this@MergeRequestEntity.milestones.map { it.iid })
-        accountIds.addAll(this@MergeRequestEntity.accounts.map { it.iid })
-    }
-}
-
-internal fun MergeRequest.toSqlEntity(owner: ProjectEntity): MergeRequestEntity = MergeRequestEntity(
-    id = this.id?.toLongOrNull(),
-    iid = this.iid,
-    platformIid = this.platformIid,
-    title = this.title,
-    description = this.description,
-    createdAt = this.createdAt,
-    closedAt = this.closedAt,
-    updatedAt = this.updatedAt,
-    state = this.state,
-    webUrl = this.webUrl,
-    project = owner
-)
+        project = owner
+    )

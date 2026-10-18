@@ -19,7 +19,10 @@ internal interface IBranchFileConnectionDao {
     /**
      * Find all files connected to a branch (paged)
      */
-    fun findFilesByBranch(branchId: String, pageable: Pageable): Page<File>
+    fun findFilesByBranch(
+        branchId: String,
+        pageable: Pageable
+    ): Page<File>
 
     /**
      * Find all branches connected to a file

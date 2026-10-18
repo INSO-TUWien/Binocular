@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class GraphQlMilestoneMapper {
-    fun toDto(milestone: Milestone): MilestoneDto {
-        return MilestoneDto(
+    fun toDto(milestone: Milestone): MilestoneDto =
+        MilestoneDto(
             id = milestone.id,
             iid = milestone.platformIid,
             title = milestone.title,
@@ -19,5 +19,4 @@ class GraphQlMilestoneMapper {
             startDate = milestone.startDate,
             webUrl = milestone.webUrl
         )
-    }
 }

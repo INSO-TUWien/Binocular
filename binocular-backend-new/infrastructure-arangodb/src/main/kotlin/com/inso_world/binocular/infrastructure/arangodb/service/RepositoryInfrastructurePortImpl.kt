@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.service
 
 import com.inso_world.binocular.core.delegates.logger
@@ -8,7 +9,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.nosql.ar
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.nosql.arangodb.CommitDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.nosql.arangodb.RepositoryDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.mapper.RepositoryMapper
-import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.model.Branch
 import com.inso_world.binocular.model.Commit
 import com.inso_world.binocular.model.Repository
@@ -18,13 +18,14 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
-internal class RepositoryInfrastructurePortImpl : RepositoryInfrastructurePort,
-    AbstractInfrastructurePort<Repository, String>() {
-
+internal class RepositoryInfrastructurePortImpl :
+    AbstractInfrastructurePort<Repository, String>(),
+    RepositoryInfrastructurePort {
     @PostConstruct
     fun init() {
         super.dao = repositoryDao
     }
+
     companion object {
         val logger by logger()
     }
@@ -64,23 +65,17 @@ internal class RepositoryInfrastructurePortImpl : RepositoryInfrastructurePort,
 
     override fun saveAll(values: Collection<Repository>): Iterable<Repository> = this.repositoryDao.saveAll(values)
 
-    override fun update(value: Repository): Repository {
-        return this.repositoryDao.save(value)
-    }
+    override fun update(value: Repository): Repository = this.repositoryDao.save(value)
 
     override fun findByName(name: String): Repository? = this.repositoryDao.findByName(name)?.let { this.repositoryMapper.toDomain(it) }
 
     override fun findExistingCommits(
         repo: Repository,
         shas: Set<String>,
-    ): Sequence<Commit> {
-        return commitDao.findByRepositoryAndShaIn(repo.localPath, shas).asSequence()
-    }
+    ): Sequence<Commit> = commitDao.findByRepositoryAndShaIn(repo.localPath, shas).asSequence()
 
     override fun findBranch(
         repository: Repository,
         name: String,
-    ): Branch? {
-        return branchDao.findByRepositoryAndName(repository.localPath, name)
-    }
+    ): Branch? = branchDao.findByRepositoryAndName(repository.localPath, name)
 }

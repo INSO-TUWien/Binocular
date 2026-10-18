@@ -1,16 +1,12 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.mapper
 
 import com.inso_world.binocular.core.delegates.logger
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
-import com.inso_world.binocular.infrastructure.sql.persistence.entity.ProjectEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.RepositoryEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.toSqlEntity
-import com.inso_world.binocular.model.Branch
-import com.inso_world.binocular.model.Commit
-import com.inso_world.binocular.model.Project
 import com.inso_world.binocular.model.Repository
-import com.inso_world.binocular.model.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -49,8 +45,9 @@ internal class RepositoryMapper : EntityMapper<Repository, RepositoryEntity> {
      */
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toEntity(domain: Repository): RepositoryEntity {
-        val owner = projectRepository.findByIid(domain.projectId.value)
-            ?: throw IllegalStateException("ProjectEntity with iid ${domain.projectId} not found")
+        val owner =
+            projectRepository.findByIid(domain.projectId.value)
+                ?: throw IllegalStateException("ProjectEntity with iid ${domain.projectId} not found")
 
         val entity = domain.toSqlEntity(owner)
         return entity
@@ -63,13 +60,14 @@ internal class RepositoryMapper : EntityMapper<Repository, RepositoryEntity> {
      * @return The Repository domain object
      */
     override fun toDomain(entity: RepositoryEntity): Repository {
-        val domain = Repository(
-            localPath = entity.localPath.trim(),
-            projectId = entity.project.iid,
-            iid = entity.iid
-        ).apply {
-            this.id = entity.id?.toString()
-        }
+        val domain =
+            Repository(
+                localPath = entity.localPath.trim(),
+                projectId = entity.project.iid,
+                iid = entity.iid
+            ).apply {
+                this.id = entity.id?.toString()
+            }
 
         return domain
     }

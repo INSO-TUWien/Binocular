@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.entity
 
 import com.arangodb.springframework.annotation.Document
@@ -57,7 +58,10 @@ data class DeveloperEntity(
     /**
      * Business key combining repository ID and email for uniqueness.
      */
-    data class Key(val repositoryId: String?, val email: String)
+    data class Key(
+        val repositoryId: String?,
+        val email: String
+    )
 
     /**
      * Extracts the name portion from the git signature.
@@ -66,7 +70,11 @@ data class DeveloperEntity(
     val name: String
         get() {
             val nameRegex = Regex("""^(.+?)\s*<""")
-            return nameRegex.find(gitSignature)?.groupValues?.get(1)?.trim()
+            return nameRegex
+                .find(gitSignature)
+                ?.groupValues
+                ?.get(1)
+                ?.trim()
                 ?: throw IllegalArgumentException("Could not extract name from gitSignature: $gitSignature")
         }
 

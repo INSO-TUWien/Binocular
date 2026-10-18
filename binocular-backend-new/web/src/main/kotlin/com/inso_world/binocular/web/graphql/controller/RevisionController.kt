@@ -34,12 +34,13 @@ internal class RevisionController(
     ): PageDto<RevisionDto> {
         logger.info("Getting all revisions...")
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = page,
-            size = perPage,
-            sort = sort ?: Sort.DESC,
-            sortBy = "id",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = page,
+                size = perPage,
+                sort = sort ?: Sort.DESC,
+                sortBy = "id",
+            )
 
         val result = fileService.findAllRevisions(pageable)
         return PageDto(result).map { mapper.toDto(it) }

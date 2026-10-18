@@ -111,11 +111,12 @@ object PaginationUtils {
         sort: ApiSort?,
         sortBy: String?,
     ): Pageable {
-        val direction: SpringSort.Direction? = when (sort) {
-            ApiSort.ASC -> SpringSort.Direction.ASC
-            ApiSort.DESC -> SpringSort.Direction.DESC
-            null -> SpringSort.Direction.ASC
-        }
+        val direction: SpringSort.Direction? =
+            when (sort) {
+                ApiSort.ASC -> SpringSort.Direction.ASC
+                ApiSort.DESC -> SpringSort.Direction.DESC
+                null -> SpringSort.Direction.ASC
+            }
         val base = createPageableWithValidation(page, size)
         return if (direction != null && !sortBy.isNullOrBlank()) {
             PageRequest.of(base.pageNumber, base.pageSize, SpringSort.by(direction, sortBy))

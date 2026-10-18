@@ -274,7 +274,10 @@ internal class DbExportControllerTest : RestControllerTest() {
                     assertEquals(
                         expected.platformIid,
                         actual.get("platformIid")?.asInt() ?: actual.get("iid").asInt(),
-                        "Issue $index iid mismatch: expected ${expected.platformIid}, got ${actual.get("platformIid")?.asInt() ?: actual.get("iid").asInt()}",
+                        "Issue $index iid mismatch: expected ${expected.platformIid}, got ${actual
+                            .get(
+                                "platformIid"
+                            )?.asInt() ?: actual.get("iid").asInt()}",
                     )
                     assertEquals(
                         expected.title,
@@ -360,7 +363,10 @@ internal class DbExportControllerTest : RestControllerTest() {
                     assertEquals(
                         expected.platformIid,
                         actual.get("platformIid")?.asInt() ?: actual.get("iid").asInt(),
-                        "MergeRequest $index iid mismatch: expected ${expected.platformIid}, got ${actual.get("platformIid")?.asInt() ?: actual.get("iid").asInt()}",
+                        "MergeRequest $index iid mismatch: expected ${expected.platformIid}, got ${actual
+                            .get(
+                                "platformIid"
+                            )?.asInt() ?: actual.get("iid").asInt()}",
                     )
                     assertEquals(
                         expected.title,
@@ -541,7 +547,10 @@ internal class DbExportControllerTest : RestControllerTest() {
                     assertEquals(
                         expected.platformIid,
                         actual.get("platformIid")?.asInt() ?: actual.get("iid").asInt(),
-                        "Milestone $index iid mismatch: expected ${expected.platformIid}, got ${actual.get("platformIid")?.asInt() ?: actual.get("iid").asInt()}",
+                        "Milestone $index iid mismatch: expected ${expected.platformIid}, got ${actual
+                            .get(
+                                "platformIid"
+                            )?.asInt() ?: actual.get("iid").asInt()}",
                     )
                     assertEquals(
                         expected.title,

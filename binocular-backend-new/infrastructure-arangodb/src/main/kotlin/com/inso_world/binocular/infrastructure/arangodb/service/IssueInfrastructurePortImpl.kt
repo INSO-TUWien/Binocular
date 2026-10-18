@@ -26,13 +26,13 @@ import org.springframework.stereotype.Service
 
 @Service
 internal class IssueInfrastructurePortImpl :
-    IssueInfrastructurePort,
-    AbstractInfrastructurePort<Issue, String>() {
-
+    AbstractInfrastructurePort<Issue, String>(),
+    IssueInfrastructurePort {
     @PostConstruct
     fun init() {
         super.dao = issueDao
     }
+
     @Autowired
     private lateinit var issueDao: IIssueDao
 

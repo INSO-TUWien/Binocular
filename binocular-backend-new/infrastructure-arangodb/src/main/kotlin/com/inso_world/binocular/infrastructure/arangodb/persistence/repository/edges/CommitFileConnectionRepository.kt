@@ -30,7 +30,11 @@ interface CommitFileConnectionRepository : ArangoRepository<CommitFileConnection
             RETURN f
 """,
     )
-    fun findFilesByCommitOrdered(commitId: String, offset: Int, limit: Int): List<FileEntity>
+    fun findFilesByCommitOrdered(
+        commitId: String,
+        offset: Int,
+        limit: Int
+    ): List<FileEntity>
 
     @Query(
         """
@@ -91,7 +95,10 @@ FOR c IN commits
             }
 """,
     )
-    fun findOwnershipByCommitAndFile(commitId: String, fileId: String): List<Map<String, Any?>>
+    fun findOwnershipByCommitAndFile(
+        commitId: String,
+        fileId: String
+    ): List<Map<String, Any?>>
 
     @Query(
         """
@@ -115,7 +122,11 @@ FOR c IN commits
             RETURN cm
 """,
     )
-    fun findCommitsByFileOrdered(fileId: String, offset: Int, limit: Int): List<CommitEntity>
+    fun findCommitsByFileOrdered(
+        fileId: String,
+        offset: Int,
+        limit: Int
+    ): List<CommitEntity>
 
     @Query(
         """

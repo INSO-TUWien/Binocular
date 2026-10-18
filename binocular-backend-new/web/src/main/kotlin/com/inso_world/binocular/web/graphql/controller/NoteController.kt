@@ -1,7 +1,6 @@
 package com.inso_world.binocular.web.graphql.controller
 
 import com.inso_world.binocular.core.service.NoteInfrastructurePort
-import com.inso_world.binocular.model.Note
 import com.inso_world.binocular.web.graphql.error.GraphQLValidationUtils
 import com.inso_world.binocular.web.graphql.mapper.GraphQlMapper
 import com.inso_world.binocular.web.graphql.model.NoteDto
@@ -40,12 +39,13 @@ internal class NoteController(
     ): PageDto<NoteDto> {
         logger.info("Getting all notes...")
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = page,
-            size = perPage,
-            sort = sort ?: Sort.DESC,
-            sortBy = "createdAt",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = page,
+                size = perPage,
+                sort = sort ?: Sort.DESC,
+                sortBy = "createdAt",
+            )
 
         logger.debug(
             "Getting all notes with properties page={}, perPage={}, sort={}",
@@ -75,5 +75,4 @@ internal class NoteController(
         logger.info("Getting note by id: $id")
         return mapper.toDto(GraphQLValidationUtils.requireEntityExists(noteService.findById(id), "Note", id))
     }
-
 }

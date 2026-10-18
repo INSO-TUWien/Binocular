@@ -48,7 +48,11 @@ class BranchTest : BaseUnitTest() {
                 localPath = "/path/to/repo",
                 projectId = project.iid,
             ).apply { this.project = project }
-        val developer = Developer(name = "Test Committer", email = "committer@test.com", repositoryId = repository.iid).apply { this.repository = repository }
+        val developer =
+            Developer(name = "Test Committer", email = "committer@test.com", repositoryId = repository.iid).apply {
+                this.repository =
+                    repository
+            }
         val signatureA = Signature(developerId = developer.iid, developer = developer, timestamp = LocalDateTime.of(2024, 1, 1, 0, 0))
         val signatureB = Signature(developerId = developer.iid, developer = developer, timestamp = LocalDateTime.of(2024, 1, 2, 0, 0))
         headCommit =
@@ -216,11 +220,20 @@ class BranchTest : BaseUnitTest() {
 
         @Test
         fun `toDomain updates head multiple times on repeated calls with different commits`() {
-            val committer = Developer(name = "Test Committer", email = "committer@test.com", repositoryId = repository.iid).apply { this.repository = repository }
+            val committer =
+                Developer(name = "Test Committer", email = "committer@test.com", repositoryId = repository.iid).apply {
+                    this.repository =
+                        repository
+                }
             val thirdCommit =
                 Commit(
                     sha = "c".repeat(40),
-                    authorSignature = Signature(developerId = committer.iid, developer = committer, timestamp = LocalDateTime.of(2024, 1, 3, 0, 0)),
+                    authorSignature =
+                        Signature(
+                            developerId = committer.iid,
+                            developer = committer,
+                            timestamp = LocalDateTime.of(2024, 1, 3, 0, 0)
+                        ),
                     repositoryId = repository.iid,
                     repository = repository,
                 )
@@ -250,11 +263,20 @@ class BranchTest : BaseUnitTest() {
         fun `toDomain throws exception when head commit belongs to different repository`() {
             val project2 = Project(name = "another-project")
             val repository2 = Repository(localPath = "/path/to/repo2", projectId = project2.iid).apply { this.project = project2 }
-            val testCommitter2 = Developer(name = "Test Committer", email = "commit2@test.com", repositoryId = repository2.iid).apply { this.repository = repository2 }
+            val testCommitter2 =
+                Developer(name = "Test Committer", email = "commit2@test.com", repositoryId = repository2.iid).apply {
+                    this.repository =
+                        repository2
+                }
             val commitFromDifferentRepo =
                 Commit(
                     sha = "d".repeat(40),
-                    authorSignature = Signature(developerId = testCommitter2.iid, developer = testCommitter2, timestamp = LocalDateTime.of(2024, 1, 1, 0, 0)),
+                    authorSignature =
+                        Signature(
+                            developerId = testCommitter2.iid,
+                            developer = testCommitter2,
+                            timestamp = LocalDateTime.of(2024, 1, 1, 0, 0)
+                        ),
                     repositoryId = repository2.iid,
                     repository = repository2,
                 )
@@ -275,11 +297,20 @@ class BranchTest : BaseUnitTest() {
 
             val project2 = Project(name = "another-project")
             val repository2 = Repository(localPath = "/path/to/repo2", projectId = project2.iid).apply { this.project = project2 }
-            val testCommitter2 = Developer(name = "Test Committer", email = "commit2@test.com", repositoryId = repository2.iid).apply { this.repository = repository2 }
+            val testCommitter2 =
+                Developer(name = "Test Committer", email = "commit2@test.com", repositoryId = repository2.iid).apply {
+                    this.repository =
+                        repository2
+                }
             val commitFromDifferentRepo =
                 Commit(
                     sha = "d".repeat(40),
-                    authorSignature = Signature(developerId = testCommitter2.iid, developer = testCommitter2, timestamp = LocalDateTime.of(2024, 1, 1, 0, 0)),
+                    authorSignature =
+                        Signature(
+                            developerId = testCommitter2.iid,
+                            developer = testCommitter2,
+                            timestamp = LocalDateTime.of(2024, 1, 1, 0, 0)
+                        ),
                     repositoryId = repository2.iid,
                     repository = repository2,
                 )
@@ -393,11 +424,20 @@ class BranchTest : BaseUnitTest() {
     fun `toDomain branches are scoped to specific repository`() {
         val project2 = Project(name = "another-project")
         val repository2 = Repository(localPath = "/path/to/repo2", projectId = project2.iid).apply { this.project = project2 }
-        val testCommitter2 = Developer(name = "Test Committer", email = "commit2@test.com", repositoryId = repository2.iid).apply { this.repository = repository2 }
+        val testCommitter2 =
+            Developer(name = "Test Committer", email = "commit2@test.com", repositoryId = repository2.iid).apply {
+                this.repository =
+                    repository2
+            }
         val commit2 =
             Commit(
                 sha = "e".repeat(40),
-                authorSignature = Signature(developerId = testCommitter2.iid, developer = testCommitter2, timestamp = LocalDateTime.of(2024, 1, 1, 0, 0)),
+                authorSignature =
+                    Signature(
+                        developerId = testCommitter2.iid,
+                        developer = testCommitter2,
+                        timestamp = LocalDateTime.of(2024, 1, 1, 0, 0)
+                    ),
                 repositoryId = repository2.iid,
                 repository = repository2,
             )

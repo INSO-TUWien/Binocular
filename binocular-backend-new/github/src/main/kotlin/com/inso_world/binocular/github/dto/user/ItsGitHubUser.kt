@@ -13,16 +13,17 @@ data class ItsGitHubUser(
     val avatarUrl: String?
 ) {
     fun toDomain(project: Project): Account {
-        val acc = Account(
-            gid = this.id,
-            login = this.login,
-            platform = Platform.GitHub,
-            projectIds = mutableSetOf(project.iid),
-        ).apply {
-            this.name = this@ItsGitHubUser.name
-            this.url = this@ItsGitHubUser.url
-            this.avatarUrl = this@ItsGitHubUser.avatarUrl
-        }
+        val acc =
+            Account(
+                gid = this.id,
+                login = this.login,
+                platform = Platform.GitHub,
+                projectIds = mutableSetOf(project.iid),
+            ).apply {
+                this.name = this@ItsGitHubUser.name
+                this.url = this@ItsGitHubUser.url
+                this.avatarUrl = this@ItsGitHubUser.avatarUrl
+            }
         return acc
     }
 }

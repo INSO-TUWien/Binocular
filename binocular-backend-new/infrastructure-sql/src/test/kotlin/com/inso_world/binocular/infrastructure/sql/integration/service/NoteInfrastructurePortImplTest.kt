@@ -31,7 +31,6 @@ import kotlin.uuid.Uuid
 
 @Transactional
 internal class NoteInfrastructurePortImplTest : BaseServiceTest() {
-
     @Autowired
     private lateinit var projectPort: ProjectInfrastructurePort
 
@@ -60,42 +59,49 @@ internal class NoteInfrastructurePortImplTest : BaseServiceTest() {
         project = projectPort.create(TestData.Domain.testProject(name = "Note Port Test Project", id = null))
         projectEntity = em.find(ProjectEntity::class.java, project.id!!.toLong())
 
-        account = accountPort.create(
-            Account(
-                gid = "note-account-gid",
-                platform = Platform.GitHub,
-                login = "note-user",
-                projectIds = mutableSetOf(project.iid),
+        account =
+            accountPort.create(
+                Account(
+                    gid = "note-account-gid",
+                    platform = Platform.GitHub,
+                    login = "note-user",
+                    projectIds = mutableSetOf(project.iid),
+                ).apply {
+                    name = "Note User"
+                }
+            )
+        val accountEntity =
+            em
+                .createQuery(
+                    "select a from AccountEntity a where a.login = :login",
+                    AccountEntity::class.java,
+                ).setParameter("login", "note-user")
+                .singleResult
+
+        issueEntity =
+            IssueEntity(
+                project = projectEntity,
+                gid = "issue-gid-note-test",
+                iid = issueIid,
+                title = "linked issue",
+            ).also { em.persist(it) }
+
+        mergeRequestEntity =
+            MergeRequestEntity(
+                iid = mrIid,
+                title = "linked mr",
+                project = projectEntity,
+            ).also { em.persist(it) }
+
+        noteEntity =
+            NoteEntity(
+                iid = noteIid,
+                body = "relationship note",
             ).apply {
-                name = "Note User"
+                accounts.add(accountEntity)
+                issues.add(issueEntity)
+                mergeRequests.add(mergeRequestEntity)
             }
-        )
-        val accountEntity = em.createQuery(
-            "select a from AccountEntity a where a.login = :login",
-            AccountEntity::class.java,
-        ).setParameter("login", "note-user").singleResult
-
-        issueEntity = IssueEntity(
-            project = projectEntity,
-            gid = "issue-gid-note-test",
-            iid = issueIid,
-            title = "linked issue",
-        ).also { em.persist(it) }
-
-        mergeRequestEntity = MergeRequestEntity(
-            iid = mrIid,
-            title = "linked mr",
-            project = projectEntity,
-        ).also { em.persist(it) }
-
-        noteEntity = NoteEntity(
-            iid = noteIid,
-            body = "relationship note",
-        ).apply {
-            accounts.add(accountEntity)
-            issues.add(issueEntity)
-            mergeRequests.add(mergeRequestEntity)
-        }
         em.persist(noteEntity)
 
         // Keep inverse collections consistent for entity toDomain() paths.

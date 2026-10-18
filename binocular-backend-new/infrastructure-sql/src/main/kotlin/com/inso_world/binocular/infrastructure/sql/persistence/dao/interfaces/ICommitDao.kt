@@ -8,6 +8,7 @@ import java.util.stream.Stream
 
 internal interface ICommitDao : IDao<CommitEntity, Long> {
     fun findByIid(iid: com.inso_world.binocular.model.Commit.Id): CommitEntity?
+
     fun findAllByIidIn(iids: Collection<com.inso_world.binocular.model.Commit.Id>): List<CommitEntity>
 
     fun findExistingSha(

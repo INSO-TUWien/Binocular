@@ -1,6 +1,5 @@
 package com.inso_world.binocular.web.graphql.model
 
-import java.time.LocalDateTime
 import com.inso_world.binocular.web.graphql.model.MentionDto
 
 data class MergeRequestDto(

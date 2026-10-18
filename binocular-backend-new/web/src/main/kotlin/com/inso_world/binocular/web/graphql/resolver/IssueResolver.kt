@@ -84,7 +84,7 @@ class IssueResolver(
     @SchemaMapping(typeName = "Issue", field = "author")
     fun author(issue: IssueDto): AccountDto? {
         logger.info("Resolving author for issue: ${issue.id}")
-        return issue.authorId?.let { 
+        return issue.authorId?.let {
             accountService.findByIid(Account.Id(Uuid.parse(it)))?.let { mapper.toDto(it) }
         }
     }

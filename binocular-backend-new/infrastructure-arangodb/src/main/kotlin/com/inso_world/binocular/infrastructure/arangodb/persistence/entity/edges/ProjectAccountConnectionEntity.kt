@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges
 
 import com.arangodb.serde.jackson.Id
@@ -9,9 +10,8 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.Accou
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.ProjectEntity
 
 @Edge(value = "projects-accounts")
-class ProjectAccountConnectionEntity (
+class ProjectAccountConnectionEntity(
     @Id var id: String? = null,
     @From var from: ProjectEntity,
     @To var to: AccountEntity,
 )
-

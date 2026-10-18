@@ -12,7 +12,10 @@ import org.springframework.stereotype.Repository
  * ArangoDB implementation of IRemoteDao.
  */
 @Repository
-internal class RemoteDao @Autowired constructor(
-    private val remoteRepository: RemoteRepository,
-    private val remoteMapper: RemoteMapper,
-) : MappedArangoDbDao<Remote, RemoteEntity, String>(remoteRepository, remoteMapper), IRemoteDao
+internal class RemoteDao
+    @Autowired
+    constructor(
+        private val remoteRepository: RemoteRepository,
+        private val remoteMapper: RemoteMapper,
+    ) : MappedArangoDbDao<Remote, RemoteEntity, String>(remoteRepository, remoteMapper),
+        IRemoteDao

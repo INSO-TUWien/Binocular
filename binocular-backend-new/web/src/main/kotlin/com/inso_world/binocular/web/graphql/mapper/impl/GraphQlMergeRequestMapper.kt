@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component
 class GraphQlMergeRequestMapper(
     private val mentionMapper: GraphQlMentionMapper
 ) {
-    fun toDto(mergeRequest: MergeRequest): MergeRequestDto {
-        return MergeRequestDto(
+    fun toDto(mergeRequest: MergeRequest): MergeRequestDto =
+        MergeRequestDto(
             id = mergeRequest.id,
             iid = mergeRequest.platformIid,
             title = mergeRequest.title,
@@ -22,7 +22,6 @@ class GraphQlMergeRequestMapper(
             webUrl = mergeRequest.webUrl,
             mentions = mergeRequest.mentions.map { mentionMapper.toDto(it) },
             sourceBranch = null, // Not directly available in domain model
-            targetBranch = null  // Not directly available in domain model
+            targetBranch = null // Not directly available in domain model
         )
-    }
 }

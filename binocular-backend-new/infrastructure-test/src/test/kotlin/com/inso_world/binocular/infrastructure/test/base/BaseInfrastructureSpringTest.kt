@@ -4,8 +4,8 @@ import com.inso_world.binocular.core.integration.base.InfrastructureDataSetup
 import com.inso_world.binocular.infrastructure.test.config.LocalArangodbConfig
 import com.inso_world.binocular.infrastructure.test.config.LocalPostgresConfig
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest

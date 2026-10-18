@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.persistence.entity
 
 import com.inso_world.binocular.infrastructure.sql.persistence.converter.KotlinUuidConverter
@@ -70,8 +71,30 @@ internal data class NoteEntity(
         mergeRequests = mutableListOf(),
     )
 
-    fun toDomain(): Note = Note(
-        id = this.id?.toString(),
+    fun toDomain(): Note =
+        Note(
+            id = this.id?.toString(),
+            body = this.body,
+            createdAt = this.createdAt,
+            updatedAt = this.updatedAt,
+            system = this.system,
+            resolvable = this.resolvable,
+            confidential = this.confidential,
+            internal = this.internal,
+            imported = this.imported,
+            importedFrom = this.importedFrom,
+            iid = this.iid,
+            issueIds = this.issues.map { it.iid }.toMutableSet(),
+            mergeRequestIds = this.mergeRequests.map { it.iid }.toMutableSet(),
+        ).apply {
+            accountIds.addAll(this@NoteEntity.accounts.map { it.iid })
+        }
+}
+
+internal fun Note.toSqlEntity(): NoteEntity =
+    NoteEntity(
+        id = this.id?.toLongOrNull(),
+        iid = this.iid,
         body = this.body,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
@@ -80,25 +103,5 @@ internal data class NoteEntity(
         confidential = this.confidential,
         internal = this.internal,
         imported = this.imported,
-        importedFrom = this.importedFrom,
-        iid = this.iid,
-        issueIds = this.issues.map { it.iid }.toMutableSet(),
-        mergeRequestIds = this.mergeRequests.map { it.iid }.toMutableSet(),
-    ).apply {
-        accountIds.addAll(this@NoteEntity.accounts.map { it.iid })
-    }
-}
-
-internal fun Note.toSqlEntity(): NoteEntity = NoteEntity(
-    id = this.id?.toLongOrNull(),
-    iid = this.iid,
-    body = this.body,
-    createdAt = this.createdAt,
-    updatedAt = this.updatedAt,
-    system = this.system,
-    resolvable = this.resolvable,
-    confidential = this.confidential,
-    internal = this.internal,
-    imported = this.imported,
-    importedFrom = this.importedFrom
-)
+        importedFrom = this.importedFrom
+    )

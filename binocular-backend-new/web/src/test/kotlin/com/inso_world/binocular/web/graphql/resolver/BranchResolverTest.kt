@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 internal class BranchResolverTest : GraphQlControllerTest() {
     @Autowired
     private lateinit var branchResolver: BranchResolver
+
     @Nested
     inner class BasicFunctionality {
         @Test
@@ -47,7 +48,13 @@ internal class BranchResolverTest : GraphQlControllerTest() {
                 { assertEquals("main", result.get("branch").asText(), "Branch name mismatch") },
                 { assertEquals(true, result.get("active").asBoolean(), "Branch active status mismatch") },
                 { assertEquals(true, result.get("tracksFileRenames").asBoolean(), "Branch tracksFileRenames mismatch") },
-                { assertEquals("abc1230000000000000000000000000000000000", result.get("latestCommit").asText(), "Branch latestCommit mismatch") },
+                {
+                    assertEquals(
+                        "abc1230000000000000000000000000000000000",
+                        result.get("latestCommit").asText(),
+                        "Branch latestCommit mismatch"
+                    )
+                },
             )
         }
     }
@@ -93,7 +100,13 @@ internal class BranchResolverTest : GraphQlControllerTest() {
                 { assertEquals("main", result.get("branch").asText(), "Branch name mismatch") },
                 { assertEquals(true, result.get("active").asBoolean(), "Branch active status mismatch") },
                 { assertEquals(true, result.get("tracksFileRenames").asBoolean(), "Branch tracksFileRenames mismatch") },
-                { assertEquals("abc1230000000000000000000000000000000000", result.get("latestCommit").asText(), "Branch latestCommit mismatch") },
+                {
+                    assertEquals(
+                        "abc1230000000000000000000000000000000000",
+                        result.get("latestCommit").asText(),
+                        "Branch latestCommit mismatch"
+                    )
+                },
             )
 
             // Verify files (paginated connection)
@@ -104,7 +117,14 @@ internal class BranchResolverTest : GraphQlControllerTest() {
             assertEquals(2, files.size(), "Should have 2 files")
 
             // Create a list of file paths from the result
-            val filePaths = (0 until files.size()).map { files.get(it).get("file").get("path").asText() }
+            val filePaths =
+                (0 until files.size()).map {
+                    files
+                        .get(it)
+                        .get("file")
+                        .get("path")
+                        .asText()
+                }
 
             // Verify that both files are present
             assertAll(
@@ -152,7 +172,13 @@ internal class BranchResolverTest : GraphQlControllerTest() {
                 { assertEquals("feature/new-feature", result.get("branch").asText(), "Branch name mismatch") },
                 { assertEquals(true, result.get("active").asBoolean(), "Branch active status mismatch") },
                 { assertEquals(false, result.get("tracksFileRenames").asBoolean(), "Branch tracksFileRenames mismatch") },
-                { assertEquals("def4560000000000000000000000000000000000", result.get("latestCommit").asText(), "Branch latestCommit mismatch") },
+                {
+                    assertEquals(
+                        "def4560000000000000000000000000000000000",
+                        result.get("latestCommit").asText(),
+                        "Branch latestCommit mismatch"
+                    )
+                },
             )
 
             // Verify files (paginated connection)
@@ -163,7 +189,14 @@ internal class BranchResolverTest : GraphQlControllerTest() {
             assertTrue(files.size() >= 1, "Should have at least 1 file")
 
             // Ensure expected file is present among results
-            val filePaths = (0 until files.size()).map { files.get(it).get("file").get("path").asText() }
+            val filePaths =
+                (0 until files.size()).map {
+                    files
+                        .get(it)
+                        .get("file")
+                        .get("path")
+                        .asText()
+                }
             assertTrue(filePaths.contains("src/main/kotlin/com/example/Utils.kt"), "Should contain Utils.kt file")
         }
     }

@@ -21,7 +21,6 @@ internal class SqlInfrastructureDataSetup(
     private val repositoryInfrastructurePort: RepositoryInfrastructurePortImpl,
     private val branchInfrastructurePort: BranchInfrastructurePortImpl,
 ) : InfrastructureDataSetup {
-
     @Autowired
     private lateinit var transactionTemplate: TransactionTemplate
 
@@ -54,7 +53,6 @@ internal class SqlInfrastructureDataSetup(
 //        userPort.deleteAll()
             entityManager.flush()
         }
-
 
         logger.info("<<< SqlInfrastructureDataSetup teardown")
     }

@@ -18,7 +18,6 @@ import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.Stats
 import com.inso_world.binocular.model.User
 import com.inso_world.binocular.model.vcs.ReferenceCategory
-
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -27,35 +26,34 @@ import org.springframework.test.util.AssertionErrors.fail
 import java.lang.reflect.ParameterizedType
 import kotlin.collections.Map
 
-
 // Test to ensure that the persistence entity classes align with the domain model classes
 // Tests should fail if there are mismatches in property types or relations
 // and warn if there are extra properties or relations
 @Disabled("Refactored in domain model #454")
 class DomainModelAlignmentTest {
-
     // Mapped pairs are based of off mappers
-    private val mappedClasses = mapOf(
-        Account::class.java to AccountEntity::class.java,
-        Branch::class.java to BranchEntity::class.java,
-        Build::class.java to BuildEntity::class.java,
-        Commit::class.java to CommitEntity::class.java,
-        File::class.java to FileEntity::class.java,
-        Issue::class.java to IssueEntity::class.java,
-        Job::class.java to JobEntity::class.java,
-        Mention::class.java to MentionEntity::class.java,
-        MergeRequest::class.java to MergeRequestEntity::class.java,
-        Milestone::class.java to MilestoneEntity::class.java,
-        Module::class.java to ModuleEntity::class.java,
-        Note::class.java to NoteEntity::class.java,
-        Platform::class.java to PlatformEntity::class.java,
-        Stats::class.java to StatsEntity::class.java,
-        User::class.java to UserEntity::class.java,
-        Developer::class.java to DeveloperEntity::class.java,
-        Repository::class.java to RepositoryEntity::class.java,
-        ReferenceCategory::class.java to String::class.java,
-        Project::class.java to ProjectEntity::class.java,
-    );
+    private val mappedClasses =
+        mapOf(
+            Account::class.java to AccountEntity::class.java,
+            Branch::class.java to BranchEntity::class.java,
+            Build::class.java to BuildEntity::class.java,
+            Commit::class.java to CommitEntity::class.java,
+            File::class.java to FileEntity::class.java,
+            Issue::class.java to IssueEntity::class.java,
+            Job::class.java to JobEntity::class.java,
+            Mention::class.java to MentionEntity::class.java,
+            MergeRequest::class.java to MergeRequestEntity::class.java,
+            Milestone::class.java to MilestoneEntity::class.java,
+            Module::class.java to ModuleEntity::class.java,
+            Note::class.java to NoteEntity::class.java,
+            Platform::class.java to PlatformEntity::class.java,
+            Stats::class.java to StatsEntity::class.java,
+            User::class.java to UserEntity::class.java,
+            Developer::class.java to DeveloperEntity::class.java,
+            Repository::class.java to RepositoryEntity::class.java,
+            ReferenceCategory::class.java to String::class.java,
+            Project::class.java to ProjectEntity::class.java,
+        )
 
     companion object {
         @JvmStatic
@@ -84,7 +82,10 @@ class DomainModelAlignmentTest {
 
     @ParameterizedTest
     @MethodSource("entityModelPairs")
-    fun `compare entity and model alignment`(model: Class<*>, entity: Class<*>) {
+    fun `compare entity and model alignment`(
+        model: Class<*>,
+        entity: Class<*>
+    ) {
         var internalModelProperties = emptySet<String>()
         var allowedTypePairs = emptyMap<Class<out Any>, Class<out Any>>()
         var mappedProperties = emptyMap<String, String>()
@@ -93,55 +94,64 @@ class DomainModelAlignmentTest {
         // handle special cases per model entity pair if applicable
         // TODO: spacial cases better defined in companion object?
         if (model == Issue::class.java) {
-            allowedTypePairs = mapOf(
-                java.time.LocalDateTime::class.java to java.util.Date::class.java
-            )
+            allowedTypePairs =
+                mapOf(
+                    java.time.LocalDateTime::class.java to java.util.Date::class.java
+                )
         }
         if (model == Commit::class.java) {
             internalModelProperties = setOf("_parents", "_children", "_branches")
 
-            mappedProperties = mapOf(
-                "commitDateTime" to "date"
-            )
+            mappedProperties =
+                mapOf(
+                    "commitDateTime" to "date"
+                )
 
-            allowedTypePairs = mapOf(
-                java.time.LocalDateTime::class.java to java.util.Date::class.java,
-                java.util.Set::class.java to java.util.List::class.java
-            )
+            allowedTypePairs =
+                mapOf(
+                    java.time.LocalDateTime::class.java to java.util.Date::class.java,
+                    java.util.Set::class.java to java.util.List::class.java
+                )
 
-            deprecatedProperties = setOf(
-                "branch"
-            )
+            deprecatedProperties =
+                setOf(
+                    "branch"
+                )
         }
         if (model == User::class.java) {
             internalModelProperties = setOf("_committedCommits", "_authoredCommits")
         }
         if (model == Branch::class.java) {
             internalModelProperties = setOf("_commits")
-            mappedProperties = mapOf(
-                "name" to "branch"
-            )
-            deprecatedProperties = setOf(
-                "branch"
-            )
+            mappedProperties =
+                mapOf(
+                    "name" to "branch"
+                )
+            deprecatedProperties =
+                setOf(
+                    "branch"
+                )
         }
         if (model == Build::class.java) {
-            allowedTypePairs = mapOf(
-            java.time.LocalDateTime::class.java to java.util.Date::class.java
-            )
+            allowedTypePairs =
+                mapOf(
+                    java.time.LocalDateTime::class.java to java.util.Date::class.java
+                )
         }
         if (model == Job::class.java) {
-            allowedTypePairs = mapOf(
-            java.time.LocalDateTime::class.java to java.util.Date::class.java
-            )
+            allowedTypePairs =
+                mapOf(
+                    java.time.LocalDateTime::class.java to java.util.Date::class.java
+                )
         }
         if (model == Mention::class.java) {
-            allowedTypePairs = mapOf(
-            java.time.LocalDateTime::class.java to java.util.Date::class.java
-            )
+            allowedTypePairs =
+                mapOf(
+                    java.time.LocalDateTime::class.java to java.util.Date::class.java
+                )
         }
 
-        //perform test
+        // perform test
         `compare raw entity and model properties`(
             entity,
             model,
@@ -152,24 +162,26 @@ class DomainModelAlignmentTest {
         )
 
         `compare entity and model edges`(entity, model)
-
     }
 
     // Generic method to compare properties of given entity and model classes
     // internalModelProperties: properties that should be ignored in the comparison because they are internal to the model
     // allowedTypePairs: map of model types to entity types that are considered equivalent
     // mappedProperties: map of model property names to entity property names based on mapping rules
-    fun `compare raw entity and model properties`(entity: Class<*>,
-                                                  model: Class<*>,
-                                                  internalModelProperties: Set<String>,
-                                                  allowedTypePairs: Map<Class<out Any>, Class<out Any>>,
-                                                  mappedProperties: Map<String, String>,
-                                                  deprecatedProperties: Set<String>) {
-        val entityProps = entity.declaredFields
-            .associate { it.name to it.type }
-        val modelProps = model.declaredFields
-            .associate { it.name to it.type }
-
+    fun `compare raw entity and model properties`(
+        entity: Class<*>,
+        model: Class<*>,
+        internalModelProperties: Set<String>,
+        allowedTypePairs: Map<Class<out Any>, Class<out Any>>,
+        mappedProperties: Map<String, String>,
+        deprecatedProperties: Set<String>
+    ) {
+        val entityProps =
+            entity.declaredFields
+                .associate { it.name to it.type }
+        val modelProps =
+            model.declaredFields
+                .associate { it.name to it.type }
 
         // check for matching type or allowed equivalence
         modelProps.forEach { (name, modelType) ->
@@ -177,12 +189,12 @@ class DomainModelAlignmentTest {
             val entityType = entityProps[entityPropertyName]
 
             if (deprecatedProperties.contains(name)) {
-                //if a property is deprecated check for its existence in the entity and mapping status
+                // if a property is deprecated check for its existence in the entity and mapping status
                 if (entityType != null) {
                     if (!mappedProperties.values.contains(entityPropertyName)) {
                         println("️⚠️ Property '$name' in ${model.simpleName} is deprecated but still exists in ${entity.simpleName}.")
                     } else {
-                        var key : String = ""
+                        var key: String = ""
                         mappedProperties.forEach { pair ->
                             if (pair.value == entityPropertyName) key = pair.key
                         }
@@ -201,7 +213,9 @@ class DomainModelAlignmentTest {
 
             val isAllowedMismatch = (allowedTypePairs[modelType] == entityType) || (mappedClasses[modelType] == entityType)
             if (entityType != modelType && !isAllowedMismatch) {
-                fail("❌ Property '$name' type mismatch between ${model.simpleName} and ${entity.simpleName}: expected $modelType but got $entityType")
+                fail(
+                    "❌ Property '$name' type mismatch between ${model.simpleName} and ${entity.simpleName}: expected $modelType but got $entityType"
+                )
             }
         }
 
@@ -215,33 +229,41 @@ class DomainModelAlignmentTest {
         }
     }
 
-    fun `compare entity and model edges`(entity: Class<*>,
-                                         model: Class<*>,) {
-        val entityRelations = entity.declaredFields
-            .filter { field ->
-                val type = field.genericType
-                val isRelevant = (!(type is Class<*> && type.isPrimitive)
-                        && type != String::class.java
-                        && type != java.util.Date::class.java)
-                        && !(field.name.contains("_"))
-                isRelevant
-            }
-            .map { field -> field.name to field.genericType }
-            .toSet()
+    fun `compare entity and model edges`(
+        entity: Class<*>,
+        model: Class<*>,
+    ) {
+        val entityRelations =
+            entity.declaredFields
+                .filter { field ->
+                    val type = field.genericType
+                    val isRelevant =
+                        (
+                            !(type is Class<*> && type.isPrimitive) &&
+                                type != String::class.java &&
+                                type != java.util.Date::class.java
+                        ) &&
+                            !(field.name.contains("_"))
+                    isRelevant
+                }.map { field -> field.name to field.genericType }
+                .toSet()
 
         // find all fields that don't have primitive or LocalDateTime type in commit model or have names containing"_"
         // and save their names and generic type in modelRelations
-        val modelRelations = model.declaredFields
-            .filter { field ->
-                val type = field.genericType
-                val isRelevant = (!(type is Class<*> && type.isPrimitive)
-                        && type != String::class.java
-                        && type != java.time.LocalDateTime::class.java)
-                        && !(field.name.contains("_"))
-                isRelevant
-            }
-            .map { field -> field.name to field.genericType }
-            .toSet()
+        val modelRelations =
+            model.declaredFields
+                .filter { field ->
+                    val type = field.genericType
+                    val isRelevant =
+                        (
+                            !(type is Class<*> && type.isPrimitive) &&
+                                type != String::class.java &&
+                                type != java.time.LocalDateTime::class.java
+                        ) &&
+                            !(field.name.contains("_"))
+                    isRelevant
+                }.map { field -> field.name to field.genericType }
+                .toSet()
 
         // check that all model relations exist in entity relations with correct mapped types
         modelRelations.forEach { (name, modelType) ->
@@ -263,13 +285,16 @@ class DomainModelAlignmentTest {
                 val paramMatch = (mappedClasses[modelParam] == entityParam) || modelParam == entityParam
 
                 if (!rawMatch || !paramMatch) {
-                    fail("❌ Edge '$name' mismatch between ${model.simpleName} and ${entity.simpleName}: expected $modelRaw<$modelParam> but got $entityRaw<$entityParam>")
+                    fail(
+                        "❌ Edge '$name' mismatch between ${model.simpleName} and ${entity.simpleName}: expected $modelRaw<$modelParam> but got $entityRaw<$entityParam>"
+                    )
                 }
-
             } else if (modelType is Class<*> && entityRelation is Class<*>) {
                 val mappedExpected = mappedClasses[modelType]
                 if (entityRelation != mappedExpected && entityRelation != modelType) {
-                    fail("❌ Edge '$name' mismatch between ${model.simpleName} and ${entity.simpleName}: expected ${mappedExpected ?: modelType} but got $entityRelation")
+                    fail(
+                        "❌ Edge '$name' mismatch between ${model.simpleName} and ${entity.simpleName}: expected ${mappedExpected ?: modelType} but got $entityRelation"
+                    )
                 }
             }
         }
@@ -278,10 +303,12 @@ class DomainModelAlignmentTest {
         val extraRelations = entityRelations.map { it.first }.toSet() - modelRelations.map { it.first }.toSet()
         if (extraRelations.isNotEmpty()) {
             for (extraRelation in extraRelations) {
-                println("⚠️ ${entity.simpleName} has extra relation (edge) through field $extraRelation to entity class : ${entityRelations.find { it.first == extraRelation }?.second}.")
+                println(
+                    "⚠️ ${entity.simpleName} has extra relation (edge) through field $extraRelation to entity class : ${entityRelations.find {
+                        it.first == extraRelation
+                    }?.second}."
+                )
             }
         }
     }
-
-
 }

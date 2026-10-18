@@ -30,7 +30,6 @@ open class Index(
         private var logger: Logger = LoggerFactory.getLogger(Index::class.java)
     }
 
-
     // this is just to test the account indexing as accounts should be indexed together with issues
     @Command(command = ["accounts"], description = "Index accounts from ITS")
     open fun accounts(

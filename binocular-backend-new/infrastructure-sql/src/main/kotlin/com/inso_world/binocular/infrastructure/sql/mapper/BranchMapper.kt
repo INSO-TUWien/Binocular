@@ -7,11 +7,7 @@ import com.inso_world.binocular.infrastructure.sql.persistence.entity.CommitEnti
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.RepositoryEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.toSqlEntity
 import com.inso_world.binocular.model.Branch
-import com.inso_world.binocular.model.Commit
-import com.inso_world.binocular.model.Repository
 import jakarta.validation.Valid
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Lazy
 import org.springframework.data.util.ReflectionUtils.setField
 import org.springframework.stereotype.Component
 
@@ -33,7 +29,6 @@ import org.springframework.stereotype.Component
  */
 @Component
 internal class BranchMapper : EntityMapper<Branch, BranchEntity> {
-
     companion object {
         private val logger by logger()
     }
@@ -45,13 +40,14 @@ internal class BranchMapper : EntityMapper<Branch, BranchEntity> {
      * @return The BranchEntity (structure only)
      */
     @Deprecated("Use toEntity(domain, owner, head) instead", ReplaceWith("toEntity(domain, owner, head)"))
-    override fun toEntity(domain: Branch): BranchEntity {
+    override fun toEntity(domain: Branch): BranchEntity =
         throw UnsupportedOperationException("Mapping to entity now requires explicit owner and head entities.")
-    }
 
-    fun toEntity(domain: Branch, owner: RepositoryEntity, head: CommitEntity): BranchEntity {
-        return domain.toSqlEntity(owner, head)
-    }
+    fun toEntity(
+        domain: Branch,
+        owner: RepositoryEntity,
+        head: CommitEntity
+    ): BranchEntity = domain.toSqlEntity(owner, head)
 
     /**
      * Converts a BranchEntity to Branch domain object.

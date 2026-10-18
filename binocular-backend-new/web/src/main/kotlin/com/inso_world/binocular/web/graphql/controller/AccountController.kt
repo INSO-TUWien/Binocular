@@ -1,7 +1,6 @@
 package com.inso_world.binocular.web.graphql.controller
 
 import com.inso_world.binocular.core.service.AccountInfrastructurePort
-import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.web.graphql.error.GraphQLValidationUtils
 import com.inso_world.binocular.web.graphql.mapper.GraphQlMapper
 import com.inso_world.binocular.web.graphql.model.AccountDto
@@ -40,12 +39,13 @@ internal class AccountController(
     ): PageDto<AccountDto> {
         logger.info("Getting all accounts...")
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = page,
-            size = perPage,
-            sort = sort ?: Sort.ASC,
-            sortBy = "id",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = page,
+                size = perPage,
+                sort = sort ?: Sort.ASC,
+                sortBy = "id",
+            )
 
         logger.debug(
             "Getting all accounts with properties page={}, perPage={}, sort={}",
@@ -75,5 +75,4 @@ internal class AccountController(
         logger.info("Getting account by id: $id")
         return mapper.toDto(GraphQLValidationUtils.requireEntityExists(accountService.findById(id), "Account", id))
     }
-
 }

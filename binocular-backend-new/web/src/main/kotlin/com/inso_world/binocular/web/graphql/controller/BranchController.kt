@@ -1,7 +1,6 @@
 package com.inso_world.binocular.web.graphql.controller
 
 import com.inso_world.binocular.core.service.BranchInfrastructurePort
-import com.inso_world.binocular.model.Branch
 import com.inso_world.binocular.web.graphql.error.GraphQLValidationUtils
 import com.inso_world.binocular.web.graphql.mapper.GraphQlMapper
 import com.inso_world.binocular.web.graphql.model.BranchDto
@@ -40,12 +39,13 @@ internal class BranchController(
     ): PageDto<BranchDto> {
         logger.info("Getting all branches...")
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = page,
-            size = perPage,
-            sort = sort ?: Sort.ASC,
-            sortBy = "branch",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = page,
+                size = perPage,
+                sort = sort ?: Sort.ASC,
+                sortBy = "branch",
+            )
 
         logger.debug(
             "Getting all branches with properties page={}, perPage={}, sort={}",
@@ -87,11 +87,12 @@ internal class BranchController(
             return mapper.toDto(GraphQLValidationUtils.requireEntityExists(branchService.findById(id), "Branch", id))
         }
 
-        return mapper.toDto(GraphQLValidationUtils.requireEntityExists(
-            branchService.findByName(requireNotNull(branchName)),
-            "Branch",
-            branchName))
+        return mapper.toDto(
+            GraphQLValidationUtils.requireEntityExists(
+                branchService.findByName(requireNotNull(branchName)),
+                "Branch",
+                branchName
+            )
+        )
     }
-
-
 }

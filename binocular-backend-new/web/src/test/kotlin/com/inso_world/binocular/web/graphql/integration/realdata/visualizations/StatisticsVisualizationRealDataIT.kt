@@ -1,16 +1,16 @@
 package com.inso_world.binocular.web.graphql.integration.realdata.visualizations
 
+import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 import com.inso_world.binocular.web.graphql.integration.realdata.base.BaseGraphQlCompatibilityIT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 
 internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
-
     @Test
     fun `statistics commits snapshot returns expected first item`() {
-        val query = $$"""
+        val query =
+            $$"""
             query (
               $page: Int,
               $perPage: Int,
@@ -52,15 +52,16 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1000,
-            "since" to "2024-08-08T03:00",
-            "until" to "2025-12-08T12:00:26",
-            "sort" to "ASC",
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1000,
+                "since" to "2024-08-08T03:00",
+                "until" to "2025-12-08T12:00:26",
+                "sort" to "ASC",
+            )
 
         val root = client.execute(query, variables)
         val commits = root.get("commits")
@@ -90,7 +91,11 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
         assertEquals("e6c685f88ddf315c7081f9b17d9dbc680437a491", parents.get(0).asText(), "parents[0]")
 
         assertIsoInstantEquals(first.get("date").asText(), "2024-08-08T14:21:21.000Z", "date")
-        assertEquals("https://github.com/INSO-World/Binocular/commit/c44daad5df789734ed8d3867c24bf5ad06152268", first.get("webUrl").asText(), "webUrl")
+        assertEquals(
+            "https://github.com/INSO-World/Binocular/commit/c44daad5df789734ed8d3867c24bf5ad06152268",
+            first.get("webUrl").asText(),
+            "webUrl"
+        )
 
         val stats = first.get("stats")
         assertEquals(75, stats.get("additions").asInt(), "stats.additions")
@@ -117,7 +122,11 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
         run {
             val item = filesData.get(1)
             val f = item.get("file")
-            assertEquals("binocular-frontend/src/visualizations/code-review-metrics/chart/chart.tsx", f.get("path").asText(), "files[1].file.path")
+            assertEquals(
+                "binocular-frontend/src/visualizations/code-review-metrics/chart/chart.tsx",
+                f.get("path").asText(),
+                "files[1].file.path"
+            )
             assertEquals("File", f.get("__typename").asText(), "files[1].file.__typename")
             val s = item.get("stats")
             assertEquals(0, s.get("additions").asInt(), "files[1].stats.additions")
@@ -132,7 +141,8 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
 
     @Test
     fun `statistics users snapshot returns expected first two items`() {
-        val query = $$"""
+        val query =
+            $$"""
             query (
               $page: Int,
               $perPage: Int
@@ -150,12 +160,13 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1000,
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1000,
+            )
 
         val root = client.execute(query, variables)
         val users = root.get("users")
@@ -196,7 +207,11 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
             }
             assertTrue(johannNode != null, "users.data should contain Johann Grabner <johann.grabner@inso.tuwien.ac.at>")
             val u1 = johannNode!!
-            assertEquals("Johann Grabner <johann.grabner@inso.tuwien.ac.at>", u1.get("gitSignature").asText(), "users[*].gitSignature (Johann)")
+            assertEquals(
+                "Johann Grabner <johann.grabner@inso.tuwien.ac.at>",
+                u1.get("gitSignature").asText(),
+                "users[*].gitSignature (Johann)"
+            )
             val acc = u1.get("account")
             if (!acc.isNull) {
                 assertEquals("GitHub", acc.get("platform").asText(), "users[*].account.platform (Johann)")
@@ -210,7 +225,8 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
 
     @Test
     fun `statistics issues snapshot returns expected first item`() {
-        val query = $$"""
+        val query =
+            $$"""
             query (
               $page: Int,
               $perPage: Int,
@@ -238,14 +254,15 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1000,
-            "since" to "2024-08-08T03:00",
-            "until" to "2025-12-08T12:00:26",
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1000,
+                "since" to "2024-08-08T03:00",
+                "until" to "2025-12-08T12:00:26",
+            )
 
         val root = client.execute(query, variables)
         val issues = root.get("issues")
@@ -275,7 +292,11 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
         assertEquals("uberroot4", author.get("login").asText(), "issue.author.login")
         assertEquals("Manuel Stöger", author.get("name").asText(), "issue.author.name")
         val authorUser = author.get("user")
-        assertEquals("Manuel Stöger <manuel.stoeger@inso-world.com>", authorUser.get("gitSignature").asText(), "issue.author.user.gitSignature")
+        assertEquals(
+            "Manuel Stöger <manuel.stoeger@inso-world.com>",
+            authorUser.get("gitSignature").asText(),
+            "issue.author.user.gitSignature"
+        )
         // assertEquals("6869054", authorUser.get("id").asText(), "issue.author.user.id")
         assertEquals("User", authorUser.get("__typename").asText(), "issue.author.user.__typename")
         assertEquals("Account", author.get("__typename").asText(), "issue.author.__typename")
@@ -306,7 +327,8 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
 
     @Test
     fun `statistics builds snapshot returns expected first item`() {
-        val query = $$"""
+        val query =
+            $$"""
             query (
               $page: Int,
               $perPage: Int,
@@ -340,15 +362,16 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1000,
-            "since" to 1723078800000,
-            "until" to 1765191626000,
-            "sort" to "ASC",
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1000,
+                "since" to 1723078800000,
+                "until" to 1765191626000,
+                "sort" to "ASC",
+            )
 
         val root = client.execute(query, variables)
         val builds = root.get("builds")
@@ -395,7 +418,8 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
 
     @Test
     fun `statistics mergeRequests snapshot returns expected first item`() {
-        val query = $$"""
+        val query =
+            $$"""
             query (
               $page: Int,
               $perPage: Int,
@@ -425,14 +449,15 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1000,
-            "since" to "2024-08-08T03:00",
-            "until" to "2025-12-08T12:00:26",
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1000,
+                "since" to "2024-08-08T03:00",
+                "until" to "2025-12-08T12:00:26",
+            )
 
         val root = client.execute(query, variables)
         val mr = root.get("mergeRequests")
@@ -459,7 +484,11 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
         assertEquals("Nyzabes", author.get("login").asText(), "data[0].author.login")
         assertEquals("Sebastian Watzinger", author.get("name").asText(), "data[0].author.name")
         val authorUser = author.get("user")
-        assertEquals("Sebastian Watzinger <se.watzinger@gmail.com>", authorUser.get("gitSignature").asText(), "data[0].author.user.gitSignature")
+        assertEquals(
+            "Sebastian Watzinger <se.watzinger@gmail.com>",
+            authorUser.get("gitSignature").asText(),
+            "data[0].author.user.gitSignature"
+        )
         // assertEquals("6812846", authorUser.get("id").asText(), "data[0].author.user.id")
         assertEquals("User", authorUser.get("__typename").asText(), "data[0].author.user.__typename")
         assertEquals("Account", author.get("__typename").asText(), "data[0].author.__typename")
@@ -471,5 +500,4 @@ internal class StatisticsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() 
         assertEquals("mergeRequest", first.get("__typename").asText(), "data[0].__typename")
         assertEquals("PaginatedmergeRequest", mr.get("__typename").asText(), "mergeRequests.__typename")
     }
-
 }

@@ -19,10 +19,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 )
 @ExtendWith(SpringExtension::class)
 internal class ContainerCheck : BaseIntegrationTest() {
-
     @Test
     fun `check if postgres container is running`() {
         assertTrue(SqlTestConfig.pg.isRunning)
     }
-
 }

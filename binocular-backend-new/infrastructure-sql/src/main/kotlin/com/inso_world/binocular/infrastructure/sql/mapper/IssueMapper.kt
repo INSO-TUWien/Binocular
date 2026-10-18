@@ -3,14 +3,8 @@ package com.inso_world.binocular.infrastructure.sql.mapper
 import com.inso_world.binocular.core.delegates.logger
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.IssueEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.ProjectEntity
-import com.inso_world.binocular.infrastructure.sql.persistence.entity.RepositoryEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.toSqlEntity
 import com.inso_world.binocular.model.Issue
-import com.inso_world.binocular.model.Project
-import com.inso_world.binocular.model.Repository
-import com.inso_world.binocular.model.User
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.util.ReflectionUtils.setField
@@ -30,7 +24,10 @@ internal class IssueMapper {
     /**
      * Converts a domain Issue to a SQL IssueEntity
      */
-    fun toEntity(domain: Issue, owner: ProjectEntity): IssueEntity {
+    fun toEntity(
+        domain: Issue,
+        owner: ProjectEntity
+    ): IssueEntity {
         val entity = domain.toSqlEntity(owner)
         entity.setDomainLabels(domain.labels)
         entity.setDomainMentions(domain.mentions)
@@ -40,11 +37,12 @@ internal class IssueMapper {
     /**
      * Converts a SQL IssueEntity to a domain Issue
      */
-    fun toDomain(entity: IssueEntity): Issue {
-        return entity.toDomain()
-    }
+    fun toDomain(entity: IssueEntity): Issue = entity.toDomain()
 
-    fun refreshDomain(target: Issue, entity: IssueEntity): Issue {
+    fun refreshDomain(
+        target: Issue,
+        entity: IssueEntity
+    ): Issue {
         setField(
             target.javaClass.getDeclaredField("id"),
             target,
@@ -59,8 +57,6 @@ internal class IssueMapper {
      */
     fun toDomainList(entities: Iterable<IssueEntity>): List<Issue> = entities.map { toDomain(it) }
 }
-
-
 
 // package com.inso_world.binocular.infrastructure.sql.persistence.mapper
 //

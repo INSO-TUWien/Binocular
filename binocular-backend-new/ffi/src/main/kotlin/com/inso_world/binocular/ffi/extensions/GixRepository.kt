@@ -1,6 +1,5 @@
 package com.inso_world.binocular.ffi.pojos
 
-import com.inso_world.binocular.ffi.extensions.toFfi
 import com.inso_world.binocular.ffi.internal.GixRepository
 import com.inso_world.binocular.model.Project
 import com.inso_world.binocular.model.Repository

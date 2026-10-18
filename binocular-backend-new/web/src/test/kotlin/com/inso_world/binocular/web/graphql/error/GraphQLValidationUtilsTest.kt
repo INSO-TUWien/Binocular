@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class GraphQLValidationUtilsTest {
-
     @Test
     fun `createPageableWithValidation should not throw exception for valid parameters`() {
         // Valid parameters
@@ -22,9 +21,10 @@ class GraphQLValidationUtilsTest {
 
     @Test
     fun `createPageableWithValidation should throw exception for invalid page parameter`() {
-        val exception = assertThrows<ValidationException> {
-            PaginationUtils.createPageableWithValidation(0, 10)
-        }
+        val exception =
+            assertThrows<ValidationException> {
+                PaginationUtils.createPageableWithValidation(0, 10)
+            }
 
         assert(exception.message?.contains("Page must be greater than or equal to 1") == true)
         assert(exception.extensions["parameter"] == "page")
@@ -34,9 +34,10 @@ class GraphQLValidationUtilsTest {
 
     @Test
     fun `createPageableWithValidation should throw exception for invalid perPage parameter`() {
-        val exception = assertThrows<ValidationException> {
-            PaginationUtils.createPageableWithValidation(1, 0)
-        }
+        val exception =
+            assertThrows<ValidationException> {
+                PaginationUtils.createPageableWithValidation(1, 0)
+            }
 
         assert(exception.message?.contains("PerPage must be greater than or equal to 1") == true)
         assert(exception.extensions["parameter"] == "perPage")
@@ -46,9 +47,10 @@ class GraphQLValidationUtilsTest {
 
     @Test
     fun `createPageableWithValidation should throw exception for negative page parameter`() {
-        val exception = assertThrows<ValidationException> {
-            PaginationUtils.createPageableWithValidation(-5, 10)
-        }
+        val exception =
+            assertThrows<ValidationException> {
+                PaginationUtils.createPageableWithValidation(-5, 10)
+            }
 
         assert(exception.message?.contains("Page must be greater than or equal to 1") == true)
         assert(exception.extensions["parameter"] == "page")
@@ -58,9 +60,10 @@ class GraphQLValidationUtilsTest {
 
     @Test
     fun `createPageableWithValidation should throw exception for negative perPage parameter`() {
-        val exception = assertThrows<ValidationException> {
-            PaginationUtils.createPageableWithValidation(1, -5)
-        }
+        val exception =
+            assertThrows<ValidationException> {
+                PaginationUtils.createPageableWithValidation(1, -5)
+            }
 
         assert(exception.message?.contains("PerPage must be greater than or equal to 1") == true)
         assert(exception.extensions["parameter"] == "perPage")
@@ -70,9 +73,10 @@ class GraphQLValidationUtilsTest {
 
     @Test
     fun `createPageableWithValidation should throw exception for extremely large page parameter`() {
-        val exception = assertThrows<ValidationException> {
-            PaginationUtils.createPageableWithValidation(20000, 10)
-        }
+        val exception =
+            assertThrows<ValidationException> {
+                PaginationUtils.createPageableWithValidation(20000, 10)
+            }
 
         assert(exception.message?.contains("Page number is too large") == true)
         assert(exception.extensions["parameter"] == "page")
@@ -82,9 +86,10 @@ class GraphQLValidationUtilsTest {
 
     @Test
     fun `createPageableWithValidation should throw exception for extremely large perPage parameter`() {
-        val exception = assertThrows<ValidationException> {
-            PaginationUtils.createPageableWithValidation(1, 2000)
-        }
+        val exception =
+            assertThrows<ValidationException> {
+                PaginationUtils.createPageableWithValidation(1, 2000)
+            }
 
         assert(exception.message?.contains("PerPage is too large") == true)
         assert(exception.extensions["parameter"] == "perPage")
@@ -94,9 +99,10 @@ class GraphQLValidationUtilsTest {
 
     @Test
     fun `createPageableWithValidation should throw exception for Integer MAX_VALUE page parameter`() {
-        val exception = assertThrows<ValidationException> {
-            PaginationUtils.createPageableWithValidation(Integer.MAX_VALUE, 10)
-        }
+        val exception =
+            assertThrows<ValidationException> {
+                PaginationUtils.createPageableWithValidation(Integer.MAX_VALUE, 10)
+            }
 
         assert(exception.message?.contains("maximum integer value") == true)
         assert(exception.extensions["parameter"] == "page")
@@ -113,9 +119,10 @@ class GraphQLValidationUtilsTest {
 
     @Test
     fun `requireEntityExists should throw exception if entity is null`() {
-        val exception = assertThrows<NotFoundException> {
-            GraphQLValidationUtils.requireEntityExists(null, "TestEntity", "1")
-        }
+        val exception =
+            assertThrows<NotFoundException> {
+                GraphQLValidationUtils.requireEntityExists(null, "TestEntity", "1")
+            }
 
         assert(exception.message?.contains("TestEntity not found with id: 1") == true)
     }

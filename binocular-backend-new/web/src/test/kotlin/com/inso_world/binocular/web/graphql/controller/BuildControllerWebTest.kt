@@ -323,10 +323,11 @@ internal class BuildControllerWebTest : BaseIntegrationTest() {
             assertEquals(1, buildsData.size(), "Expected 1 build on second page, but got ${buildsData.size()}")
 
             val actualBuild = buildsData.get(0)
-            val expectedBuild = TestDataProvider.testBuilds
-                .sortedByDescending { it.id?.toInt() ?: Int.MIN_VALUE }
-                .drop(1)
-                .first()
+            val expectedBuild =
+                TestDataProvider.testBuilds
+                    .sortedByDescending { it.id?.toInt() ?: Int.MIN_VALUE }
+                    .drop(1)
+                    .first()
 
             assertAll(
                 { assertEquals(expectedBuild.id, actualBuild.get("id").asText(), "Build id mismatch on page 2") },

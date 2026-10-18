@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -28,7 +29,6 @@ import kotlin.uuid.ExperimentalUuidApi
  */
 @Component
 internal class DeveloperMapper : EntityMapper<Developer, DeveloperEntity> {
-
     companion object {
         private val logger by logger()
     }
@@ -41,11 +41,12 @@ internal class DeveloperMapper : EntityMapper<Developer, DeveloperEntity> {
      */
     @OptIn(ExperimentalUuidApi::class)
     override fun toEntity(domain: Developer): DeveloperEntity {
-        val owner = RepositoryEntity(
-            iid = domain.repositoryId.value,
-            localPath = "",
-            project = ProjectEntity(iid = domain.repositoryId.value, name = "")
-        )
+        val owner =
+            RepositoryEntity(
+                iid = domain.repositoryId.value,
+                localPath = "",
+                project = ProjectEntity(iid = domain.repositoryId.value, name = "")
+            )
         val entity = domain.toArangoEntity(owner)
         return entity
     }
@@ -57,14 +58,15 @@ internal class DeveloperMapper : EntityMapper<Developer, DeveloperEntity> {
      * @return The Developer domain object (structure only, without relationships)
      */
     override fun toDomain(entity: DeveloperEntity): Developer {
-        val domain = Developer(
-            name = entity.name,
-            email = entity.email,
-            repositoryId = entity.repository?.let { Repository.Id(it.iid) } ?: Repository.Id(entity.iid.value),
-            iid = entity.iid
-        ).apply {
-            this.id = entity.id
-        }
+        val domain =
+            Developer(
+                name = entity.name,
+                email = entity.email,
+                repositoryId = entity.repository?.let { Repository.Id(it.iid) } ?: Repository.Id(entity.iid.value),
+                iid = entity.iid
+            ).apply {
+                this.id = entity.id
+            }
         return domain
     }
 

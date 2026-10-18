@@ -7,7 +7,10 @@ import java.util.stream.Stream
 
 internal interface IDeveloperDao : IDao<DeveloperEntity, Long> {
     fun findByIid(iid: com.inso_world.binocular.model.Developer.Id): DeveloperEntity?
+
     fun findAllByGitSignatureIn(emails: Collection<String>): Stream<DeveloperEntity>
+
     fun findAll(repository: RepositoryEntity): Iterable<DeveloperEntity>
+
     fun findAllAsStream(repository: Repository): Stream<DeveloperEntity>
 }

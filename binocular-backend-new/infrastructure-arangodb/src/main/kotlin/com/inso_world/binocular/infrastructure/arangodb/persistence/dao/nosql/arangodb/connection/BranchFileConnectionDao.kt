@@ -50,19 +50,23 @@ internal class BranchFileConnectionDao
         }
 
         /**
-        * Find all files by branch paginated
-        */
-        override fun findFilesByBranch(branchId: String, pageable: Pageable): Page<File> {
+         * Find all files by branch paginated
+         */
+        override fun findFilesByBranch(
+            branchId: String,
+            pageable: Pageable
+        ): Page<File> {
             val offset = pageable.offset.toInt()
             val size = pageable.pageSize
             val firstOrder = pageable.sort.firstOrNull()
             val asc = firstOrder?.direction != Sort.Direction.DESC
 
-            val entities = if (asc) {
-                repository.findFilesByBranchAsc(branchId, offset, size)
-            } else {
-                repository.findFilesByBranchDesc(branchId, offset, size)
-            }
+            val entities =
+                if (asc) {
+                    repository.findFilesByBranchAsc(branchId, offset, size)
+                } else {
+                    repository.findFilesByBranchDesc(branchId, offset, size)
+                }
             val content = entities.map { fileMapper.toDomain(it) }
             val total = repository.countFilesByBranch(branchId)
             return Page(content, total, pageable)

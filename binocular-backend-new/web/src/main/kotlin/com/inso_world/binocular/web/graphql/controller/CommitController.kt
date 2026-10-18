@@ -1,7 +1,6 @@
 package com.inso_world.binocular.web.graphql.controller
 
 import com.inso_world.binocular.core.service.CommitInfrastructurePort
-import com.inso_world.binocular.model.Commit
 import com.inso_world.binocular.web.graphql.error.GraphQLValidationUtils
 import com.inso_world.binocular.web.graphql.mapper.GraphQlMapper
 import com.inso_world.binocular.web.graphql.model.CommitDto
@@ -45,12 +44,13 @@ internal class CommitController(
     ): PageDto<CommitDto> {
         logger.info("Getting commits with since=$since, until=$until")
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = page,
-            size = perPage,
-            sort = sort ?: Sort.ASC,
-            sortBy = "date",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = page,
+                size = perPage,
+                sort = sort ?: Sort.ASC,
+                sortBy = "date",
+            )
 
         logger.debug(
             "Getting all commits with properties page={}, perPage={}, sort={}",
@@ -85,5 +85,4 @@ internal class CommitController(
         val bySha = commitService.findAll().firstOrNull { it.sha == sha }
         return mapper.toDto(GraphQLValidationUtils.requireEntityExists(bySha, "Commit", sha))
     }
-
 }

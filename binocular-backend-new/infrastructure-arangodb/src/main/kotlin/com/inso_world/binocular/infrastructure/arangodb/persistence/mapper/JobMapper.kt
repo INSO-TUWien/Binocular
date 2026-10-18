@@ -3,7 +3,6 @@ package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.JobEntity
 import com.inso_world.binocular.model.Job
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.time.ZoneOffset
 import java.util.Date
@@ -23,7 +22,6 @@ import java.util.Date
  */
 @Component
 internal class JobMapper : EntityMapper<Job, JobEntity> {
-
     /**
      * Converts a Job value object to JobEntity.
      *

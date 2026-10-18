@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component
 class GraphQlBuildMapper(
     private val jobMapper: GraphQlJobMapper
 ) {
-    fun toDto(build: Build): BuildDto {
-        return BuildDto(
+    fun toDto(build: Build): BuildDto =
+        BuildDto(
             id = build.id,
             sha = build.sha,
             ref = build.ref,
@@ -26,5 +26,4 @@ class GraphQlBuildMapper(
             webUrl = build.webUrl,
             jobs = build.jobs.map { jobMapper.toDto(it) }
         )
-    }
 }

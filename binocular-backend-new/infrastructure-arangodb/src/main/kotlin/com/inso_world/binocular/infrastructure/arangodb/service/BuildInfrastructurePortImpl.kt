@@ -4,7 +4,6 @@ import com.inso_world.binocular.core.persistence.model.Page
 import com.inso_world.binocular.core.service.BuildInfrastructurePort
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.ICommitBuildConnectionDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.node.IBuildDao
-import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.model.Build
 import com.inso_world.binocular.model.Commit
 import jakarta.annotation.PostConstruct
@@ -14,17 +13,16 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.time.ZoneOffset
-import java.util.Date
 
 @Service
-internal class BuildInfrastructurePortImpl : BuildInfrastructurePort,
-    AbstractInfrastructurePort<Build, String>() {
-
+internal class BuildInfrastructurePortImpl :
+    AbstractInfrastructurePort<Build, String>(),
+    BuildInfrastructurePort {
     @PostConstruct
     fun init() {
         super.dao = buildDao
     }
+
     @Autowired private lateinit var buildDao: IBuildDao
 
     @Autowired private lateinit var commitBuildConnectionRepository: ICommitBuildConnectionDao

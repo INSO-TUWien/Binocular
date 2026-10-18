@@ -23,13 +23,14 @@ import org.springframework.stereotype.Service
  * This service is database-agnostic and works with both ArangoDB and SQL implementations.
  */
 @Service
-internal class NoteInfrastructurePortImpl : NoteInfrastructurePort,
-    AbstractInfrastructurePort<Note, String>() {
-
+internal class NoteInfrastructurePortImpl :
+    AbstractInfrastructurePort<Note, String>(),
+    NoteInfrastructurePort {
     @PostConstruct
     fun init() {
         super.dao = noteDao
     }
+
     @Autowired private lateinit var noteDao: INoteDao
 
     @Autowired private lateinit var noteAccountConnectionRepository: INoteAccountConnectionDao

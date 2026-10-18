@@ -19,7 +19,9 @@ interface BranchFileConnectionRepository : ArangoRepository<BranchFileConnection
             RETURN f
 """,
     )
-    fun findFilesByBranch(@Param("branchId") branchId: String): List<FileEntity>
+    fun findFilesByBranch(
+        @Param("branchId") branchId: String
+    ): List<FileEntity>
 
     @Query(
         """
@@ -30,7 +32,9 @@ interface BranchFileConnectionRepository : ArangoRepository<BranchFileConnection
             RETURN b
 """,
     )
-    fun findBranchesByFile(@Param("fileId") fileId: String): List<BranchEntity>
+    fun findBranchesByFile(
+        @Param("fileId") fileId: String
+    ): List<BranchEntity>
 
     @Query(
         """
@@ -75,6 +79,7 @@ interface BranchFileConnectionRepository : ArangoRepository<BranchFileConnection
         )
         """
     )
-    fun countFilesByBranch(@Param("branchId") branchId: String): Long
-
+    fun countFilesByBranch(
+        @Param("branchId") branchId: String
+    ): Long
 }

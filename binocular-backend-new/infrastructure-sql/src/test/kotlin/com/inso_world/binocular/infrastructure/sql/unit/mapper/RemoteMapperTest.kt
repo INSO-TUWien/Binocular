@@ -16,26 +16,28 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
 internal class RemoteMapperTest : BaseMapperTest() {
-
     @Nested
     inner class ToDomain {
         @Test
         fun `maps remote entity to domain`() {
-            val projectEntity = ProjectEntity(
-                name = "test-project",
-                iid = Project.Id(Uuid.random())
-            )
-            val repoEntity = RepositoryEntity(
-                localPath = "/tmp/repo",
-                project = projectEntity,
-                iid = Repository.Id(Uuid.random())
-            )
-            val remoteEntity = RemoteEntity(
-                name = "origin",
-                url = "https://example.com/repo.git",
-                repository = repoEntity,
-                iid = Remote.Id(Uuid.random())
-            ).apply { id = 30L }
+            val projectEntity =
+                ProjectEntity(
+                    name = "test-project",
+                    iid = Project.Id(Uuid.random())
+                )
+            val repoEntity =
+                RepositoryEntity(
+                    localPath = "/tmp/repo",
+                    project = projectEntity,
+                    iid = Repository.Id(Uuid.random())
+                )
+            val remoteEntity =
+                RemoteEntity(
+                    name = "origin",
+                    url = "https://example.com/repo.git",
+                    repository = repoEntity,
+                    iid = Remote.Id(Uuid.random())
+                ).apply { id = 30L }
 
             val domain = remoteMapper.toDomain(remoteEntity)
 

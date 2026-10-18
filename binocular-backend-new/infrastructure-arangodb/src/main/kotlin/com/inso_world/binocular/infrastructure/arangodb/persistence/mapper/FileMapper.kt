@@ -1,11 +1,11 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.FileEntity
 import com.inso_world.binocular.model.File
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 /**
@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component
  */
 @Component
 internal class FileMapper : EntityMapper<File, FileEntity> {
-
     companion object {
         private val logger by logger()
     }

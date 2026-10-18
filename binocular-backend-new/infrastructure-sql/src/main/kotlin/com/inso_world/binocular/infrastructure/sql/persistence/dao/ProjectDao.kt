@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.persistence.dao
 
 import com.inso_world.binocular.infrastructure.sql.persistence.dao.interfaces.IProjectDao
@@ -12,8 +13,8 @@ import kotlin.uuid.ExperimentalUuidApi
 
 @Repository
 internal open class ProjectDao(
-    @org.springframework.beans.factory.annotation.Autowired private val projectRepo: ProjectRepository,
-    @org.springframework.beans.factory.annotation.Autowired @org.springframework.context.annotation.Lazy private val repositoryDao: RepositoryDao,
+    @Autowired private val projectRepo: ProjectRepository,
+    @Autowired @Lazy private val repositoryDao: RepositoryDao,
 ) : SqlDao<ProjectEntity, Long>(projectRepo),
     IProjectDao {
     init {
@@ -23,21 +24,20 @@ internal open class ProjectDao(
     override fun findByName(name: String): ProjectEntity? = projectRepo.findByName(name)
 
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-    override fun findByIid(iid: com.inso_world.binocular.model.Project.Id): ProjectEntity? = projectRepo.findByIid(iid.value)
+    override fun findByIid(iid: Project.Id): ProjectEntity? = projectRepo.findByIid(iid.value)
 
     override fun findByIid(iid: Any): ProjectEntity? {
-        val uIid: kotlin.uuid.Uuid = when (iid) {
-            is com.inso_world.binocular.model.Project.Id -> iid.value
-            is kotlin.uuid.Uuid -> iid
-            is String -> kotlin.uuid.Uuid.parse(iid)
-            else -> throw IllegalArgumentException("Unsupported iid type: ${iid.javaClass}")
-        }
+        val uIid: kotlin.uuid.Uuid =
+            when (iid) {
+                is Project.Id -> iid.value
+                is kotlin.uuid.Uuid -> iid
+                is String -> kotlin.uuid.Uuid.parse(iid)
+                else -> throw IllegalArgumentException("Unsupported iid type: ${iid.javaClass}")
+            }
         return projectRepo.findByIid(uIid)
     }
 
-    override fun findByIids(iids: Collection<Any>): List<ProjectEntity> {
-        return iids.mapNotNull { findByIid(it) }
-    }
+    override fun findByIids(iids: Collection<Any>): List<ProjectEntity> = iids.mapNotNull { findByIid(it) }
 
 //    @Transactional
 //    override fun delete(entity: ProjectEntity) {

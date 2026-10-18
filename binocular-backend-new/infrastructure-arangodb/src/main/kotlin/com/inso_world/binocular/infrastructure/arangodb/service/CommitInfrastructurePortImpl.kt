@@ -10,7 +10,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfac
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.edge.ICommitUserConnectionDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.edge.IIssueCommitConnectionDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.node.ICommitDao
-import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.model.Build
 import com.inso_world.binocular.model.Commit
 import com.inso_world.binocular.model.File
@@ -28,13 +27,14 @@ import org.springframework.stereotype.Service
 import java.time.ZoneOffset
 
 @Service
-internal class CommitInfrastructurePortImpl : CommitInfrastructurePort ,
-    AbstractInfrastructurePort<Commit, String>() {
-
+internal class CommitInfrastructurePortImpl :
+    AbstractInfrastructurePort<Commit, String>(),
+    CommitInfrastructurePort {
     @PostConstruct
     fun init() {
         super.dao = commitDao
     }
+
     @Autowired private lateinit var commitDao: ICommitDao
 
     @Autowired private lateinit var commitBuildConnectionRepository: ICommitBuildConnectionDao
@@ -206,9 +206,7 @@ internal class CommitInfrastructurePortImpl : CommitInfrastructurePort ,
         since: Long?,
         until: Long?,
     ): Page<Commit> {
-
-        fun Commit.commitMillis() =
-            commitDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
+        fun Commit.commitMillis() = commitDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
 
         val comparatorAsc: Comparator<Commit> =
             compareBy(
@@ -217,20 +215,22 @@ internal class CommitInfrastructurePortImpl : CommitInfrastructurePort ,
             )
 
         val filteredAndSorted =
-            commitDao.findAll()
+            commitDao
+                .findAll()
                 .asSequence()
                 .filter { commit ->
                     val ts = commit.commitMillis() ?: return@filter true
                     (since == null || ts >= since) &&
-                            (until == null || ts <= until)
-                }
-                .sortedWith(comparatorAsc)
+                        (until == null || ts <= until)
+                }.sortedWith(comparatorAsc)
                 .toList()
 
-        val from = (pageable.pageNumber * pageable.pageSize)
-            .coerceAtMost(filteredAndSorted.size)
-        val to = (from + pageable.pageSize)
-            .coerceAtMost(filteredAndSorted.size)
+        val from =
+            (pageable.pageNumber * pageable.pageSize)
+                .coerceAtMost(filteredAndSorted.size)
+        val to =
+            (from + pageable.pageSize)
+                .coerceAtMost(filteredAndSorted.size)
 
         return Page(
             content = filteredAndSorted.subList(from, to),
@@ -238,5 +238,4 @@ internal class CommitInfrastructurePortImpl : CommitInfrastructurePort ,
             pageable = pageable
         )
     }
-
 }

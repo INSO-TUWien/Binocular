@@ -1,38 +1,38 @@
-//package com.inso_world.binocular.infrastructure.sql.integration.persistence.repository
+// package com.inso_world.binocular.infrastructure.sql.integration.persistence.repository
 //
-//import com.inso_world.binocular.infrastructure.sql.integration.persistence.repository.base.BaseRepositoryTest
-//import com.inso_world.binocular.infrastructure.sql.persistence.entity.CommitEntity
-//import com.inso_world.binocular.infrastructure.sql.persistence.entity.ProjectEntity
-//import com.inso_world.binocular.infrastructure.sql.persistence.entity.RepositoryEntity
-//import com.inso_world.binocular.infrastructure.sql.persistence.entity.UserEntity
-//import com.inso_world.binocular.infrastructure.sql.persistence.repository.ProjectRepository
-//import com.inso_world.binocular.infrastructure.sql.persistence.repository.RepositoryRepository
-//import com.inso_world.binocular.model.Commit
-//import com.inso_world.binocular.model.Project
-//import com.inso_world.binocular.model.Repository
-//import com.inso_world.binocular.model.User
-//import org.assertj.core.api.Assertions.assertThat
-//import org.junit.jupiter.api.AfterEach
-//import org.junit.jupiter.api.BeforeEach
-//import org.junit.jupiter.api.DisplayName
-//import org.junit.jupiter.api.Nested
-//import org.junit.jupiter.api.Test
-//import org.junit.jupiter.api.assertAll
-//import org.springframework.beans.factory.annotation.Autowired
-//import java.time.LocalDateTime
-//import kotlin.uuid.ExperimentalUuidApi
-//import kotlin.uuid.Uuid
+// import com.inso_world.binocular.infrastructure.sql.integration.persistence.repository.base.BaseRepositoryTest
+// import com.inso_world.binocular.infrastructure.sql.persistence.entity.CommitEntity
+// import com.inso_world.binocular.infrastructure.sql.persistence.entity.ProjectEntity
+// import com.inso_world.binocular.infrastructure.sql.persistence.entity.RepositoryEntity
+// import com.inso_world.binocular.infrastructure.sql.persistence.entity.UserEntity
+// import com.inso_world.binocular.infrastructure.sql.persistence.repository.ProjectRepository
+// import com.inso_world.binocular.infrastructure.sql.persistence.repository.RepositoryRepository
+// import com.inso_world.binocular.model.Commit
+// import com.inso_world.binocular.model.Project
+// import com.inso_world.binocular.model.Repository
+// import com.inso_world.binocular.model.User
+// import org.assertj.core.api.Assertions.assertThat
+// import org.junit.jupiter.api.AfterEach
+// import org.junit.jupiter.api.BeforeEach
+// import org.junit.jupiter.api.DisplayName
+// import org.junit.jupiter.api.Nested
+// import org.junit.jupiter.api.Test
+// import org.junit.jupiter.api.assertAll
+// import org.springframework.beans.factory.annotation.Autowired
+// import java.time.LocalDateTime
+// import kotlin.uuid.ExperimentalUuidApi
+// import kotlin.uuid.Uuid
 //
-//@OptIn(ExperimentalUuidApi::class)
-//internal class RepositoryRepositoryTest : BaseRepositoryTest() {
+// @OptIn(ExperimentalUuidApi::class)
+// internal class RepositoryRepositoryTest : BaseRepositoryTest() {
 //    @Autowired
 //    private lateinit var repositoryRepository: RepositoryRepository
 //
 //    @Autowired
 //    private lateinit var projectRepository: ProjectRepository
 //
-////    @Autowired
-////    private lateinit var commitRepository: CommitRepository
+// //    @Autowired
+// //    private lateinit var commitRepository: CommitRepository
 //
 //    private lateinit var testProject: ProjectEntity
 //
@@ -48,7 +48,7 @@
 //
 //    @AfterEach
 //    fun cleanup() {
-////        tearDown()
+// //        tearDown()
 //    }
 //
 //    private fun createRepositoryEntity(localPath: String): RepositoryEntity {
@@ -134,8 +134,8 @@
 //        @Test
 //        fun `returns null when iid exists but no commits match the SHAs`() {
 //            val repository = createRepositoryEntity("/test/repo3")
-////            createCommitEntity("f".repeat(40), repository)
-////            createCommitEntity("1".repeat(40), repository)
+// //            createCommitEntity("f".repeat(40), repository)
+// //            createCommitEntity("1".repeat(40), repository)
 //
 //            val saved = repositoryRepository.save(repository)
 //
@@ -150,8 +150,8 @@
 //        @Test
 //        fun `returns null when iid does not exist`() {
 //            val repository = createRepositoryEntity("/test/repo4")
-////            createCommitEntity("2".repeat(40), repository)
-////
+// //            createCommitEntity("2".repeat(40), repository)
+// //
 //            repositoryRepository.save(repository)
 //
 //            val nonExistentIid = kotlin.uuid.Uuid.random()
@@ -179,9 +179,9 @@
 //        @Test
 //        fun `returns repository when one of multiple SHAs matches`() {
 //            val repository = createRepositoryEntity("/test/repo6")
-////            createCommitEntity("4".repeat(40), repository)
-////            createCommitEntity("5".repeat(40), repository)
-////
+// //            createCommitEntity("4".repeat(40), repository)
+// //            createCommitEntity("5".repeat(40), repository)
+// //
 //            val saved = repositoryRepository.save(repository)
 //
 //            val found = repositoryRepository.findByIidAndCommits_ShaIn(
@@ -310,4 +310,4 @@
 //            assertThat(found).isNull()
 //        }
 //    }
-//}
+// }

@@ -1,13 +1,11 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
-import com.inso_world.binocular.core.persistence.proxy.RelationshipProxyFactory
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.MilestoneEntity
 import com.inso_world.binocular.model.*
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -29,7 +27,6 @@ import kotlin.uuid.Uuid
  */
 @Component
 internal class MilestoneMapper : EntityMapper<Milestone, MilestoneEntity> {
-
     companion object {
         private val logger by logger()
     }
@@ -43,20 +40,21 @@ internal class MilestoneMapper : EntityMapper<Milestone, MilestoneEntity> {
      * @return The MilestoneEntity with milestone metadata
      */
     override fun toEntity(domain: Milestone): MilestoneEntity {
-        val entity = MilestoneEntity(
-            id = domain.id,
-            iid = domain.iid.value,
-            platformIid = domain.platformIid,
-            title = domain.title,
-            description = domain.description,
-            createdAt = domain.createdAt,
-            updatedAt = domain.updatedAt,
-            startDate = domain.startDate,
-            dueDate = domain.dueDate,
-            state = domain.state,
-            expired = domain.expired,
-            webUrl = domain.webUrl,
-        )
+        val entity =
+            MilestoneEntity(
+                id = domain.id,
+                iid = domain.iid.value,
+                platformIid = domain.platformIid,
+                title = domain.title,
+                description = domain.description,
+                createdAt = domain.createdAt,
+                updatedAt = domain.updatedAt,
+                startDate = domain.startDate,
+                dueDate = domain.dueDate,
+                state = domain.state,
+                expired = domain.expired,
+                webUrl = domain.webUrl,
+            )
         return entity
     }
 
@@ -64,28 +62,29 @@ internal class MilestoneMapper : EntityMapper<Milestone, MilestoneEntity> {
     override fun toDomain(entity: MilestoneEntity): Milestone {
         // Fast-path: Check if already mapped
 
-        val domain = Milestone(
-            id = entity.id,
-            platformIid = entity.platformIid,
-            title = entity.title,
-            description = entity.description,
-            createdAt = entity.createdAt,
-            updatedAt = entity.updatedAt,
-            startDate = entity.startDate,
-            dueDate = entity.dueDate,
-            state = entity.state,
-            expired = entity.expired,
-            webUrl = entity.webUrl,
-            project =
-                entity.project?.let { Project.Id(it.iid) }
-                    ?: Project.Id(entity.iid ?: Uuid.random()),
-            issueIds = entity.issues.mapNotNull { it.iid?.let { iid -> Issue.Id(iid) } }.toMutableSet(),
-            mergeRequestIds = entity.mergeRequests.mapNotNull { it.iid?.let { iid -> MergeRequest.Id(iid) } }.toMutableSet(),
-            iid = Milestone.Id(entity.iid!!),
-        )
+        val domain =
+            Milestone(
+                id = entity.id,
+                platformIid = entity.platformIid,
+                title = entity.title,
+                description = entity.description,
+                createdAt = entity.createdAt,
+                updatedAt = entity.updatedAt,
+                startDate = entity.startDate,
+                dueDate = entity.dueDate,
+                state = entity.state,
+                expired = entity.expired,
+                webUrl = entity.webUrl,
+                project =
+                    entity.project?.let { Project.Id(it.iid) }
+                        ?: Project.Id(entity.iid ?: Uuid.random()),
+                issueIds = entity.issues.mapNotNull { it.iid?.let { iid -> Issue.Id(iid) } }.toMutableSet(),
+                mergeRequestIds = entity.mergeRequests.mapNotNull { it.iid?.let { iid -> MergeRequest.Id(iid) } }.toMutableSet(),
+                iid = Milestone.Id(entity.iid!!),
+            )
 
         return domain
     }
 
-        override fun toDomainList(entities: Iterable<MilestoneEntity>): List<Milestone> = entities.map { toDomain(it) }
-    }
+    override fun toDomainList(entities: Iterable<MilestoneEntity>): List<Milestone> = entities.map { toDomain(it) }
+}

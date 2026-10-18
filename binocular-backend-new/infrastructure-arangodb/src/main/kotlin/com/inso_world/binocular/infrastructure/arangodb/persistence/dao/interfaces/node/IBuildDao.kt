@@ -6,5 +6,9 @@ import com.inso_world.binocular.model.Build
 import org.springframework.data.domain.Pageable
 
 internal interface IBuildDao : IDao<Build, String> {
-    fun findAll(pageable: Pageable, since: Long?, until: Long?): Page<Build>
+    fun findAll(
+        pageable: Pageable,
+        since: Long?,
+        until: Long?
+    ): Page<Build>
 }

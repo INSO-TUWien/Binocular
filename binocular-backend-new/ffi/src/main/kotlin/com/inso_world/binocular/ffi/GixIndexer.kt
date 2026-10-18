@@ -63,10 +63,11 @@ class GixIndexer : GitIndexer {
 
         val commits: List<Commit> = branchTraversalResult.commits.toDomain(repo.iid)
         val headCommit = commits.associateBy { it.sha }.getValue(branchTraversalResult.branch.target)
-        val branch: Branch = branchTraversalResult.branch.toDomain(
-            repo.iid,
-            headCommit,
-        )
+        val branch: Branch =
+            branchTraversalResult.branch.toDomain(
+                repo.iid,
+                headCommit,
+            )
 
         return Pair(branch, commits)
     }

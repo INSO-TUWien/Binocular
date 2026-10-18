@@ -106,5 +106,4 @@ class UserResolver(
         val accounts = accountService.findAccountsByUserId(userId)
         return accounts.firstOrNull()?.let { mapper.toDto(it) }
     }
-
 }

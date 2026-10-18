@@ -1,10 +1,9 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.persistence.entity
 
 import com.inso_world.binocular.infrastructure.sql.persistence.converter.KotlinUuidConverter
-import com.inso_world.binocular.model.Issue
 import com.inso_world.binocular.model.Project
-import com.inso_world.binocular.model.Repository
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Convert
@@ -69,17 +68,21 @@ internal data class ProjectEntity(
         cascade = [CascadeType.ALL],
         mappedBy = "project",
         orphanRemoval = true,
-    ) var issues: MutableSet<IssueEntity> = mutableSetOf()
+    )
+    var issues: MutableSet<IssueEntity> = mutableSetOf()
 
     @OneToMany(
         fetch = FetchType.LAZY,
         cascade = [CascadeType.ALL],
         mappedBy = "project",
         orphanRemoval = true,
-    ) var mergeRequests: MutableSet<MergeRequestEntity> = mutableSetOf()
+    )
+    var mergeRequests: MutableSet<MergeRequestEntity> = mutableSetOf()
 
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = [CascadeType.ALL])
+    @ManyToMany(
+        fetch = FetchType.LAZY,
+        cascade = [CascadeType.ALL]
+    )
     @JoinTable(
         name = "project_account",
         joinColumns = [JoinColumn(name = "fk_project_id")],
@@ -104,7 +107,6 @@ internal data class ProjectEntity(
         }
         return added
     }
-
 
     override fun toString(): String = "ProjectEntity(id=$id, iid=$iid, name=$name, description=$description)"
 

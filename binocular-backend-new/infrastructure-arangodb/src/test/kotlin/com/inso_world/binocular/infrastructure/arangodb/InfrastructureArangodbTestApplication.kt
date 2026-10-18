@@ -7,9 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
     scanBasePackages = ["com.inso_world.binocular.infrastructure.arangodb", "com.inso_world.binocular.core"],
 )
 internal class InfrastructureArangodbTestApplication {
-
     @Test
     fun contextLoads() {
     }
-
 }

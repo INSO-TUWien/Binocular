@@ -7,7 +7,6 @@ import com.inso_world.binocular.infrastructure.sql.persistence.entity.DeveloperE
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.RepositoryEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.toSqlEntity
 import com.inso_world.binocular.model.Commit
-import com.inso_world.binocular.model.Repository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.util.ReflectionUtils.setField
 import org.springframework.stereotype.Component
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Component
  */
 @Component
 internal class CommitMapper : EntityMapper<Commit, CommitEntity> {
-
     @Autowired
     private lateinit var developerMapper: DeveloperMapper
 
@@ -42,17 +40,20 @@ internal class CommitMapper : EntityMapper<Commit, CommitEntity> {
      * Converts a Commit domain object to CommitEntity.
      */
     @Deprecated("Use toEntity(domain, repository, author, committer) instead")
-    override fun toEntity(domain: Commit): CommitEntity {
+    override fun toEntity(domain: Commit): CommitEntity =
         throw UnsupportedOperationException("Mapping to entity now requires explicit dependencies.")
-    }
 
-    fun toEntity(domain: Commit, repository: RepositoryEntity, author: DeveloperEntity, committer: DeveloperEntity): CommitEntity {
-        return domain.toSqlEntity(
+    fun toEntity(
+        domain: Commit,
+        repository: RepositoryEntity,
+        author: DeveloperEntity,
+        committer: DeveloperEntity
+    ): CommitEntity =
+        domain.toSqlEntity(
             repository = repository,
             author = author,
             committer = committer,
         )
-    }
 
     /**
      * Converts a CommitEntity to Commit domain object.

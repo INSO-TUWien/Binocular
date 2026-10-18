@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.dao.nosql.arangodb.connection
 
 import com.inso_world.binocular.infrastructure.arangodb.model.edge.IssueAccountConnection
@@ -41,9 +42,12 @@ internal class IssueAccountConnectionDao
         }
 
         /**
-        * Finds all accounts connected to the given issue with the specified role.
-        */
-        override fun findAccountsByIssue(issueId: String, role: IssueAccountRole): List<Account> {
+         * Finds all accounts connected to the given issue with the specified role.
+         */
+        override fun findAccountsByIssue(
+            issueId: String,
+            role: IssueAccountRole
+        ): List<Account> {
             val accountEntities = repository.findAccountsByIssueAndRole(issueId, role.value)
             return accountEntities.map { accountMapper.toDomain(it) }
         }

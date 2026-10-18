@@ -1,17 +1,16 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.entity
 
 import com.arangodb.springframework.annotation.Document
 import com.arangodb.springframework.annotation.Field
 import com.arangodb.springframework.annotation.PersistentIndexed
 import com.arangodb.springframework.annotation.Relations
+import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.AccountUserConnectionEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.IssueAccountConnectionEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.MergeRequestAccountConnectionEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.NoteAccountConnectionEntity
-import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.AccountUserConnectionEntity
-import com.inso_world.binocular.model.Platform
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.ProjectAccountConnectionEntity
-import com.inso_world.binocular.model.Project
 import org.springframework.data.annotation.Id
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid

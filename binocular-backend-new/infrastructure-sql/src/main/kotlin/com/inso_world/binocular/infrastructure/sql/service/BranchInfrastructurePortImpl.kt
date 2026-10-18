@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.service
 
 import com.inso_world.binocular.core.persistence.model.Page
@@ -27,7 +28,6 @@ internal class BranchInfrastructurePortImpl(
     @Autowired private val branchMapper: BranchMapper,
 ) : AbstractInfrastructurePort<Branch, BranchEntity, Long>(Long::class),
     BranchInfrastructurePort {
-
     @Autowired
     private lateinit var branchDao: IBranchDao
 
@@ -85,19 +85,19 @@ internal class BranchInfrastructurePortImpl(
     }
 
     override fun create(value: Branch): Branch {
-        val owner = repositoryDao.findByIid(value.repositoryId)
-            ?: throw IllegalStateException("Repository not found: ${value.repositoryId}")
-        val head = commitDao.findBySha(owner, value.headSha)
-            ?: throw IllegalStateException("Head commit not found: ${value.headSha} in repository ${value.repositoryId}")
+        val owner =
+            repositoryDao.findByIid(value.repositoryId)
+                ?: throw IllegalStateException("Repository not found: ${value.repositoryId}")
+        val head =
+            commitDao.findBySha(owner, value.headSha)
+                ?: throw IllegalStateException("Head commit not found: ${value.headSha} in repository ${value.repositoryId}")
 
         val entity = branchMapper.toEntity(value, owner, head)
         val savedEntity = branchDao.create(entity)
         return branchMapper.toDomain(savedEntity)
     }
 
-    override fun saveAll(values: Collection<Branch>): Iterable<Branch> {
-        return values.map { create(it) }
-    }
+    override fun saveAll(values: Collection<Branch>): Iterable<Branch> = values.map { create(it) }
 
     @Transactional(readOnly = true)
     override fun findAll(): Iterable<Branch> {

@@ -20,11 +20,10 @@ import org.springframework.stereotype.Repository
 internal class FileDao(
     @Autowired private val fileRepository: FileRepository,
     @Autowired private val fileMapper: FileMapper,
-) : MappedArangoDbDao<File, FileEntity, String>(fileRepository, fileMapper), IFileDao {
-
+) : MappedArangoDbDao<File, FileEntity, String>(fileRepository, fileMapper),
+    IFileDao {
     override fun findByPath(path: String): File? {
         val entity = fileRepository.findByPath(path) ?: return null
         return fileMapper.toDomain(entity)
     }
-
 }

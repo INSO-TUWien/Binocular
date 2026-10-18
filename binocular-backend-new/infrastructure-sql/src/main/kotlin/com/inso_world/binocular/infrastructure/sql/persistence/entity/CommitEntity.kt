@@ -2,8 +2,6 @@ package com.inso_world.binocular.infrastructure.sql.persistence.entity
 
 import com.inso_world.binocular.infrastructure.sql.persistence.converter.KotlinUuidConverter
 import com.inso_world.binocular.model.Commit
-import com.inso_world.binocular.model.Developer
-import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.Signature
 import jakarta.persistence.Column
 import jakarta.persistence.Convert

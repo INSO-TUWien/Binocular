@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -6,8 +7,6 @@ import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.AccountEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.PlatformEntity
 import com.inso_world.binocular.model.*
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -29,7 +28,6 @@ import kotlin.uuid.Uuid
  */
 @Component
 internal class AccountMapper : EntityMapper<Account, AccountEntity> {
-
     companion object {
         private val logger by logger()
     }
@@ -54,7 +52,7 @@ internal class AccountMapper : EntityMapper<Account, AccountEntity> {
             name = domain.name,
             avatarUrl = domain.avatarUrl,
             url = domain.url,
-            //project = domain.project,
+            // project = domain.project,
         )
 
     /**
@@ -68,18 +66,19 @@ internal class AccountMapper : EntityMapper<Account, AccountEntity> {
      */
     @OptIn(ExperimentalUuidApi::class)
     override fun toDomain(entity: AccountEntity): Account {
-        val domain = Account(
-            gid = entity.gid,
-            platform = toPlatform(entity.platform) ?: Platform.GitHub, // Default to GitHub if unknown
-            login = entity.login,
-            iid = entity.iid?.let { Account.Id(it) } ?: Account.Id(Uuid.random()),
-        ).apply {
-            this.id = entity.id
-            this.name = entity.name
-            this.avatarUrl = entity.avatarUrl
-            this.url = entity.url
-            this.projectIds.addAll(entity.projects.map { Project.Id(it.iid) })
-        }
+        val domain =
+            Account(
+                gid = entity.gid,
+                platform = toPlatform(entity.platform) ?: Platform.GitHub, // Default to GitHub if unknown
+                login = entity.login,
+                iid = entity.iid?.let { Account.Id(it) } ?: Account.Id(Uuid.random()),
+            ).apply {
+                this.id = entity.id
+                this.name = entity.name
+                this.avatarUrl = entity.avatarUrl
+                this.url = entity.url
+                this.projectIds.addAll(entity.projects.map { Project.Id(it.iid) })
+            }
 
         domain.issueIds.addAll(
             entity.issues.mapNotNull { it.iid?.let { iid -> Issue.Id(iid) } }
@@ -101,7 +100,6 @@ internal class AccountMapper : EntityMapper<Account, AccountEntity> {
             Platform.GitHub -> PlatformEntity.GitHub
             Platform.GitLab -> PlatformEntity.GitLab
         }
-
 
     private fun toPlatform(platformEntity: PlatformEntity): Platform? {
         if (platformEntity == PlatformEntity.GitHub) {

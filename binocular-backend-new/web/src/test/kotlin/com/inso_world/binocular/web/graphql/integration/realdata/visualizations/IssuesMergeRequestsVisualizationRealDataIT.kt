@@ -1,16 +1,16 @@
 package com.inso_world.binocular.web.graphql.integration.realdata.visualizations
 
+import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 import com.inso_world.binocular.web.graphql.integration.realdata.base.BaseGraphQlCompatibilityIT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 
 internal class IssuesMergeRequestsVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
-
     @Test
     fun `merge requests query returns expected snapshot for first item`() {
-        val query = $$"""
+        val query =
+            $$"""
             query (
               $page: Int,
               $perPage: Int,
@@ -61,14 +61,15 @@ internal class IssuesMergeRequestsVisualizationRealDataIT : BaseGraphQlCompatibi
                 __typename
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1000,
-            "since" to "2024-08-08T03:00",
-            "until" to "2025-12-08T12:00:26",
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1000,
+                "since" to "2024-08-08T03:00",
+                "until" to "2025-12-08T12:00:26",
+            )
 
         val root = client.execute(query, variables)
         val mr = root.get("mergeRequests")
@@ -99,7 +100,11 @@ internal class IssuesMergeRequestsVisualizationRealDataIT : BaseGraphQlCompatibi
         assertEquals("Nyzabes", author.get("login").asText(), "data[0].author.login")
         assertEquals("Sebastian Watzinger", author.get("name").asText(), "data[0].author.name")
         val authorUser = author.get("user")
-        assertEquals("Sebastian Watzinger <se.watzinger@gmail.com>", authorUser.get("gitSignature").asText(), "data[0].author.user.gitSignature")
+        assertEquals(
+            "Sebastian Watzinger <se.watzinger@gmail.com>",
+            authorUser.get("gitSignature").asText(),
+            "data[0].author.user.gitSignature"
+        )
         // assertEquals("6812846", authorUser.get("id").asText(), "data[0].author.user.id")
         assertEquals("User", authorUser.get("__typename").asText(), "data[0].author.user.__typename")
         assertEquals("Account", author.get("__typename").asText(), "data[0].author.__typename")

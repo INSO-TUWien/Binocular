@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -8,7 +9,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.toAra
 import com.inso_world.binocular.model.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import kotlin.uuid.Uuid
 
 /**
  * Mapper for Project aggregate root.
@@ -28,7 +28,6 @@ import kotlin.uuid.Uuid
  */
 @Component
 internal class ProjectMapper : EntityMapper<Project, ProjectEntity> {
-
     @Autowired
     private lateinit var issueMapper: IssueMapper
 
@@ -50,8 +49,8 @@ internal class ProjectMapper : EntityMapper<Project, ProjectEntity> {
      */
     override fun toEntity(domain: Project): ProjectEntity {
         val entity = domain.toArangoEntity()
-        
-        // Relationships are handled via IDs in domain, 
+
+        // Relationships are handled via IDs in domain,
         // persistence layer can populate @Ref fields if needed during save
 
         return entity
@@ -65,12 +64,13 @@ internal class ProjectMapper : EntityMapper<Project, ProjectEntity> {
      */
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toDomain(entity: ProjectEntity): Project {
-        val domain = Project(
-            name = entity.name,
-            iid = Project.Id(entity.iid),
-        ).apply {
-            this.id = entity.id
-        }
+        val domain =
+            Project(
+                name = entity.name,
+                iid = Project.Id(entity.iid),
+            ).apply {
+                this.id = entity.id
+            }
 
         domain.issueIds.addAll(entity.issues.mapNotNull { it.iid?.let { iid -> Issue.Id(iid) } })
         domain.mergeRequestIds.addAll(entity.mergeRequests.mapNotNull { it.iid?.let { iid -> MergeRequest.Id(iid) } })

@@ -68,9 +68,18 @@ class MockTestDataProvider {
     @Deprecated("Use developers instead")
     val users: List<User> =
         listOf(
-            User(name = "User A", repositoryId = repository.iid).apply { this.repository = repository; this.email = "a@test.com" },
-            User(name = "User B", repositoryId = repository.iid).apply { this.repository = repository; this.email = "b@test.com" },
-            User(name = "Author Only", repositoryId = repository.iid).apply { this.repository = repository; this.email = "author@test.com" },
+            User(name = "User A", repositoryId = repository.iid).apply {
+                this.repository = repository
+                this.email = "a@test.com"
+            },
+            User(name = "User B", repositoryId = repository.iid).apply {
+                this.repository = repository
+                this.email = "b@test.com"
+            },
+            User(name = "Author Only", repositoryId = repository.iid).apply {
+                this.repository = repository
+                this.email = "author@test.com"
+            },
         )
 
     @Deprecated("Use developerByEmail instead")
@@ -80,7 +89,11 @@ class MockTestDataProvider {
         listOf(
             Developer(name = "User A", email = "a@test.com", repositoryId = repository.iid).apply { this.repository = repository },
             Developer(name = "User B", email = "b@test.com", repositoryId = repository.iid).apply { this.repository = repository },
-            Developer(name = "Author Only", email = "author@test.com", repositoryId = repository.iid).apply { this.repository = repository },
+            Developer(
+                name = "Author Only",
+                email = "author@test.com",
+                repositoryId = repository.iid
+            ).apply { this.repository = repository },
         )
     val developerByEmail = developers.associateBy { it.email }
 

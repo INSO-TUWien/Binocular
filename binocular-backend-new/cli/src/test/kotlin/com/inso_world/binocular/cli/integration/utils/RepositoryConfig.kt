@@ -1,14 +1,9 @@
 package com.inso_world.binocular.cli.integration.utils
 
-import com.inso_world.binocular.cli.service.RepositoryService
 import com.inso_world.binocular.core.index.GitIndexer
-import com.inso_world.binocular.ffi.GixIndexer
 import com.inso_world.binocular.model.Commit
 import com.inso_world.binocular.model.Project
 import com.inso_world.binocular.model.Repository
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer
-import org.springframework.core.io.ClassPathResource
 import kotlin.io.path.Path
 
 internal data class RepositoryConfig(

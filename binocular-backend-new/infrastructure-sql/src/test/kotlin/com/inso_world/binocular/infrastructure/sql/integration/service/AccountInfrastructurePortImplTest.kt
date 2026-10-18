@@ -13,13 +13,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 internal class AccountInfrastructurePortImplTest : BaseServiceTest() {
-
     @Autowired
     private lateinit var projectPort: ProjectInfrastructurePort
 
@@ -43,18 +41,19 @@ internal class AccountInfrastructurePortImplTest : BaseServiceTest() {
     inner class Save {
         @Test
         fun `save one account, expecting it in database`() {
-            val accounts = listOf(
-                Account(
-                    "MDQ9JXMlcjY5MoB7Nah4",
-                    Platform.GitHub,
-                    "user1",
-                    projectIds = mutableSetOf(testProject.iid)
-                ).apply {
-                    this.name = "User One"
-                    this.avatarUrl = "https://example.com/avatars/user1.png"
-                    this.url = "https://github.com/user1"
-                }
-            )
+            val accounts =
+                listOf(
+                    Account(
+                        "MDQ9JXMlcjY5MoB7Nah4",
+                        Platform.GitHub,
+                        "user1",
+                        projectIds = mutableSetOf(testProject.iid)
+                    ).apply {
+                        this.name = "User One"
+                        this.avatarUrl = "https://example.com/avatars/user1.png"
+                        this.url = "https://github.com/user1"
+                    }
+                )
 
             val savedAccounts = accountPort.saveAll(accounts)
             val savedAccount = savedAccounts.first()
@@ -63,7 +62,7 @@ internal class AccountInfrastructurePortImplTest : BaseServiceTest() {
                 "check account in db",
                 {
                     assertThat(savedAccount.iid).isNotNull()
-                    //assertThat(accountPort.findAll()).hasSize(1)
+                    // assertThat(accountPort.findAll()).hasSize(1)
                     assertThat(savedAccount.gid).isEqualTo(accounts[0].gid)
                     assertThat(savedAccount.login).isEqualTo(accounts[0].login)
                     assertThat(savedAccount.name).isEqualTo(accounts[0].name)
@@ -76,28 +75,29 @@ internal class AccountInfrastructurePortImplTest : BaseServiceTest() {
 
         @Test
         fun `save accounts, expecting in database`() {
-            val accounts = listOf(
-                Account(
-                    gid = "abc123",
-                    platform = Platform.GitHub,
-                    login = "testuser",
-                    projectIds = mutableSetOf(testProject.iid)
-                ).apply {
-                    this.name = "User One"
-                    this.avatarUrl = "https://example.com/avatars/user1.png"
-                    this.url = "https://github.com/user1"
-                },
-                Account(
-                    gid = "cba321",
-                    platform = Platform.GitHub,
-                    login = "testuser2",
-                    projectIds = mutableSetOf(testProject.iid)
-                ).apply {
-                    this.name = "User Two"
-                    this.avatarUrl = "https://example.com/avatars/user2.png"
-                    this.url = "https://github.com/user2"
-                }
-            )
+            val accounts =
+                listOf(
+                    Account(
+                        gid = "abc123",
+                        platform = Platform.GitHub,
+                        login = "testuser",
+                        projectIds = mutableSetOf(testProject.iid)
+                    ).apply {
+                        this.name = "User One"
+                        this.avatarUrl = "https://example.com/avatars/user1.png"
+                        this.url = "https://github.com/user1"
+                    },
+                    Account(
+                        gid = "cba321",
+                        platform = Platform.GitHub,
+                        login = "testuser2",
+                        projectIds = mutableSetOf(testProject.iid)
+                    ).apply {
+                        this.name = "User Two"
+                        this.avatarUrl = "https://example.com/avatars/user2.png"
+                        this.url = "https://github.com/user2"
+                    }
+                )
 
             val saved = accountPort.saveAll(accounts)
             assertThat(saved).hasSize(2)
@@ -116,33 +116,33 @@ internal class AccountInfrastructurePortImplTest : BaseServiceTest() {
                     }
                 )
             }
-
         }
 
         @Test
         fun `save accounts with same gid, expecting error`() {
-            val accounts = listOf(
-                Account(
-                    gid = "abc123",
-                    platform = Platform.GitHub,
-                    login = "testuser",
-                    projectIds = mutableSetOf(testProject.iid)
-                ).apply {
-                    this.name = "User One"
-                    this.avatarUrl = "https://example.com/avatars/user1.png"
-                    this.url = "https://github.com/user1"
-                },
-                Account(
-                    gid = "abc123",
-                    platform = Platform.GitHub,
-                    login = "testuser2",
-                    projectIds = mutableSetOf(testProject.iid)
-                ).apply {
-                    this.name = "User Two"
-                    this.avatarUrl = "https://example.com/avatars/user2.png"
-                    this.url = "https://github.com/user2"
-                }
-            )
+            val accounts =
+                listOf(
+                    Account(
+                        gid = "abc123",
+                        platform = Platform.GitHub,
+                        login = "testuser",
+                        projectIds = mutableSetOf(testProject.iid)
+                    ).apply {
+                        this.name = "User One"
+                        this.avatarUrl = "https://example.com/avatars/user1.png"
+                        this.url = "https://github.com/user1"
+                    },
+                    Account(
+                        gid = "abc123",
+                        platform = Platform.GitHub,
+                        login = "testuser2",
+                        projectIds = mutableSetOf(testProject.iid)
+                    ).apply {
+                        this.name = "User Two"
+                        this.avatarUrl = "https://example.com/avatars/user2.png"
+                        this.url = "https://github.com/user2"
+                    }
+                )
 
             assertAll(
                 "check exception and empty database",
@@ -160,32 +160,34 @@ internal class AccountInfrastructurePortImplTest : BaseServiceTest() {
     inner class Find {
         @Test
         fun `find existing gids, expecting according accounts`() {
-            val gids = listOf(
-                "abc123"
-            )
+            val gids =
+                listOf(
+                    "abc123"
+                )
 
-            val accounts = listOf(
-                Account(
-                    gid = "abc123",
-                    platform = Platform.GitHub,
-                    login = "testuser",
-                    projectIds = mutableSetOf(testProject.iid)
-                ).apply {
-                    this.name = "User One"
-                    this.avatarUrl = "https://example.com/avatars/user1.png"
-                    this.url = "https://github.com/user1"
-                },
-                Account(
-                    gid = "cba321",
-                    platform = Platform.GitHub,
-                    login = "testuser2",
-                    projectIds = mutableSetOf(testProject.iid)
-                ).apply {
-                    this.name = "User Two"
-                    this.avatarUrl = "https://example.com/avatars/user2.png"
-                    this.url = "https://github.com/user2"
-                }
-            )
+            val accounts =
+                listOf(
+                    Account(
+                        gid = "abc123",
+                        platform = Platform.GitHub,
+                        login = "testuser",
+                        projectIds = mutableSetOf(testProject.iid)
+                    ).apply {
+                        this.name = "User One"
+                        this.avatarUrl = "https://example.com/avatars/user1.png"
+                        this.url = "https://github.com/user1"
+                    },
+                    Account(
+                        gid = "cba321",
+                        platform = Platform.GitHub,
+                        login = "testuser2",
+                        projectIds = mutableSetOf(testProject.iid)
+                    ).apply {
+                        this.name = "User Two"
+                        this.avatarUrl = "https://example.com/avatars/user2.png"
+                        this.url = "https://github.com/user2"
+                    }
+                )
 
             val saved = accountPort.saveAll(accounts)
             assertThat(saved).hasSize(2)
@@ -207,11 +209,6 @@ internal class AccountInfrastructurePortImplTest : BaseServiceTest() {
                     assertThat(existingAccount.platform).isEqualTo(accounts[0].platform)
                 }
             )
-
         }
-
-
     }
-
 }
-

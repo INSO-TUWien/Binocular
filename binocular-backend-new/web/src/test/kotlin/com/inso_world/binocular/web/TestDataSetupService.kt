@@ -1,7 +1,6 @@
 package com.inso_world.binocular.web
 
 import com.inso_world.binocular.core.integration.base.InfrastructureDataSetup
-import com.inso_world.binocular.core.integration.base.TestDataProvider
 import com.inso_world.binocular.core.service.AccountInfrastructurePort
 import com.inso_world.binocular.core.service.BranchInfrastructurePort
 import com.inso_world.binocular.core.service.BuildInfrastructurePort

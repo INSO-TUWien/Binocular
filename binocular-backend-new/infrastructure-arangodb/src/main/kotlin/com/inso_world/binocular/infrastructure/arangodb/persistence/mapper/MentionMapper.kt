@@ -1,16 +1,15 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.MentionEntity
 import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.model.Mention
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.time.ZoneOffset
 import java.util.Date
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 /**
  * Mapper for Mention value objects.
@@ -27,7 +26,6 @@ import kotlin.uuid.Uuid
  */
 @Component
 internal class MentionMapper : EntityMapper<Mention, MentionEntity> {
-
     /**
      * Converts a Mention value object to MentionEntity.
      *

@@ -114,6 +114,5 @@ internal open class SqlDao<T, I : Serializable>(
         logger.trace("EM flushed")
     }
 
-    override fun count(): Long =
-        entityManager.createQuery("SELECT COUNT(e) FROM ${clazz.name} e", Long::class.java).singleResult
+    override fun count(): Long = entityManager.createQuery("SELECT COUNT(e) FROM ${clazz.name} e", Long::class.java).singleResult
 }

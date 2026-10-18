@@ -427,8 +427,7 @@ internal class CommitControllerWebTest : BaseIntegrationTest() {
                 .errors()
                 .expect { error ->
                     error.message?.contains("Commit not found with id: $nonExistentSha") ?: false
-                }
-                .verify()
+                }.verify()
         }
 
         @Test

@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.persistence.repository
 
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.CommitEntity
@@ -28,8 +29,8 @@ internal interface CommitRepository :
     @Suppress("ktlint:standard:function-naming")
     fun findAllByRepository_Iid(iid: Repository.Id): Stream<CommitEntity>
 
+    // @EntityGraph("Commit.full")
     @Query("SELECT c FROM CommitEntity c")
-//    @EntityGraph("Commit.full")
     fun findAllAsStream(): Stream<CommitEntity>
 
     @OptIn(ExperimentalUuidApi::class)

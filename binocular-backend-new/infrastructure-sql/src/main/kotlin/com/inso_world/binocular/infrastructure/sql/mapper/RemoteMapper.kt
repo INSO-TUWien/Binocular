@@ -1,11 +1,10 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.mapper
 
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.RemoteEntity
-import com.inso_world.binocular.infrastructure.sql.persistence.entity.RepositoryEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.toSqlEntity
-import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.vcs.Remote
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.util.ReflectionUtils.setField
@@ -18,8 +17,9 @@ internal class RemoteMapper : EntityMapper<Remote, RemoteEntity> {
 
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toEntity(domain: Remote): RemoteEntity {
-        val repository = repositoryRepository.findByIid(domain.repositoryId.value)
-            ?: throw IllegalStateException("RepositoryEntity with iid ${domain.repositoryId} not found")
+        val repository =
+            repositoryRepository.findByIid(domain.repositoryId.value)
+                ?: throw IllegalStateException("RepositoryEntity with iid ${domain.repositoryId} not found")
 
         val entity = domain.toSqlEntity(repository)
 

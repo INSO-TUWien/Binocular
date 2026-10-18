@@ -31,7 +31,6 @@ import kotlin.uuid.Uuid
 
 @Transactional
 internal class MergeRequestInfrastructurePortImplTest : BaseServiceTest() {
-
     @Autowired
     private lateinit var projectPort: ProjectInfrastructurePort
 
@@ -60,33 +59,38 @@ internal class MergeRequestInfrastructurePortImplTest : BaseServiceTest() {
         project = projectPort.create(TestData.Domain.testProject(name = "MR Port Test Project", id = null))
         projectEntity = em.find(ProjectEntity::class.java, project.id!!.toLong())
 
-        account = accountPort.create(
-            Account(
-                gid = "mr-account-gid",
-                platform = Platform.GitHub,
-                login = "mr-user",
-                projectIds = mutableSetOf(project.iid),
-            ).apply {
-                name = "MR User"
-            }
-        )
-        val accountEntity = em.createQuery(
-            "select a from AccountEntity a where a.login = :login",
-            com.inso_world.binocular.infrastructure.sql.persistence.entity.AccountEntity::class.java,
-        ).setParameter("login", "mr-user").singleResult
+        account =
+            accountPort.create(
+                Account(
+                    gid = "mr-account-gid",
+                    platform = Platform.GitHub,
+                    login = "mr-user",
+                    projectIds = mutableSetOf(project.iid),
+                ).apply {
+                    name = "MR User"
+                }
+            )
+        val accountEntity =
+            em
+                .createQuery(
+                    "select a from AccountEntity a where a.login = :login",
+                    com.inso_world.binocular.infrastructure.sql.persistence.entity.AccountEntity::class.java,
+                ).setParameter("login", "mr-user")
+                .singleResult
 
         noteEntity = NoteEntity(iid = noteIid, body = "note on mr").also { em.persist(it) }
         milestoneEntity = MilestoneEntity(iid = milestoneIid, title = "milestone-1").also { em.persist(it) }
 
-        mergeRequestEntity = MergeRequestEntity(
-            iid = mrIid,
-            title = "MR title",
-            project = projectEntity,
-        ).apply {
-            accounts.add(accountEntity)
-            notes.add(noteEntity)
-            milestones.add(milestoneEntity)
-        }
+        mergeRequestEntity =
+            MergeRequestEntity(
+                iid = mrIid,
+                title = "MR title",
+                project = projectEntity,
+            ).apply {
+                accounts.add(accountEntity)
+                notes.add(noteEntity)
+                milestones.add(milestoneEntity)
+            }
         em.persist(mergeRequestEntity)
         em.flush()
     }

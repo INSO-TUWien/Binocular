@@ -47,14 +47,13 @@ class RepositoryService {
     @Autowired
     private lateinit var commitService: CommitService
 
-    fun findBranch(repo: Repository, name: String): Branch? {
-        return this.repositoryPort.findBranch(repo, name)
-    }
+    fun findBranch(
+        repo: Repository,
+        name: String
+    ): Branch? = this.repositoryPort.findBranch(repo, name)
 
     @Transactional
-    fun save(repository: Repository): Repository {
-        return this.repositoryPort.create(repository)
-    }
+    fun save(repository: Repository): Repository = this.repositoryPort.create(repository)
 
     /**
      * Canonicalizes incoming commits against the repository's existing state.
@@ -84,9 +83,10 @@ class RepositoryService {
         val developersBySignature = repo.developers.associateByTo(mutableMapOf()) { it.gitSignature }
 
         // Also index by email for coalescing (case-insensitive)
-        val developersByEmail = repo.developers
-            .mapNotNull { dev -> normalizeEmail(dev.email)?.let { it to dev } }
-            .toMap(mutableMapOf())
+        val developersByEmail =
+            repo.developers
+                .mapNotNull { dev -> normalizeEmail(dev.email)?.let { it to dev } }
+                .toMap(mutableMapOf())
 
         // Build index of canonical branches
         val branchesByKey = repo.branches.associateByTo(mutableMapOf()) { it.uniqueKey }
@@ -136,45 +136,49 @@ class RepositoryService {
 
         // --- Pass 1: Ensure every incoming commit has a canonical instance ---
         // We recreate commits if they use non-canonical developers to ensure deduplication.
-        val canonicalInOrder = commits.map { incoming ->
-            val key = incoming.uniqueKey
-            val existing = commitsByKey[key]
-            if (existing != null) return@map existing
+        val canonicalInOrder =
+            commits.map { incoming ->
+                val key = incoming.uniqueKey
+                val existing = commitsByKey[key]
+                if (existing != null) return@map existing
 
-            val authorDev = incoming.authorSignature.developer
-            val committerDev = incoming.committerSignature.developer
+                val authorDev = incoming.authorSignature.developer
+                val committerDev = incoming.committerSignature.developer
 
-            val canonicalAuthor = authorDev?.let { canonicalizeDeveloper(it) }
-            val canonicalCommitter = committerDev?.let { canonicalizeDeveloper(it) }
+                val canonicalAuthor = authorDev?.let { canonicalizeDeveloper(it) }
+                val canonicalCommitter = committerDev?.let { canonicalizeDeveloper(it) }
 
-            val finalCommit = if (canonicalAuthor != authorDev || canonicalCommitter != committerDev) {
-                // Recreate commit with canonical developers because Signature is immutable
-                Commit(
-                    sha = incoming.sha,
-                    authorSignature = incoming.authorSignature.copy(
-                        developer = canonicalAuthor,
-                        developerId = canonicalAuthor?.iid ?: incoming.authorSignature.developerId,
-                    ),
-                    committerSignature = incoming.committerSignature.copy(
-                        developer = canonicalCommitter,
-                        developerId = canonicalCommitter?.iid ?: incoming.committerSignature.developerId,
-                    ),
-                    message = incoming.message,
-                    repositoryId = incoming.repositoryId,
-                    repository = repo,
-                ).apply {
-                    this.id = incoming.id
-                    this.webUrl = incoming.webUrl
-                    this.parentShas.addAll(incoming.parentShas)
-                    this.childShas.addAll(incoming.childShas)
-                }
-            } else {
-                incoming
+                val finalCommit =
+                    if (canonicalAuthor != authorDev || canonicalCommitter != committerDev) {
+                        // Recreate commit with canonical developers because Signature is immutable
+                        Commit(
+                            sha = incoming.sha,
+                            authorSignature =
+                                incoming.authorSignature.copy(
+                                    developer = canonicalAuthor,
+                                    developerId = canonicalAuthor?.iid ?: incoming.authorSignature.developerId,
+                                ),
+                            committerSignature =
+                                incoming.committerSignature.copy(
+                                    developer = canonicalCommitter,
+                                    developerId = canonicalCommitter?.iid ?: incoming.committerSignature.developerId,
+                                ),
+                            message = incoming.message,
+                            repositoryId = incoming.repositoryId,
+                            repository = repo,
+                        ).apply {
+                            this.id = incoming.id
+                            this.webUrl = incoming.webUrl
+                            this.parentShas.addAll(incoming.parentShas)
+                            this.childShas.addAll(incoming.childShas)
+                        }
+                    } else {
+                        incoming
+                    }
+
+                commitsByKey[key] = finalCommit
+                finalCommit
             }
-
-            commitsByKey[key] = finalCommit
-            finalCommit
-        }
 
         // --- Pass 2: Canonicalize developers ---
         // (Handled in Pass 1 for new commits)
@@ -197,9 +201,12 @@ class RepositoryService {
 
     private fun normalizeEmail(email: String?): String? = email?.trim()?.lowercase()
 
-    private fun sameEmail(a: Developer, b: Developer): Boolean =
+    private fun sameEmail(
+        a: Developer,
+        b: Developer
+    ): Boolean =
         normalizeEmail(a.email) != null &&
-                normalizeEmail(a.email) == normalizeEmail(b.email)
+            normalizeEmail(a.email) == normalizeEmail(b.email)
 
     private fun normalizePath(path: String): String =
         (if (path.endsWith(".git")) path else "$path/.git").let {
@@ -295,5 +302,4 @@ class RepositoryService {
 //            return repo
 //        }
     }
-
 }

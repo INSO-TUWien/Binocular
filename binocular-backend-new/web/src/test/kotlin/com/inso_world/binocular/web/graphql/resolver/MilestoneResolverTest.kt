@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 internal class MilestoneResolverTest : GraphQlControllerTest() {
     @Autowired
     private lateinit var milestoneResolver: MilestoneResolver
+
     @Nested
     inner class BasicFunctionality {
         @Test

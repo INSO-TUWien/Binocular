@@ -3,7 +3,6 @@ package com.inso_world.binocular.infrastructure.sql.integration.service
 import com.inso_world.binocular.core.service.ProjectInfrastructurePort
 import com.inso_world.binocular.core.service.RepositoryInfrastructurePort
 import com.inso_world.binocular.infrastructure.sql.integration.service.base.BaseServiceTest
-import com.inso_world.binocular.model.Issue
 import com.inso_world.binocular.model.Project
 import com.inso_world.binocular.model.Repository
 import org.assertj.core.api.Assertions.assertThat
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
-import java.time.LocalDateTime
 import kotlin.uuid.ExperimentalUuidApi
 
 internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
@@ -77,9 +75,10 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `create project with name and description`() {
             // Given: A project with name and description
-            val project = Project(name = "DescribedProject").apply {
-                description = "This is a test project with a description"
-            }
+            val project =
+                Project(name = "DescribedProject").apply {
+                    description = "This is a test project with a description"
+                }
 
             // When: Creating the project
             val created = projectPort.create(project)
@@ -96,9 +95,10 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `create project with 254 character long description, should succeed`() {
             val longDescription = "a".repeat(254)
-            val project = Project(name = "LongDescProject").apply {
-                description = longDescription
-            }
+            val project =
+                Project(name = "LongDescProject").apply {
+                    description = longDescription
+                }
 
             // When: Creating the project
             val created = projectPort.create(project)
@@ -111,9 +111,10 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `create project with 255 character long description, should succeed`() {
             val longDescription = "a".repeat(255)
-            val project = Project(name = "LongDescProject").apply {
-                description = longDescription
-            }
+            val project =
+                Project(name = "LongDescProject").apply {
+                    description = longDescription
+                }
 
             // When: Creating the project
             val created = projectPort.create(project)
@@ -127,9 +128,10 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         fun `create project with 256 character long description, should fail`() {
             // Given: A project with a very long description (255+ characters)
             val longDescription = "a".repeat(256)
-            val project = Project(name = "LongDescProject").apply {
-                description = longDescription
-            }
+            val project =
+                Project(name = "LongDescProject").apply {
+                    description = longDescription
+                }
 
             // When: Creating the project
             val ex = assertThrows<IllegalArgumentException> { projectPort.create(project) }
@@ -192,9 +194,10 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
             projectPort.create(Project(name = "Duplicate Project"))
 
             // When: creating another project with the same name
-            val exception = assertThrows<IllegalArgumentException> {
-                projectPort.create(Project(name = "Duplicate Project"))
-            }
+            val exception =
+                assertThrows<IllegalArgumentException> {
+                    projectPort.create(Project(name = "Duplicate Project"))
+                }
 
             // Then: creation fails before hitting the database unique constraint
             assertThat(exception.message).isEqualTo("Project with unique key 'Duplicate Project' already exists")
@@ -216,9 +219,10 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `create project with empty description`() {
             // Given: A project with empty string description
-            val project = Project(name = "EmptyDescProject").apply {
-                description = ""
-            }
+            val project =
+                Project(name = "EmptyDescProject").apply {
+                    description = ""
+                }
 
             // When: Creating the project
             val created = projectPort.create(project)
@@ -318,9 +322,12 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `findByIid returns correct project`() {
             // Given: A created project
-            val created = projectPort.create(Project(name = "TargetProject").apply {
-                description = "Find me!"
-            })
+            val created =
+                projectPort.create(
+                    Project(name = "TargetProject").apply {
+                        description = "Find me!"
+                    }
+                )
             projectPort.create(Project(name = "OtherProject"))
 
             // When: Finding by iid
@@ -353,9 +360,12 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         fun `findByName returns correct project`() {
             // Given: Multiple projects with different names
             projectPort.create(Project(name = "Alpha Project"))
-            val target = projectPort.create(Project(name = "Beta Project").apply {
-                description = "This is the one"
-            })
+            val target =
+                projectPort.create(
+                    Project(name = "Beta Project").apply {
+                        description = "This is the one"
+                    }
+                )
             projectPort.create(Project(name = "Gamma Project"))
 
             // When: Finding by name
@@ -426,9 +436,12 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `update project description`() {
             // Given: An existing project
-            val project = projectPort.create(Project(name = "UpdateTest").apply {
-                description = "Original description"
-            })
+            val project =
+                projectPort.create(
+                    Project(name = "UpdateTest").apply {
+                        description = "Original description"
+                    }
+                )
 
             // When: Updating description
             project.description = "Updated description"
@@ -450,9 +463,12 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `update project description to null`() {
             // Given: A project with description
-            val project = projectPort.create(Project(name = "NullUpdateTest").apply {
-                description = "Will be removed"
-            })
+            val project =
+                projectPort.create(
+                    Project(name = "NullUpdateTest").apply {
+                        description = "Will be removed"
+                    }
+                )
 
             // When: Setting description to null
             project.description = null
@@ -465,9 +481,12 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `update project description to empty string`() {
             // Given: A project with description
-            val project = projectPort.create(Project(name = "EmptyUpdateTest").apply {
-                description = "Will be empty"
-            })
+            val project =
+                projectPort.create(
+                    Project(name = "EmptyUpdateTest").apply {
+                        description = "Will be empty"
+                    }
+                )
 
             // When: Setting description to empty
             project.description = ""
@@ -500,9 +519,12 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `update same project multiple times (idempotency)`() {
             // Given: A created project
-            val project = projectPort.create(Project(name = "IdempotentTest").apply {
-                description = "Original"
-            })
+            val project =
+                projectPort.create(
+                    Project(name = "IdempotentTest").apply {
+                        description = "Original"
+                    }
+                )
 
             // When: Updating multiple times with same data
             val update1 = projectPort.update(project)
@@ -526,9 +548,12 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `update project with very long description, 254 characters, should succeed`() {
             // Given: A project with short description
-            val project = projectPort.create(Project(name = "LongUpdateTest").apply {
-                description = "Short"
-            })
+            val project =
+                projectPort.create(
+                    Project(name = "LongUpdateTest").apply {
+                        description = "Short"
+                    }
+                )
 
             // When: Updating to very long description
             val longDesc = "a".repeat(254)
@@ -546,9 +571,12 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `update project with very long description, 255 characters, should succeed`() {
             // Given: A project with short description
-            val project = projectPort.create(Project(name = "LongUpdateTest").apply {
-                description = "Short"
-            })
+            val project =
+                projectPort.create(
+                    Project(name = "LongUpdateTest").apply {
+                        description = "Short"
+                    }
+                )
 
             // When: Updating to very long description
             val longDesc = "a".repeat(255)
@@ -566,16 +594,20 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `update project with very long description, 256 characters, should fail`() {
             // Given: A project with short description
-            val project = projectPort.create(Project(name = "LongUpdateTest").apply {
-                description = "Short"
-            })
+            val project =
+                projectPort.create(
+                    Project(name = "LongUpdateTest").apply {
+                        description = "Short"
+                    }
+                )
 
             // When: Updating to very long description
             val longDesc = "a".repeat(256)
             project.description = longDesc
-            val ex = assertThrows<IllegalArgumentException> {
-                projectPort.update(project)
-            }
+            val ex =
+                assertThrows<IllegalArgumentException> {
+                    projectPort.update(project)
+                }
 
             assertThat(ex.message).isEqualTo("Description must not exceed 255 characters.")
         }
@@ -642,10 +674,11 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         fun `delete project with repository cascades correctly`() {
             // Given: A project with associated repository
             val project = projectPort.create(Project(name = "ProjectWithRepo"))
-            val repository = Repository(
-                localPath = "/repo/path",
-                projectId = project.iid,
-            ).apply { this.project = project }
+            val repository =
+                Repository(
+                    localPath = "/repo/path",
+                    projectId = project.iid,
+                ).apply { this.project = project }
             repositoryPort.create(repository)
 
             // When: Deleting the project
@@ -876,13 +909,14 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
         @Test
         fun `saveAll creates multiple projects atomically`() {
             // Given: Multiple projects to save
-            val projects = listOf(
-                Project(name = "Batch 1"),
-                Project(name = "Batch 2"),
-                Project(name = "Batch 3"),
-                Project(name = "Batch 4"),
-                Project(name = "Batch 5")
-            )
+            val projects =
+                listOf(
+                    Project(name = "Batch 1"),
+                    Project(name = "Batch 2"),
+                    Project(name = "Batch 3"),
+                    Project(name = "Batch 4"),
+                    Project(name = "Batch 5")
+                )
 
             // When: Saving all at once
             val saved = projectPort.saveAll(projects)
@@ -895,7 +929,11 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
                 {
                     val names = projectPort.findAll().map { it.name }
                     assertThat(names).containsExactlyInAnyOrder(
-                        "Batch 1", "Batch 2", "Batch 3", "Batch 4", "Batch 5"
+                        "Batch 1",
+                        "Batch 2",
+                        "Batch 3",
+                        "Batch 4",
+                        "Batch 5"
                     )
                 }
             )
@@ -922,5 +960,5 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
 }
 
 // Helper that bypasses the domain guard rails so failure scenarios can be exercised explicitly.
-//private fun Project.forceSetRepo(repository: Repository?) =
+// private fun Project.forceSetRepo(repository: Repository?) =
 //    Project::class.java.getDeclaredField("repo").apply { isAccessible = true }.also { it.set(this, repository) }

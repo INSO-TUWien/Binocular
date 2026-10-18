@@ -133,9 +133,21 @@ class BinocularRemoteTest : BaseUnitTest() {
 
         @Test
         fun `toModel correctly identifies remote among multiple remotes`() {
-            val remote1 = Remote(name = "origin", url = "https://github.com/user/repo.git", repositoryId = repository.iid).apply { this.repository = repository }
-            val remote2 = Remote(name = "upstream", url = "https://github.com/upstream/repo.git", repositoryId = repository.iid).apply { this.repository = repository }
-            val remote3 = Remote(name = "fork", url = "https://github.com/fork/repo.git", repositoryId = repository.iid).apply { this.repository = repository }
+            val remote1 =
+                Remote(name = "origin", url = "https://github.com/user/repo.git", repositoryId = repository.iid).apply {
+                    this.repository =
+                        repository
+                }
+            val remote2 =
+                Remote(name = "upstream", url = "https://github.com/upstream/repo.git", repositoryId = repository.iid).apply {
+                    this.repository =
+                        repository
+                }
+            val remote3 =
+                Remote(name = "fork", url = "https://github.com/fork/repo.git", repositoryId = repository.iid).apply {
+                    this.repository =
+                        repository
+                }
 
             val ffiRemote =
                 GixRemote(
@@ -153,8 +165,14 @@ class BinocularRemoteTest : BaseUnitTest() {
 
         @Test
         fun `toModel creates new remote when no match among existing remotes`() {
-            Remote(name = "origin", url = "https://github.com/user/repo.git", repositoryId = repository.iid).apply { this.repository = repository }
-            Remote(name = "upstream", url = "https://github.com/upstream/repo.git", repositoryId = repository.iid).apply { this.repository = repository }
+            Remote(name = "origin", url = "https://github.com/user/repo.git", repositoryId = repository.iid).apply {
+                this.repository =
+                    repository
+            }
+            Remote(name = "upstream", url = "https://github.com/upstream/repo.git", repositoryId = repository.iid).apply {
+                this.repository =
+                    repository
+            }
 
             val ffiRemote =
                 GixRemote(
@@ -765,7 +783,10 @@ class BinocularRemoteTest : BaseUnitTest() {
     ) {
         if (!expectNew) {
             // Create existing remote
-            Remote(name = name, url = "https://github.com/user/original.git", repositoryId = repository.iid).apply { this.repository = repository }
+            Remote(name = name, url = "https://github.com/user/original.git", repositoryId = repository.iid).apply {
+                this.repository =
+                    repository
+            }
         }
 
         val ffiRemote = GixRemote(name = name, url = url)

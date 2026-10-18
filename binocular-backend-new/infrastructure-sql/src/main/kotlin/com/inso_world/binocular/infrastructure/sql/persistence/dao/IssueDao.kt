@@ -1,11 +1,12 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.sql.persistence.dao
 
 import com.inso_world.binocular.core.persistence.exception.PersistenceException
 import com.inso_world.binocular.infrastructure.sql.persistence.dao.interfaces.IIssueDao
+import com.inso_world.binocular.infrastructure.sql.persistence.entity.DeveloperEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.IssueEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.ProjectEntity
-import com.inso_world.binocular.infrastructure.sql.persistence.entity.DeveloperEntity
 import com.inso_world.binocular.infrastructure.sql.persistence.repository.IssueRepository
 import com.inso_world.binocular.infrastructure.sql.persistence.repository.ProjectRepository
 import com.inso_world.binocular.model.Issue
@@ -29,36 +30,38 @@ internal class IssueDao(
     }
 
     override fun findByIid(iid: Any): IssueEntity? {
-        val uIid: kotlin.uuid.Uuid = when (iid) {
-            is com.inso_world.binocular.model.Issue.Id -> iid.value
-            is kotlin.uuid.Uuid -> iid
-            is String -> {
-                try {
-                    kotlin.uuid.Uuid.parse(iid)
-                } catch (e: IllegalArgumentException) {
-                    return null
-                }
-            }
-            else -> throw IllegalArgumentException("Unsupported iid type: ${iid.javaClass}")
-        }
-        return this.repo.findByIid(uIid)
-    }
-
-    override fun findByIids(iids: Collection<Any>): List<IssueEntity> {
-        val uIids = iids.mapNotNull { iid ->
+        val uIid: kotlin.uuid.Uuid =
             when (iid) {
-                is com.inso_world.binocular.model.Issue.Id -> iid.value
+                is Issue.Id -> iid.value
                 is kotlin.uuid.Uuid -> iid
                 is String -> {
                     try {
                         kotlin.uuid.Uuid.parse(iid)
                     } catch (e: IllegalArgumentException) {
-                        null
+                        return null
                     }
                 }
                 else -> throw IllegalArgumentException("Unsupported iid type: ${iid.javaClass}")
             }
-        }
+        return this.repo.findByIid(uIid)
+    }
+
+    override fun findByIids(iids: Collection<Any>): List<IssueEntity> {
+        val uIids =
+            iids.mapNotNull { iid ->
+                when (iid) {
+                    is Issue.Id -> iid.value
+                    is kotlin.uuid.Uuid -> iid
+                    is String -> {
+                        try {
+                            kotlin.uuid.Uuid.parse(iid)
+                        } catch (e: IllegalArgumentException) {
+                            null
+                        }
+                    }
+                    else -> throw IllegalArgumentException("Unsupported iid type: ${iid.javaClass}")
+                }
+            }
         return this.repo.findAllByIidIn(uIids)
     }
 
@@ -74,9 +77,7 @@ internal class IssueDao(
             }
     }
 
-    override fun findAllByUser(user: DeveloperEntity): Stream<IssueEntity> {
-        return repo.findAllByDevelopersContaining(user)
-    }
+    override fun findAllByUser(user: DeveloperEntity): Stream<IssueEntity> = repo.findAllByDevelopersContaining(user)
 
     override fun findAllByIidIn(iids: Collection<Issue.Id>): List<IssueEntity> = repo.findAllByIidIn(iids.map { it.value })
 
@@ -96,9 +97,7 @@ internal class IssueDao(
             )
         return ids
     }
-
 }
-
 
 // package com.inso_world.binocular.infrastructure.sql.persistence.dao
 //

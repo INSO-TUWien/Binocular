@@ -31,9 +31,7 @@ class ProjectService(
     }
 
     @Transactional
-    fun save(project: Project): Project {
-        return this.projectInfrastructurePort.create(project)
-    }
+    fun save(project: Project): Project = this.projectInfrastructurePort.create(project)
 
     @Transactional
     fun getOrCreateProject(name: String): Project {
@@ -51,8 +49,12 @@ class ProjectService(
         }
     }
 
-    fun addIssues(issueDtos: List<ItsGitHubIssue>, project: Project, repo: String, owner: String) {
-
+    fun addIssues(
+        issueDtos: List<ItsGitHubIssue>,
+        project: Project,
+        repo: String,
+        owner: String
+    ) {
         // check for all issues if they already exist
         val existingIssueEntites = this.issueService.checkExisting(issueDtos, project)
 
@@ -61,14 +63,16 @@ class ProjectService(
 
         if (existingIssueEntites.second.isNotEmpty()) {
             // if any new issues were found, get accounts from GitHub
-            val accounts = gitHubService.loadAllAssignableUsers(owner, repo).block()
-                ?.map { it.toDomain(project) }
-                ?: emptyList()
+            val accounts =
+                gitHubService
+                    .loadAllAssignableUsers(owner, repo)
+                    .block()
+                    ?.map { it.toDomain(project) }
+                    ?: emptyList()
 
             // check which accounts already exist in database
             val checkedAccounts = accountService.checkExisting(accounts)
             logger.debug("Found ${checkedAccounts.first.size} existing accounts, ${checkedAccounts.second.size} new accounts")
-
 
             // transform and add these issues as they are new
             // TODO construct updated project
@@ -94,7 +98,7 @@ class ProjectService(
     fun transformIssues(
         project: Project,
         issues: Iterable<ItsGitHubIssue>,
-        checkedAccounts:  Pair<Collection<Account>, Collection<Account>>
+        checkedAccounts: Pair<Collection<Account>, Collection<Account>>
     ): Collection<Issue> {
         logger.trace(">>> transformIssues({})", project)
 
@@ -135,7 +139,6 @@ class ProjectService(
                 }
                 // case 2: account exists in new accounts taken from GitHub
                 else if (login in newAccountCache.keys) {
-
                     val newAccount = newAccountCache[login]
                     if (newAccount != null) {
                         // add account to cache for other issues to find
@@ -149,7 +152,6 @@ class ProjectService(
                 else {
                     logger.warn("No account found for login '$login', skipping assignee")
                 }
-
             }
             issue.accountIds = updatedAccountIds
 

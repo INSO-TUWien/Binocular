@@ -1,7 +1,6 @@
 package com.inso_world.binocular.web.graphql.controller
 
 import com.inso_world.binocular.core.service.UserInfrastructurePort
-import com.inso_world.binocular.model.User
 import com.inso_world.binocular.web.graphql.error.GraphQLValidationUtils
 import com.inso_world.binocular.web.graphql.mapper.GraphQlMapper
 import com.inso_world.binocular.web.graphql.model.PageDto
@@ -40,12 +39,13 @@ internal class UserController(
     ): PageDto<UserDto> {
         logger.info("Getting all users...")
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = page,
-            size = perPage,
-            sort = sort ?: Sort.ASC,
-            sortBy = "gitSignature",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = page,
+                size = perPage,
+                sort = sort ?: Sort.ASC,
+                sortBy = "gitSignature",
+            )
 
         logger.debug(
             "Getting all users with properties page={}, perPage={}, sort={}",
@@ -75,5 +75,4 @@ internal class UserController(
         logger.info("Getting user by id: $id")
         return mapper.toDto(GraphQLValidationUtils.requireEntityExists(userService.findById(id), "User", id))
     }
-
 }

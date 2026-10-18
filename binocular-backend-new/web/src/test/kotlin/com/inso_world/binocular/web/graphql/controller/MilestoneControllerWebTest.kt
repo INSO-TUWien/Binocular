@@ -369,7 +369,9 @@ internal class MilestoneControllerWebTest : BaseIntegrationTest() {
                     assertEquals(
                         expected,
                         actual,
-                        "Milestone createdAt mismatch: expected ${expectedMilestone.createdAt}, got ${actualMilestone.get("createdAt").asText()}",
+                        "Milestone createdAt mismatch: expected ${expectedMilestone.createdAt}, got ${actualMilestone.get(
+                            "createdAt"
+                        ).asText()}",
                     )
                 },
                 {
@@ -378,7 +380,9 @@ internal class MilestoneControllerWebTest : BaseIntegrationTest() {
                     assertEquals(
                         expected,
                         actual,
-                        "Milestone updatedAt mismatch: expected ${expectedMilestone.updatedAt}, got ${actualMilestone.get("updatedAt").asText()}",
+                        "Milestone updatedAt mismatch: expected ${expectedMilestone.updatedAt}, got ${actualMilestone.get(
+                            "updatedAt"
+                        ).asText()}",
                     )
                 },
                 {
@@ -504,10 +508,11 @@ internal class MilestoneControllerWebTest : BaseIntegrationTest() {
             assertEquals(1, milestonesData.size(), "Expected 1 milestone, but got ${milestonesData.size()}")
 
             // With new default sort (dueDate DESC), compute expected second item accordingly
-            val expectedMilestone = TestDataProvider.testMilestones
-                .sortedByDescending { Instant.parse(it.dueDate) }
-                .drop(1)
-                .first()
+            val expectedMilestone =
+                TestDataProvider.testMilestones
+                    .sortedByDescending { Instant.parse(it.dueDate) }
+                    .drop(1)
+                    .first()
             val actualMilestone = milestonesData.get(0)
 
             assertAll(
@@ -547,7 +552,9 @@ internal class MilestoneControllerWebTest : BaseIntegrationTest() {
                     assertEquals(
                         expected,
                         actual,
-                        "Milestone createdAt mismatch: expected ${expectedMilestone.createdAt}, got ${actualMilestone.get("createdAt").asText()}",
+                        "Milestone createdAt mismatch: expected ${expectedMilestone.createdAt}, got ${actualMilestone.get(
+                            "createdAt"
+                        ).asText()}",
                     )
                 },
                 {
@@ -556,7 +563,9 @@ internal class MilestoneControllerWebTest : BaseIntegrationTest() {
                     assertEquals(
                         expected,
                         actual,
-                        "Milestone updatedAt mismatch: expected ${expectedMilestone.updatedAt}, got ${actualMilestone.get("updatedAt").asText()}",
+                        "Milestone updatedAt mismatch: expected ${expectedMilestone.updatedAt}, got ${actualMilestone.get(
+                            "updatedAt"
+                        ).asText()}",
                     )
                 },
                 {

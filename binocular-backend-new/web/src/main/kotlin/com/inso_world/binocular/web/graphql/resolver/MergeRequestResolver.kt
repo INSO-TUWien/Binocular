@@ -93,10 +93,13 @@ class MergeRequestResolver(
 
     // TODO: this is missing in the db idk
     @SchemaMapping(typeName = "mergeRequest", field = "sourceBranch")
-    fun sourceBranch(@Suppress("UNUSED_PARAMETER") mergeRequest: MergeRequestDto): String? = null
+    fun sourceBranch(
+        @Suppress("UNUSED_PARAMETER") mergeRequest: MergeRequestDto
+    ): String? = null
 
     // TODO: same here?
     @SchemaMapping(typeName = "mergeRequest", field = "targetBranch")
-    fun targetBranch(@Suppress("UNUSED_PARAMETER") mergeRequest: MergeRequestDto): String? = null
-
+    fun targetBranch(
+        @Suppress("UNUSED_PARAMETER") mergeRequest: MergeRequestDto
+    ): String? = null
 }

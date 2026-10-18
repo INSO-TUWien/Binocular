@@ -27,7 +27,6 @@ internal class NoteInfrastructurePortImpl(
     private val linkDao: NoteLinkDao,
     private val noteMapper: NoteMapper,
 ) : NoteInfrastructurePort {
-
     private fun resolveNoteEntity(noteId: String): NoteEntity? {
         val longId = noteId.toLongOrNull()
         if (longId != null) {
@@ -71,7 +70,13 @@ internal class NoteInfrastructurePortImpl(
 
     override fun create(entity: Note): Note = noteMapper.toDomain(noteDao.create(noteMapper.toEntity(entity)))
 
-    override fun saveAll(entities: Collection<Note>): Iterable<Note> = noteDao.saveAll(entities.map { noteMapper.toEntity(it) }).map { noteMapper.toDomain(it) }
+    override fun saveAll(entities: Collection<Note>): Iterable<Note> =
+        noteDao
+            .saveAll(
+                entities.map {
+                    noteMapper.toEntity(it)
+                }
+            ).map { noteMapper.toDomain(it) }
 
     override fun delete(entity: Note) {
         entity.id?.let { deleteById(it) }

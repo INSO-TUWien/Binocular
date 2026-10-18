@@ -110,7 +110,7 @@ internal class RepositoryServiceTest : BaseUnitTest() {
             val dev = Developer(name = "Dev", email = "dev@test.com", repositoryId = repository.iid)
             val sig = Signature(developerId = dev.iid, timestamp = LocalDateTime.now())
             val childCommit = Commit(sha = "1".repeat(40), authorSignature = sig, repositoryId = repository.iid)
-            
+
             childCommit.parentShas.add(rootCommit.sha)
             rootCommit.childShas.add(childCommit.sha)
 
@@ -141,13 +141,14 @@ internal class RepositoryServiceTest : BaseUnitTest() {
             val sig = Signature(developerId = dev.iid, timestamp = LocalDateTime.now())
             val head = Commit(sha = "a".repeat(40), authorSignature = sig, repositoryId = repository.iid)
 
-            val branch = Branch(
-                name = "main",
-                fullName = "refs/heads/main",
-                category = ReferenceCategory.LOCAL_BRANCH,
-                repositoryId = repository.iid,
-                headSha = head.sha
-            )
+            val branch =
+                Branch(
+                    name = "main",
+                    fullName = "refs/heads/main",
+                    category = ReferenceCategory.LOCAL_BRANCH,
+                    repositoryId = repository.iid,
+                    headSha = head.sha
+                )
 
             assertAll(
                 { assertThat(branch.repositoryId).isEqualTo(repository.iid) },

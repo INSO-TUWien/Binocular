@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.repository
 
 import com.arangodb.springframework.annotation.Query
@@ -10,8 +11,9 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Repository
-interface MergeRequestRepository : ArangoRepository<MergeRequestEntity, String>, TechnicalIdentifiableRepository<MergeRequestEntity> {
-
+interface MergeRequestRepository :
+    ArangoRepository<MergeRequestEntity, String>,
+    TechnicalIdentifiableRepository<MergeRequestEntity> {
     @OptIn(ExperimentalUuidApi::class)
     override fun findByIid(iid: Uuid): MergeRequestEntity?
 

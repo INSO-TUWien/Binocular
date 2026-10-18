@@ -39,12 +39,13 @@ internal class ModuleController(
     ): PageDto<ModuleDto> {
         logger.info("Getting all modules...")
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = page,
-            size = perPage,
-            sort = sort ?: Sort.DESC,
-            sortBy = "path",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = page,
+                size = perPage,
+                sort = sort ?: Sort.DESC,
+                sortBy = "path",
+            )
 
         logger.debug(
             "Getting all modules with properties page={}, perPage={}, sort={}",
@@ -74,5 +75,4 @@ internal class ModuleController(
         logger.info("Getting module by id: $id")
         return mapper.toDto(GraphQLValidationUtils.requireEntityExists(moduleService.findById(id), "Module", id))
     }
-
 }

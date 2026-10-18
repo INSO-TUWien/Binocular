@@ -1,10 +1,9 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
-import com.inso_world.binocular.core.delegates.logger
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.IssueEntity
-import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.ProjectEntity
 import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.model.Commit
 import com.inso_world.binocular.model.Developer
@@ -13,7 +12,6 @@ import com.inso_world.binocular.model.Milestone
 import com.inso_world.binocular.model.Note
 import com.inso_world.binocular.model.Project
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import java.time.ZoneOffset
 import java.util.Date
@@ -39,9 +37,9 @@ import kotlin.uuid.Uuid
  */
 @Component
 internal class IssueMapper(
-    @org.springframework.beans.factory.annotation.Autowired private val mentionMapper: com.inso_world.binocular.infrastructure.arangodb.persistence.mapper.MentionMapper,
+    @org.springframework.beans.factory.annotation.Autowired private val mentionMapper:
+        com.inso_world.binocular.infrastructure.arangodb.persistence.mapper.MentionMapper,
 ) : EntityMapper<Issue, IssueEntity> {
-
     override fun toEntity(domain: Issue): IssueEntity =
         IssueEntity(
             id = domain.id,
@@ -68,27 +66,27 @@ internal class IssueMapper(
                 title = entity.title,
                 description = entity.description,
                 createdAt =
-                entity.createdAt
-                    ?.toInstant()
-                    ?.atZone(java.time.ZoneOffset.UTC)
-                    ?.toLocalDateTime(),
+                    entity.createdAt
+                        ?.toInstant()
+                        ?.atZone(java.time.ZoneOffset.UTC)
+                        ?.toLocalDateTime(),
                 closedAt =
-                entity.closedAt
-                    ?.toInstant()
-                    ?.atZone(java.time.ZoneOffset.UTC)
-                    ?.toLocalDateTime(),
+                    entity.closedAt
+                        ?.toInstant()
+                        ?.atZone(java.time.ZoneOffset.UTC)
+                        ?.toLocalDateTime(),
                 updatedAt =
-                entity.updatedAt
-                    ?.toInstant()
-                    ?.atZone(java.time.ZoneOffset.UTC)
-                    ?.toLocalDateTime(),
+                    entity.updatedAt
+                        ?.toInstant()
+                        ?.atZone(java.time.ZoneOffset.UTC)
+                        ?.toLocalDateTime(),
                 labels = entity.labels,
                 state = entity.state,
                 webUrl = entity.webUrl,
                 mentions = entity.mentions.map { me -> this.mentionMapper.toDomain(me) },
                 project =
-                entity.project?.let { p -> Project.Id(p.iid) }
-                    ?: Project.Id(entity.iid ?: Uuid.random()),
+                    entity.project?.let { p -> Project.Id(p.iid) }
+                        ?: Project.Id(entity.iid ?: Uuid.random()),
                 accountIds = entity.accounts.mapNotNull { a -> a.iid?.let { iid -> Account.Id(iid) } }.toSet(),
                 commitIds = entity.commits.mapNotNull { c -> c.iid?.let { iid -> Commit.Id(iid) } }.toSet(),
                 milestoneIds = entity.milestones.mapNotNull { ms -> ms.iid?.let { iid -> Milestone.Id(iid) } }.toSet(),
@@ -100,7 +98,5 @@ internal class IssueMapper(
         return domain
     }
 
-    override fun toDomainList(entities: Iterable<IssueEntity>): List<Issue> {
-        return entities.map { e -> this.toDomain(e) }
-    }
+    override fun toDomainList(entities: Iterable<IssueEntity>): List<Issue> = entities.map { e -> this.toDomain(e) }
 }

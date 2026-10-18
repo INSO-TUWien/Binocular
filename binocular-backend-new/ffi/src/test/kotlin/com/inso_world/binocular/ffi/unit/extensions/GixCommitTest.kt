@@ -79,11 +79,13 @@ class GixCommitTest : BaseUnitTest() {
 
         @Test
         fun `reuses existing commit by sha`() {
-            val dev = com.inso_world.binocular.model.Developer(
-                name = "Existing",
-                email = "existing@test.com",
-                repositoryId = repository.iid,
-            ).apply { this.repository = repository }
+            val dev =
+                com.inso_world.binocular.model
+                    .Developer(
+                        name = "Existing",
+                        email = "existing@test.com",
+                        repositoryId = repository.iid,
+                    ).apply { this.repository = repository }
             val existing =
                 Commit(
                     sha = validSha,

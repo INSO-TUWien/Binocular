@@ -11,13 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertAll
-import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDateTime
-import java.util.stream.Stream
 import kotlin.uuid.ExperimentalUuidApi
 
 @OptIn(ExperimentalUuidApi::class)
@@ -48,13 +42,14 @@ class GitIndexerTest {
             val dev = Developer(name = "Dev", email = "dev@test.com", repositoryId = repository.iid)
             val sig = Signature(developerId = dev.iid, timestamp = LocalDateTime.now())
             val head = Commit(sha = "a".repeat(40), authorSignature = sig, repositoryId = repository.iid)
-            val branch = Branch(
-                name = "main",
-                fullName = "refs/heads/main",
-                category = ReferenceCategory.LOCAL_BRANCH,
-                repositoryId = repository.iid,
-                headSha = head.sha
-            )
+            val branch =
+                Branch(
+                    name = "main",
+                    fullName = "refs/heads/main",
+                    category = ReferenceCategory.LOCAL_BRANCH,
+                    repositoryId = repository.iid,
+                    headSha = head.sha
+                )
             assertThat(branch.headSha).isEqualTo(head.sha)
         }
     }
@@ -75,7 +70,7 @@ class GitIndexerTest {
             val sig = Signature(developerId = dev.iid, timestamp = LocalDateTime.now())
             val parent = Commit(sha = "0".repeat(40), authorSignature = sig, repositoryId = repository.iid)
             val child = Commit(sha = "1".repeat(40), authorSignature = sig, repositoryId = repository.iid)
-            
+
             child.parentShas.add(parent.sha)
             assertThat(child.parentShas).containsExactly(parent.sha)
         }

@@ -1,16 +1,16 @@
 package com.inso_world.binocular.web.graphql.integration.realdata.visualizations
 
+import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 import com.inso_world.binocular.web.graphql.integration.realdata.base.BaseGraphQlCompatibilityIT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import com.inso_world.binocular.web.graphql.integration.realdata.assertions.DateAssertions.assertIsoInstantEquals
 
 internal class CommitsFileChangesVisualizationRealDataIT : BaseGraphQlCompatibilityIT() {
-
     @Test
     fun `file commits for README md returns expected snapshot for first item`() {
-        val query = $$"""
+        val query =
+            $$"""
             query (
               $page: Int,
               $perPage: Int,
@@ -45,13 +45,14 @@ internal class CommitsFileChangesVisualizationRealDataIT : BaseGraphQlCompatibil
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val variables = mapOf(
-            "page" to 1,
-            "perPage" to 1000,
-            "file" to "README.md",
-        )
+        val variables =
+            mapOf(
+                "page" to 1,
+                "perPage" to 1000,
+                "file" to "README.md",
+            )
 
         val root = client.execute(query, variables)
         val file = root.get("file")
@@ -69,7 +70,11 @@ internal class CommitsFileChangesVisualizationRealDataIT : BaseGraphQlCompatibil
         assertEquals(":memo: Add documentation", commit.get("messageHeader").asText(), "commit.messageHeader")
         assertEquals("main", commit.get("branch").asText(), "commit.branch")
         assertIsoInstantEquals(commit.get("date").asText(), "2018-03-27T08:18:46.000Z", "commit.date")
-        assertEquals("https://github.com/INSO-World/Binocular/commit/61903bc02d5c48923c1274800dfee13168d17f93", commit.get("webUrl").asText(), "commit.webUrl")
+        assertEquals(
+            "https://github.com/INSO-World/Binocular/commit/61903bc02d5c48923c1274800dfee13168d17f93",
+            commit.get("webUrl").asText(),
+            "commit.webUrl"
+        )
         assertEquals("Commit", commit.get("__typename").asText(), "commit.__typename")
 
         val parents = commit.get("parents")
@@ -92,19 +97,25 @@ internal class CommitsFileChangesVisualizationRealDataIT : BaseGraphQlCompatibil
         assertTrue(filesData.size() >= 4, "commit.files.data should have at least 4 entries as per snapshot")
 
         // Order-agnostic assertions for commit.files.data
-        val expected = mapOf(
-            "docs/zivsed-architecture.png" to 655,
-            "docs/cors.png" to 400,
-            "docs/CONTRIBUTING.md" to 124,
-            "README.md" to 106,
-        )
+        val expected =
+            mapOf(
+                "docs/zivsed-architecture.png" to 655,
+                "docs/cors.png" to 400,
+                "docs/CONTRIBUTING.md" to 124,
+                "README.md" to 106,
+            )
 
         // Collect all file paths returned by the API
         // since the old graphql impl returns it in some strange order (i have no idea how),
         // it is needed to compare and verify without checking the order
         val paths = mutableListOf<String>()
         for (i in 0 until filesData.size()) {
-            val p = filesData.get(i).get("file").get("path").asText()
+            val p =
+                filesData
+                    .get(i)
+                    .get("file")
+                    .get("path")
+                    .asText()
             paths.add(p)
         }
 
@@ -122,7 +133,11 @@ internal class CommitsFileChangesVisualizationRealDataIT : BaseGraphQlCompatibil
 
             if (path == "docs/zivsed-architecture.png") {
                 assertEquals("FileInCommit", item.get("__typename").asText(), "files.data[*].__typename for docs/zivsed-architecture.png")
-                assertEquals("docs/zivsed-architecture.png", fileNode.get("path").asText(), "files.data[*].file.path for docs/zivsed-architecture.png")
+                assertEquals(
+                    "docs/zivsed-architecture.png",
+                    fileNode.get("path").asText(),
+                    "files.data[*].file.path for docs/zivsed-architecture.png"
+                )
                 assertEquals("File", fileNode.get("__typename").asText(), "files.data[*].file.__typename for docs/zivsed-architecture.png")
 
                 val hunks = item.get("hunks")
@@ -184,5 +199,4 @@ internal class CommitsFileChangesVisualizationRealDataIT : BaseGraphQlCompatibil
             if (validated == 4) break
         }
     }
-
 }

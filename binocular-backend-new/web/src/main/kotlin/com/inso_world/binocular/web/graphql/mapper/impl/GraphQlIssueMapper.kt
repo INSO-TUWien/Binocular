@@ -10,8 +10,8 @@ import kotlin.uuid.ExperimentalUuidApi
 class GraphQlIssueMapper(
     private val mentionMapper: GraphQlMentionMapper
 ) {
-    fun toDto(issue: Issue): IssueDto {
-        return IssueDto(
+    fun toDto(issue: Issue): IssueDto =
+        IssueDto(
             id = issue.id,
             iid = issue.platformIid,
             title = issue.title,
@@ -29,5 +29,4 @@ class GraphQlIssueMapper(
             milestoneIds = issue.milestoneIds.map { it.value.toString() }.toSet(),
             noteIds = issue.noteIds.map { it.value.toString() }.toSet(),
         )
-    }
 }

@@ -6,12 +6,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class GraphQlFileMapper {
-    fun toDto(file: File): FileDto {
-        return FileDto(
+    fun toDto(file: File): FileDto =
+        FileDto(
             id = file.id,
             path = file.path,
             webUrl = file.webUrl,
             maxLength = file.maxLength,
         )
-    }
 }

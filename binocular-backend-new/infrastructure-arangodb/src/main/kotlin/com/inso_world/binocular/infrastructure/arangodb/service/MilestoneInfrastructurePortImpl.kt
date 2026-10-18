@@ -5,7 +5,6 @@ import com.inso_world.binocular.core.service.MilestoneInfrastructurePort
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.edge.IIssueMilestoneConnectionDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.edge.IMergeRequestMilestoneConnectionDao
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.interfaces.node.IMilestoneDao
-import com.inso_world.binocular.model.Account
 import com.inso_world.binocular.model.Issue
 import com.inso_world.binocular.model.MergeRequest
 import com.inso_world.binocular.model.Milestone
@@ -22,13 +21,14 @@ import org.springframework.stereotype.Service
  * This service is database-agnostic and works with both ArangoDB and SQL implementations.
  */
 @Service
-internal class MilestoneInfrastructurePortImpl : MilestoneInfrastructurePort,
-    AbstractInfrastructurePort<Milestone, String>() {
-
+internal class MilestoneInfrastructurePortImpl :
+    AbstractInfrastructurePort<Milestone, String>(),
+    MilestoneInfrastructurePort {
     @PostConstruct
     fun init() {
         super.dao = milestoneDao
     }
+
     @Autowired private lateinit var milestoneDao: IMilestoneDao
 
     @Autowired private lateinit var issueMilestoneConnectionRepository: IIssueMilestoneConnectionDao

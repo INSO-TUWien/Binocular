@@ -9,8 +9,8 @@ import com.inso_world.binocular.web.util.PaginationUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.graphql.data.method.annotation.Argument
+import org.springframework.graphql.data.method.annotation.SchemaMapping
 import org.springframework.stereotype.Controller
 import java.time.LocalDateTime
 
@@ -58,7 +58,12 @@ class CommitResolver(
      * @return A list of files associated with the commit, or an empty list if the commit ID is null
      */
     @SchemaMapping(typeName = "Commit", field = "files")
-    fun files(commit: CommitDto, @Argument page: Int?, @Argument perPage: Int?, @Argument sort: Sort?): CommitFileConnection {
+    fun files(
+        commit: CommitDto,
+        @Argument page: Int?,
+        @Argument perPage: Int?,
+        @Argument sort: Sort?
+    ): CommitFileConnection {
         val currentPage = (page ?: 1).coerceAtLeast(1)
         val pageSize = perPage ?: 1000
         if (commit.id == null) {
@@ -76,35 +81,38 @@ class CommitResolver(
         val fileStatsById = commitService.findFileStatsByCommitId(id)
         val fileActionsById = commitService.findFileActionsByCommitId(id)
 
-        val pageable = PaginationUtils.createPageableWithValidation(
-            page = currentPage,
-            size = pageSize,
-            sort = sort ?: Sort.DESC,
-            sortBy = "id",
-        )
+        val pageable =
+            PaginationUtils.createPageableWithValidation(
+                page = currentPage,
+                size = pageSize,
+                sort = sort ?: Sort.DESC,
+                sortBy = "id",
+            )
         val pageResult = commitService.findFilesByCommitId(id, pageable)
 
-        val data = pageResult.content.map { f ->
-            val stats = f.id?.let { fileStatsById[it] } ?: Stats(additions = 0, deletions = 0)
-            val additions = (stats.additions ?: 0).toInt()
-            val deletions = (stats.deletions ?: 0).toInt()
-            val hunks = listOf(
-                Hunk(
-                    newStart = 1,
-                    newLines = additions,
-                    oldStart = 0,
-                    oldLines = deletions,
+        val data =
+            pageResult.content.map { f ->
+                val stats = f.id?.let { fileStatsById[it] } ?: Stats(additions = 0, deletions = 0)
+                val additions = (stats.additions ?: 0).toInt()
+                val deletions = (stats.deletions ?: 0).toInt()
+                val hunks =
+                    listOf(
+                        Hunk(
+                            newStart = 1,
+                            newLines = additions,
+                            oldStart = 0,
+                            oldLines = deletions,
+                        )
+                    )
+                val action = f.id?.let { fileActionsById[it] }
+                CommitFile(
+                    file = mapper.toDto(f),
+                    stats = mapper.toDto(stats),
+                    action = action,
+                    hunks = hunks,
+                    commitId = id,
                 )
-            )
-            val action = f.id?.let { fileActionsById[it] }
-            CommitFile(
-                file = mapper.toDto(f),
-                stats = mapper.toDto(stats),
-                action = action,
-                hunks = hunks,
-                commitId = id,
-            )
-        }
+            }
 
         return CommitFileConnection(
             count = pageResult.totalElements.toInt(),
@@ -113,7 +121,6 @@ class CommitResolver(
             data = data
         )
     }
-
 
     /**
      * Resolves the modules field for a Commit in GraphQL.
@@ -241,9 +248,7 @@ class CommitResolver(
      * commit.commitDateTime => date
      */
     @SchemaMapping(typeName = "Commit", field = "date")
-    fun date(commit: CommitDto): LocalDateTime? {
-        return commit.commitDateTime
-    }
+    fun date(commit: CommitDto): LocalDateTime? = commit.commitDateTime
 
     /**
      * Resolves the user field for a Commit in GraphQL.
