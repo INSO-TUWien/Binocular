@@ -15,8 +15,8 @@ import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { exit } from 'node:process';
-import crypto from 'node:crypto';
 import WebSocket from 'ws';
+import { CHROMIUM_MAJOR_VERSION, SEC_MS_GEC_VERSION, TRUSTED_CLIENT_TOKEN, generateSecMsGec, muidCookie } from './edgeTtsDrm.mjs';
 
 const [, , scriptArg, voiceArg] = process.argv;
 const voiceName = voiceArg || 'en-US-AndrewMultilingualNeural';
@@ -65,23 +65,6 @@ console.log(`Found ${cues.length} narration cue(s) in ${path.basename(scriptPath
 const OUTPUT_DIR = path.resolve('demo-output/voiceover-trial');
 const audioDir = path.join(OUTPUT_DIR, 'cues-edge');
 mkdirSync(audioDir, { recursive: true });
-
-const TRUSTED_CLIENT_TOKEN = '6A5AA1D4EAFF4E9FB37E23D68491D6F4';
-const CHROMIUM_FULL_VERSION = '143.0.3650.75';
-const CHROMIUM_MAJOR_VERSION = '143';
-const SEC_MS_GEC_VERSION = `1-${CHROMIUM_FULL_VERSION}`;
-const WIN_EPOCH = 11644473600;
-
-function generateSecMsGec() {
-  let ticks = Date.now() / 1000 + WIN_EPOCH;
-  ticks -= ticks % 300;
-  ticks *= 1e9 / 100;
-  return crypto
-    .createHash('sha256')
-    .update(`${Math.floor(ticks)}${TRUSTED_CLIENT_TOKEN}`)
-    .digest('hex')
-    .toUpperCase();
-}
 
 const USER_AGENT =
   `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ` +
@@ -154,6 +137,7 @@ async function main() {
       'User-Agent': USER_AGENT,
       'Accept-Encoding': 'gzip, deflate, br',
       'Accept-Language': 'en-US,en;q=0.9',
+      Cookie: muidCookie(),
     },
   });
 
