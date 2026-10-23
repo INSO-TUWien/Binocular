@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.persistence.repository
 
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.CommitEntity
@@ -9,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import java.util.stream.Stream
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import org.springframework.stereotype.Repository as SpringRepository
 
@@ -33,7 +30,6 @@ internal interface CommitRepository :
     @Query("SELECT c FROM CommitEntity c")
     fun findAllAsStream(): Stream<CommitEntity>
 
-    @OptIn(ExperimentalUuidApi::class)
     @Query(
         """
             SELECT b.head FROM BranchEntity b WHERE (b.name = :branch) AND (b.repository.iid = :repoIid)
@@ -44,7 +40,6 @@ internal interface CommitRepository :
         @Param("branch") branch: String,
     ): CommitEntity?
 
-    @OptIn(ExperimentalUuidApi::class)
     @Query(
         """
             SELECT b.head FROM BranchEntity b WHERE (b.repository.iid = :repoIid)
@@ -54,17 +49,14 @@ internal interface CommitRepository :
         @Param("repoIid") repoIid: Uuid,
     ): Iterable<CommitEntity>
 
-    @OptIn(ExperimentalUuidApi::class)
     @Suppress("ktlint:standard:function-naming")
     fun findByRepository_IidAndSha(
         iid: Uuid,
         sha: String,
     ): CommitEntity?
 
-    @OptIn(ExperimentalUuidApi::class)
     fun findByIid(iid: Uuid): CommitEntity?
 
-    @OptIn(ExperimentalUuidApi::class)
     fun findAllByIidIn(iids: Collection<Uuid>): List<CommitEntity>
 
     @Query(

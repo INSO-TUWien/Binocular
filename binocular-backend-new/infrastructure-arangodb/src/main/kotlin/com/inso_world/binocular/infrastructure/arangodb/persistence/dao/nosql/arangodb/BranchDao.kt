@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.dao.nosql.arangodb
 
 import com.inso_world.binocular.core.persistence.model.Page

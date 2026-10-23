@@ -1,4 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model.vcs
 
 import com.inso_world.binocular.model.AbstractDomainObject
@@ -7,13 +6,11 @@ import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.validation.GitUrl
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * Remote — a named URL endpoint referencing an external Git repository location.
  */
-@OptIn(ExperimentalUuidApi::class)
 data class Remote(
     @field:NotBlank
     @field:Pattern(

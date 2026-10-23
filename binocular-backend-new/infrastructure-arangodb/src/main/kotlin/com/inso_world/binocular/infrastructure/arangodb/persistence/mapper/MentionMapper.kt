@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
@@ -9,7 +7,6 @@ import com.inso_world.binocular.model.Mention
 import org.springframework.stereotype.Component
 import java.time.ZoneOffset
 import java.util.Date
-import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Mapper for Mention value objects.
@@ -49,7 +46,6 @@ internal class MentionMapper : EntityMapper<Mention, MentionEntity> {
      * @param entity The MentionEntity to convert
      * @return The Mention value object with commit reference and metadata
      */
-    @OptIn(ExperimentalUuidApi::class)
     override fun toDomain(entity: MentionEntity): Mention {
         // Fast-path: Check if already mapped
 

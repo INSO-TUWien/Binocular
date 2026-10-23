@@ -69,7 +69,6 @@ internal data class DeveloperEntity(
             this.id = this@DeveloperEntity.id?.toString()
         }
 
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     fun toLegacyUser(): com.inso_world.binocular.model.User =
         com.inso_world.binocular.model
             .User(

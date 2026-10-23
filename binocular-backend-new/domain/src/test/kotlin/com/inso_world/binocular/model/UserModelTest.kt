@@ -12,7 +12,6 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import kotlin.uuid.ExperimentalUuidApi
 
 class UserModelTest {
     private lateinit var repository: Repository
@@ -44,7 +43,6 @@ class UserModelTest {
     fun `create user, validate uniqueKey`() {
         val user = user()
 
-        @OptIn(ExperimentalUuidApi::class)
         assertAll(
             { assertThat(user.uniqueKey).isEqualTo(User.Key(repository.iid, "test-user <null>")) },
             { assertThat(user.uniqueKey.repositoryId).isEqualTo(repository.iid) },

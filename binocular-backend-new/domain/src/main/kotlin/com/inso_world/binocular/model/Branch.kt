@@ -1,11 +1,9 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
 import com.inso_world.binocular.model.vcs.ReferenceCategory
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.NotNull
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -38,7 +36,6 @@ import kotlin.uuid.Uuid
  * @property head Last known commit SHA associated with this branch.
  * @property repository Owning repository; this branch registers itself to `repository.branches` in `init`.
  */
-@OptIn(ExperimentalUuidApi::class)
 class Branch(
     @field:NotBlank val name: String,
     @field:NotBlank val fullName: String,

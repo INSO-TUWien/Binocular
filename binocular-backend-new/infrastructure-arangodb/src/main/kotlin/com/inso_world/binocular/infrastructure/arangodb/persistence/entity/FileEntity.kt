@@ -10,14 +10,12 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.CommitFileUserConnectionEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.ModuleFileConnectionEntity
 import org.springframework.data.annotation.Id
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * ArangoDB-specific File entity.
  */
 @Document("files")
-@OptIn(ExperimentalUuidApi::class)
 data class FileEntity(
     @Id
     var id: String? = null,

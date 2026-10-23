@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.service
 
 import com.inso_world.binocular.core.delegates.logger
@@ -35,9 +33,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import java.util.stream.Collectors
-import kotlin.uuid.ExperimentalUuidApi
 
-@OptIn(ExperimentalUuidApi::class)
 @Service
 @Validated
 @Deprecated("Use domain aggregate `Repository`")

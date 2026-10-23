@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
@@ -7,7 +5,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.Merge
 import com.inso_world.binocular.model.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -26,7 +23,6 @@ import kotlin.uuid.Uuid
  * This mapper is typically called by infrastructure ports and assemblers. It eagerly maps
  * mentions but uses lazy loading for accounts, milestones, and notes to optimize performance.
  */
-@OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 @Component
 internal class MergeRequestMapper(
     @org.springframework.beans.factory.annotation.Autowired private val mentionMapper: MentionMapper,

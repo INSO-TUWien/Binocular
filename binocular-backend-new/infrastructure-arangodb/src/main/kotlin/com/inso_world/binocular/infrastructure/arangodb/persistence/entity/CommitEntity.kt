@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.entity
 
 import com.arangodb.springframework.annotation.Document
@@ -19,7 +17,6 @@ import com.inso_world.binocular.model.Signature
 import org.springframework.data.annotation.Id
 import java.time.LocalDateTime
 import java.util.Date
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -42,7 +39,6 @@ import kotlin.uuid.Uuid
  * ### Indexes
  * - [sha]: Unique persistent index for SHA-based lookups
  */
-@OptIn(ExperimentalUuidApi::class)
 @Document(collection = "commits")
 data class CommitEntity(
     @Id var id: String? = null,
@@ -157,7 +153,6 @@ data class CommitEntity(
  * @param committer The committer DeveloperEntity
  * @return CommitEntity for persistence
  */
-@OptIn(ExperimentalUuidApi::class)
 internal fun Commit.toArangoEntity(
     repository: RepositoryEntity,
     author: DeveloperEntity,

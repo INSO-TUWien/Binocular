@@ -1,14 +1,11 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * Domain model for a Module, representing a code module or package in the codebase.
  * This class is database-agnostic and contains no persistence-specific annotations.
  */
-@OptIn(ExperimentalUuidApi::class)
 data class Module(
     @Deprecated("Avoid using database specific id, use business key", ReplaceWith("iid"))
     var id: String? = null,

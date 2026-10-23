@@ -13,7 +13,6 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -35,7 +34,6 @@ class NonRemovingMutableSetTest {
      * Simple test entity for testing [NonRemovingMutableSet].
      * Uses `name` as the uniqueKey for deduplication.
      */
-    @OptIn(ExperimentalUuidApi::class)
     private data class TestEntity(
         val id: String?,
         val name: String,

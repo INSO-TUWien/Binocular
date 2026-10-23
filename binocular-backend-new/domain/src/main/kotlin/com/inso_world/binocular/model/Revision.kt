@@ -1,12 +1,9 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 data class Revision(
     val content: String? = null,
     val commitSha: String,

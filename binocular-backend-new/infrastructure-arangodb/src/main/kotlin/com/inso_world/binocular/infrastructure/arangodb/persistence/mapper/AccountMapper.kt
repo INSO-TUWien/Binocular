@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -8,7 +6,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.Accou
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.PlatformEntity
 import com.inso_world.binocular.model.*
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -64,7 +61,6 @@ internal class AccountMapper : EntityMapper<Account, AccountEntity> {
      * @param entity The AccountEntity to convert
      * @return The Account domain object with lazy-loaded relationships
      */
-    @OptIn(ExperimentalUuidApi::class)
     override fun toDomain(entity: AccountEntity): Account {
         val domain =
             Account(

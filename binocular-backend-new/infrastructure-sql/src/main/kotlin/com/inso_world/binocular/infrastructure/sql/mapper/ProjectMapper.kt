@@ -18,7 +18,6 @@ internal class ProjectMapper : EntityMapper<Project, ProjectEntity> {
         return entity
     }
 
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toDomain(entity: ProjectEntity): Project {
         val domain =
             Project(

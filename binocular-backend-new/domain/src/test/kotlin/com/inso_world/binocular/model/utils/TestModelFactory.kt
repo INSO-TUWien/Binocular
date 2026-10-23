@@ -4,10 +4,8 @@ import com.inso_world.binocular.model.*
 import com.inso_world.binocular.model.vcs.ReferenceCategory
 import com.inso_world.binocular.model.vcs.Remote
 import java.time.LocalDateTime
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 object TestModelFactory {
     fun createProject(name: String, iid: Project.Id = Project.Id(Uuid.random())): Project = Project(name = name, iid = iid)
 

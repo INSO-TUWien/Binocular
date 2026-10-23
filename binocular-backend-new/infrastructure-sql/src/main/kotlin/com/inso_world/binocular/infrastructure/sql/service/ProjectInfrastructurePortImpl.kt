@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.service
 
 import com.inso_world.binocular.core.delegates.logger
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import kotlin.getValue
-import kotlin.uuid.ExperimentalUuidApi
 
 @Service
 @Validated
@@ -187,7 +184,6 @@ internal class ProjectInfrastructurePortImpl(
 
     override fun findByIids(iids: Collection<Project.Id>): List<Project> = iids.mapNotNull { findByIid(it) }
 
-    @OptIn(ExperimentalUuidApi::class)
     @Transactional(readOnly = true)
     override fun findById(id: String): Project? {
         TODO()

@@ -3,7 +3,6 @@ package com.inso_world.binocular.infrastructure.arangodb.migration
 import com.arangodb.ArangoDatabase
 import com.inso_world.binocular.core.delegates.logger
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -21,7 +20,6 @@ import kotlin.uuid.Uuid
  * 3. Sets the `repository` field on every developer that is missing it, deriving the
  *    repository from the commits that reference the developer as author or committer
  */
-@OptIn(ExperimentalUuidApi::class)
 @Component
 @Suppress("ktlint:standard:class-naming")
 class V005_AddRepositoryDeveloperRef : Migration {

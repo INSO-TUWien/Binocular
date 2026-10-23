@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -59,7 +57,6 @@ internal class RepositoryMapper : EntityMapper<Repository, RepositoryEntity> {
      * @param domain The Repository domain object to convert
      * @return The RepositoryEntity
      */
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toEntity(domain: Repository): RepositoryEntity {
         // Find project or create a placeholder if it doesn't exist yet
         val owner =
@@ -89,7 +86,6 @@ internal class RepositoryMapper : EntityMapper<Repository, RepositoryEntity> {
      * @param entity The RepositoryEntity to convert
      * @return The Repository domain object
      */
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toDomain(entity: RepositoryEntity): Repository {
         val domain =
             Repository(

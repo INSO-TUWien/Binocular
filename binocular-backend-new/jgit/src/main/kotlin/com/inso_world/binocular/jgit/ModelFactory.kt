@@ -3,13 +3,11 @@ package com.inso_world.binocular.jgit
 import com.inso_world.binocular.model.*
 import com.inso_world.binocular.model.vcs.ReferenceCategory
 import java.time.LocalDateTime
-import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Java-friendly factory for creating domain objects that use Kotlin-specific features 
  * (like value classes and ExperimentalUuidApi) which makes their constructors appear private in Java.
  */
-@OptIn(ExperimentalUuidApi::class)
 class ModelFactory {
 
     companion object {

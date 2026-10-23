@@ -27,7 +27,6 @@ import java.util.Date
  * This mapper is typically called by infrastructure ports and assemblers. It eagerly maps
  * jobs but uses lazy loading for commits to optimize performance.
  */
-@OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 @Component
 internal class BuildMapper
     @Autowired

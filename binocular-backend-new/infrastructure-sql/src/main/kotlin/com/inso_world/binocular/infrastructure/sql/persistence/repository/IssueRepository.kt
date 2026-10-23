@@ -12,10 +12,8 @@ import kotlin.uuid.Uuid
 internal interface IssueRepository :
     JpaRepository<IssueEntity, Long>,
     JpaSpecificationExecutor<IssueEntity> {
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     fun findByIid(iid: Uuid): IssueEntity?
 
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     fun findAllByIidIn(iids: Collection<Uuid>): List<IssueEntity>
 
     fun findAllByDevelopersContaining(user: DeveloperEntity): Stream<IssueEntity>

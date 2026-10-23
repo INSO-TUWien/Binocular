@@ -9,14 +9,12 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDateTime
-import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * BDD tests for Signature value class.
  * Signature represents a Git signature consisting of a Developer and a timestamp,
  * used for author and committer information in commits.
  */
-@OptIn(ExperimentalUuidApi::class)
 class SignatureModelTest {
     private lateinit var repository: Repository
     private lateinit var developer: Developer

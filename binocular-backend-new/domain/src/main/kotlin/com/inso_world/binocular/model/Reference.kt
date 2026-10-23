@@ -1,12 +1,9 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
 import com.inso_world.binocular.model.vcs.ReferenceCategory
 import jakarta.validation.constraints.NotNull
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 abstract class Reference<Key>(
     @field:NotNull
     open val category: ReferenceCategory,

@@ -4,7 +4,6 @@ import com.arangodb.ArangoDatabase
 import com.inso_world.binocular.core.delegates.logger
 import com.inso_world.binocular.infrastructure.arangodb.InfrastructureConfig
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -16,7 +15,6 @@ import kotlin.uuid.Uuid
  *
  * Uses Kotlin's [Uuid] class to generate UUIDs for consistency with domain model.
  */
-@OptIn(ExperimentalUuidApi::class)
 @Component
 @Suppress("ktlint:standard:class-naming")
 class V000_AddRepository(

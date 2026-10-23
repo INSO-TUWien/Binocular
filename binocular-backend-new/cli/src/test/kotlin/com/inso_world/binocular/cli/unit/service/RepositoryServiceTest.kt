@@ -15,9 +15,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.time.LocalDateTime
-import kotlin.uuid.ExperimentalUuidApi
 
-@OptIn(ExperimentalUuidApi::class)
 @DisplayName("RepositoryService")
 internal class RepositoryServiceTest : BaseUnitTest() {
     private lateinit var project: Project

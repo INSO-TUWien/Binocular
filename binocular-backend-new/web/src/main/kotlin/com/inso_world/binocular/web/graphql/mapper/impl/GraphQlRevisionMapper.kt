@@ -7,7 +7,6 @@ import com.inso_world.binocular.web.graphql.model.RevisionDto
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 
-@OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 @Component
 class GraphQlRevisionMapper(
     private val commitMapper: GraphQlCommitMapper,

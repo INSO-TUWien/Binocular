@@ -1,17 +1,14 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import java.util.Objects
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * Domain model for an Account, representing a user account from a platform like GitHub or GitLab.
  * This class is database-agnostic and contains no persistence-specific annotations.
  */
-@OptIn(ExperimentalUuidApi::class)
 data class Account(
 
     @field:NotBlank

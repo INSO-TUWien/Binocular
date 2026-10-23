@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
@@ -10,7 +8,6 @@ import com.inso_world.binocular.model.vcs.Remote
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Mapper for Remote domain objects.
@@ -19,7 +16,6 @@ import kotlin.uuid.ExperimentalUuidApi
 internal class RemoteMapper(
     @Autowired @Lazy private val repositoryMapper: RepositoryMapper,
 ) : EntityMapper<Remote, RemoteEntity> {
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toEntity(domain: Remote): RemoteEntity {
         val owner =
             domain.repository?.let { repositoryMapper.toEntity(it) }
@@ -41,7 +37,6 @@ internal class RemoteMapper(
         return entity
     }
 
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toDomain(entity: RemoteEntity): Remote {
         val repoDomain = repositoryMapper.toDomain(entity.repository)
         val domain =

@@ -8,13 +8,11 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * BDD tests for Developer domain model.
  * Developer represents a git user scoped to a Repository, extending Stakeholder.
  */
-@OptIn(ExperimentalUuidApi::class)
 class DeveloperModelTest {
     private lateinit var repository: Repository
 

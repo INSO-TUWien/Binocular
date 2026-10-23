@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.persistence.dao
 
 import com.inso_world.binocular.infrastructure.sql.persistence.dao.interfaces.ICommitDao
@@ -12,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Repository
 import java.util.stream.Stream
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -55,11 +52,9 @@ internal class CommitDao(
         return this.repo.findAllByIidIn(uIids)
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     override fun findAllByIidIn(iids: Collection<Commit.Id>): List<CommitEntity> = repo.findAllByIidIn(iids.map { it.value })
 
     private object CommitEntitySpecification {
-        @OptIn(ExperimentalUuidApi::class)
         fun hasRepositoryIid(iid: com.inso_world.binocular.model.Repository.Id): Specification<CommitEntity> =
             Specification { root, query, cb ->
                 if (query?.resultType != Long::class.java) {
@@ -91,17 +86,14 @@ internal class CommitDao(
         return shas
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     override fun findHeadForBranch(
         repository: RepositoryEntity,
         branch: String,
     ): CommitEntity? = this.repo.findLeafCommitsByRepository(repository.iid.value, branch)
 
-    @OptIn(ExperimentalUuidApi::class)
     override fun findAllLeafCommits(repository: RepositoryEntity): Iterable<CommitEntity> =
         this.repo.findAllLeafCommits(repository.iid.value)
 
-    @OptIn(ExperimentalUuidApi::class)
     override fun findBySha(
         repository: RepositoryEntity,
         sha: String,

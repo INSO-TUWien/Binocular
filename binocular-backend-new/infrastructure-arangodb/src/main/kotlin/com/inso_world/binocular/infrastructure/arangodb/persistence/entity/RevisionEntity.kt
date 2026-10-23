@@ -6,7 +6,6 @@ import com.arangodb.springframework.annotation.From
 import com.arangodb.springframework.annotation.PersistentIndexed
 import com.arangodb.springframework.annotation.To
 import org.springframework.data.annotation.Id
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -16,7 +15,6 @@ import kotlin.uuid.Uuid
  * In ArangoDB, we model this as an edge between File and Commit.
  */
 @Document("revisions")
-@OptIn(ExperimentalUuidApi::class)
 data class RevisionEntity(
     @Id var id: String? = null,
     @Field("iid")

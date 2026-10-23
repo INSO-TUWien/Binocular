@@ -1,9 +1,7 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -31,7 +29,6 @@ import kotlin.uuid.Uuid
  * @see Signature
  */
 @Deprecated("Use Developer instead", ReplaceWith("Developer"))
-@OptIn(ExperimentalUuidApi::class)
 data class User(
     @field:NotBlank val name: String,
     @field:NotNull val repositoryId: Repository.Id,

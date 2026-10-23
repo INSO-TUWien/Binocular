@@ -17,9 +17,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.util.ReflectionUtils.setField
-import kotlin.uuid.ExperimentalUuidApi
 
-@OptIn(ExperimentalUuidApi::class)
 internal class ProjectDaoTest(
     @Autowired val repositoryInfrastructurePort: RepositoryInfrastructurePort,
     @Autowired val projectInfrastructurePort: ProjectInfrastructurePort,

@@ -1,4 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
 import com.inso_world.binocular.model.vcs.Remote
@@ -7,7 +6,6 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -34,7 +32,6 @@ import kotlin.uuid.Uuid
  *   Participates in [uniqueKey] as `localPath.trim()`.
  * @property project Owning [Project]; establishes the [Repository]↔[Project] association during `init`.
  */
-@OptIn(ExperimentalUuidApi::class)
 data class Repository(
     @field:NotBlank
     @field:Size(max = 255)

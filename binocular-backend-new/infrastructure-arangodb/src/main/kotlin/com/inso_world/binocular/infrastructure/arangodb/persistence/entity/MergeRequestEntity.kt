@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.entity
 
 import com.arangodb.springframework.annotation.Document
@@ -11,13 +9,11 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.MergeRequestMilestoneConnectionEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.MergeRequestNoteConnectionEntity
 import org.springframework.data.annotation.Id
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * ArangoDB-specific MergeRequest entity.
  */
-@OptIn(ExperimentalUuidApi::class)
 @Document("mergeRequests")
 data class MergeRequestEntity(
     @Id

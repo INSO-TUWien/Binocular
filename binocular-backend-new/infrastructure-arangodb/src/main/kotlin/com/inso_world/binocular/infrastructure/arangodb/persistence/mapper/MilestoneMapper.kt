@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -7,7 +5,6 @@ import com.inso_world.binocular.core.persistence.mapper.EntityMapper
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.MilestoneEntity
 import com.inso_world.binocular.model.*
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -58,7 +55,6 @@ internal class MilestoneMapper : EntityMapper<Milestone, MilestoneEntity> {
         return entity
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     override fun toDomain(entity: MilestoneEntity): Milestone {
         // Fast-path: Check if already mapped
 

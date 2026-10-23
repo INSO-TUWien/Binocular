@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.integration.service
 
 import com.inso_world.binocular.core.service.AccountInfrastructurePort

@@ -209,6 +209,7 @@
                     <args>
                         <arg>-Xjsr305=strict</arg>
                         <arg>-Xannotation-target-all</arg>
+                        <arg>-opt-in=kotlin.uuid.ExperimentalUuidApi</arg>
                     </args>
                     <compilerPlugins>
                         <plugin>spring</plugin>

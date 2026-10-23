@@ -18,13 +18,11 @@ import org.springframework.context.annotation.Profile
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.validation.annotation.Validated
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Service
 @Profile("postgres")
 @Validated
-@OptIn(ExperimentalUuidApi::class)
 internal class MergeRequestInfrastructurePortImpl(
     private val mrDao: MergeRequestDao,
     private val linkDao: MergeRequestLinkDao,

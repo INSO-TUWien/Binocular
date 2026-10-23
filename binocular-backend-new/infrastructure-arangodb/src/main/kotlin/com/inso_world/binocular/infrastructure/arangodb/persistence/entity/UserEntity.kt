@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.entity
 
 import com.arangodb.springframework.annotation.Document
@@ -13,7 +11,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges
 import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.User
 import org.springframework.data.annotation.Id
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -32,7 +29,6 @@ import kotlin.uuid.Uuid
  * ### Indexes
  * - [iid]: Unique persistent index for UUID-based lookups
  */
-@OptIn(ExperimentalUuidApi::class)
 @Document("users")
 data class UserEntity(
     @Id
@@ -115,7 +111,6 @@ data class UserEntity(
  * @return UserEntity for persistence
  */
 @Suppress("DEPRECATION")
-@OptIn(ExperimentalUuidApi::class)
 internal fun User.toArangoEntity(repository: RepositoryEntity): UserEntity =
     UserEntity(
         id = this.id,

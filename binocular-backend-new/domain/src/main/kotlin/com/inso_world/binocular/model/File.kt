@@ -1,14 +1,11 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * Domain model for a File, representing a file in a Git repository.
  * This class is database-agnostic and contains no persistence-specific annotations.
  */
-@OptIn(ExperimentalUuidApi::class)
 data class File(
     var path: String,
     override val iid: File.Id = Id(Uuid.random()),

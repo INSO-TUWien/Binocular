@@ -1,9 +1,7 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -41,7 +39,6 @@ import kotlin.uuid.Uuid
  * @see committedCommits
  * @see authoredCommits
  */
-@OptIn(ExperimentalUuidApi::class)
 data class Developer(
     @field:NotBlank
     override val name: String,

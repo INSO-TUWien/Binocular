@@ -3,7 +3,6 @@ package com.inso_world.binocular.infrastructure.arangodb.migration
 import com.arangodb.ArangoDatabase
 import com.inso_world.binocular.core.delegates.logger
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -20,7 +19,6 @@ import kotlin.uuid.Uuid
  * 2. Sets the `author` and `committer` fields on every commit that is missing them,
  *    resolving the developer via the existing `commits-users` edge
  */
-@OptIn(ExperimentalUuidApi::class)
 @Component
 @Suppress("ktlint:standard:class-naming")
 class V004_AddCommitAuthorRef : Migration {

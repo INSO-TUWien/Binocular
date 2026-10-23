@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -11,7 +9,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.toAra
 import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.User
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Mapper for User domain objects.
@@ -43,7 +40,6 @@ internal class UserMapper : EntityMapper<User, UserEntity> {
      * @param domain The User domain object to convert
      * @return The UserEntity (structure only, without relationships)
      */
-    @OptIn(ExperimentalUuidApi::class)
     override fun toEntity(domain: User): UserEntity {
         val owner =
             RepositoryEntity(
@@ -62,7 +58,6 @@ internal class UserMapper : EntityMapper<User, UserEntity> {
      * @param entity The UserEntity to convert
      * @return The User domain object (structure only, without relationships)
      */
-    @OptIn(ExperimentalUuidApi::class)
     override fun toDomain(entity: UserEntity): User {
         val domain =
             User(

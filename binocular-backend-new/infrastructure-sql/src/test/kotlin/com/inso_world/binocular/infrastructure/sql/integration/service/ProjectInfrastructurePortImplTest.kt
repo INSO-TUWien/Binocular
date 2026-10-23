@@ -15,7 +15,6 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
-import kotlin.uuid.ExperimentalUuidApi
 
 internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
     @Autowired
@@ -246,7 +245,6 @@ internal class ProjectInfrastructurePortImplTest : BaseServiceTest() {
 
     @Nested
     @DisplayName("Read Operations")
-    @OptIn(ExperimentalUuidApi::class)
     inner class ReadOperations {
         @Test
         fun `findAll returns all created projects`() {

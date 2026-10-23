@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
@@ -13,7 +11,6 @@ import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.Signature
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Mapper for Commit domain objects.
@@ -41,7 +38,6 @@ internal class CommitMapper : EntityMapper<Commit, CommitEntity> {
      * @param domain The Commit domain object to convert
      * @return The CommitEntity (structure only, without relationships)
      */
-    @OptIn(ExperimentalUuidApi::class)
     @Deprecated("Use toEntity(domain, repository, author, committer) instead")
     override fun toEntity(domain: Commit): CommitEntity {
         val owner =
@@ -93,7 +89,6 @@ internal class CommitMapper : EntityMapper<Commit, CommitEntity> {
      * @param entity The CommitEntity to convert
      * @return The Commit domain object (structure only, without relationships)
      */
-    @OptIn(ExperimentalUuidApi::class)
     override fun toDomain(entity: CommitEntity): Commit {
         val domain =
             Commit(

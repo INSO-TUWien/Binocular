@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -11,7 +9,6 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.toAra
 import com.inso_world.binocular.model.Developer
 import com.inso_world.binocular.model.Repository
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Mapper for Developer domain objects.
@@ -39,7 +36,6 @@ internal class DeveloperMapper : EntityMapper<Developer, DeveloperEntity> {
      * @param domain The Developer domain object to convert
      * @return The DeveloperEntity (structure only, without relationships)
      */
-    @OptIn(ExperimentalUuidApi::class)
     override fun toEntity(domain: Developer): DeveloperEntity {
         val owner =
             RepositoryEntity(

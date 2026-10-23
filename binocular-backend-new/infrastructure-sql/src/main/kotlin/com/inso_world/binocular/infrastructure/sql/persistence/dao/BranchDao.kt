@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.persistence.dao
 
 import com.inso_world.binocular.core.persistence.exception.PersistenceException
@@ -12,7 +10,6 @@ import com.inso_world.binocular.model.Reference
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Repository
-import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * SQL implementation of IBranchDao.

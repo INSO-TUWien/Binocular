@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.persistence.dao
 
 import com.inso_world.binocular.infrastructure.sql.persistence.dao.interfaces.IRepositoryDao
@@ -7,7 +5,6 @@ import com.inso_world.binocular.infrastructure.sql.persistence.entity.Repository
 import com.inso_world.binocular.infrastructure.sql.persistence.repository.RepositoryRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
-import kotlin.uuid.ExperimentalUuidApi
 
 @Repository
 internal class RepositoryDao(

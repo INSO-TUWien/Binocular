@@ -3,9 +3,7 @@ package com.inso_world.binocular.jgit.tree
 import com.inso_world.binocular.model.*
 import com.inso_world.binocular.model.vcs.ReferenceCategory
 import java.time.LocalDateTime
-import kotlin.uuid.ExperimentalUuidApi
 
-@OptIn(ExperimentalUuidApi::class)
 object TestModelFactory {
     @JvmStatic
     @JvmOverloads

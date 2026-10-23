@@ -1,18 +1,14 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.repository
 
 import com.arangodb.springframework.repository.ArangoRepository
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.BuildEntity
 import org.springframework.stereotype.Repository
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Repository
 interface BuildRepository :
     ArangoRepository<BuildEntity, String>,
     TechnicalIdentifiableRepository<BuildEntity> {
-    @OptIn(ExperimentalUuidApi::class)
     override fun findByIid(iid: Uuid): BuildEntity?
 
     @com.arangodb.springframework.annotation.Query(

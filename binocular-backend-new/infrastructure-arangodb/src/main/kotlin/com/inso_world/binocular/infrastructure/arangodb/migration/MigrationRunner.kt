@@ -5,7 +5,6 @@ import com.inso_world.binocular.core.delegates.logger
 import com.inso_world.binocular.infrastructure.arangodb.persistence.dao.nosql.arangodb.ArangodbAppConfig
 import jakarta.annotation.PostConstruct
 import org.springframework.context.annotation.DependsOn
-import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import java.time.Instant

@@ -23,10 +23,8 @@ import com.inso_world.binocular.model.Signature
 import com.inso_world.binocular.model.vcs.ReferenceCategory
 import com.inso_world.binocular.model.vcs.Remote
 import java.time.LocalDateTime
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 internal object TestData {
     object Entity {
         /**

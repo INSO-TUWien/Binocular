@@ -8,14 +8,12 @@ import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.ModuleFileConnectionEntity
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.ModuleModuleConnectionEntity
 import org.springframework.data.annotation.Id
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * ArangoDB-specific Module entity.
  */
 @Document("modules")
-@OptIn(ExperimentalUuidApi::class)
 data class ModuleEntity(
     @Id
     var id: String? = null,

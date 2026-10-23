@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -43,7 +41,6 @@ internal class RepositoryMapper : EntityMapper<Repository, RepositoryEntity> {
      * @param domain The Repository domain object to convert
      * @return The RepositoryEntity
      */
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toEntity(domain: Repository): RepositoryEntity {
         val owner =
             projectRepository.findByIid(domain.projectId.value)

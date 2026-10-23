@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.mapper
 
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
@@ -15,7 +13,6 @@ internal class RemoteMapper : EntityMapper<Remote, RemoteEntity> {
     @Autowired
     private lateinit var repositoryRepository: com.inso_world.binocular.infrastructure.sql.persistence.repository.RepositoryRepository
 
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toEntity(domain: Remote): RemoteEntity {
         val repository =
             repositoryRepository.findByIid(domain.repositoryId.value)

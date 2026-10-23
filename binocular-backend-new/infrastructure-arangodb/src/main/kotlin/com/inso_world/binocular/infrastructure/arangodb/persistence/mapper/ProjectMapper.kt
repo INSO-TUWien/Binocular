@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.delegates.logger
@@ -62,7 +60,6 @@ internal class ProjectMapper : EntityMapper<Project, ProjectEntity> {
      * @param entity The ProjectEntity to convert
      * @return The Project domain object (structure only, without children)
      */
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toDomain(entity: ProjectEntity): Project {
         val domain =
             Project(

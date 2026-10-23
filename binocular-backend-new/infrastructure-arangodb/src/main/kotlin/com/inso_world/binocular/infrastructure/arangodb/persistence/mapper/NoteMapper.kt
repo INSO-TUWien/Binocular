@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
@@ -9,7 +7,6 @@ import com.inso_world.binocular.model.Issue
 import com.inso_world.binocular.model.MergeRequest
 import com.inso_world.binocular.model.Note
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -62,7 +59,6 @@ internal class NoteMapper : EntityMapper<Note, NoteEntity> {
      * @param entity The NoteEntity to convert
      * @return The Note domain object with IDs for relationships
      */
-    @OptIn(ExperimentalUuidApi::class)
     override fun toDomain(entity: NoteEntity): Note {
         val domain =
             Note(

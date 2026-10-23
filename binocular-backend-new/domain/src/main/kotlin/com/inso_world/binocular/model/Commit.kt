@@ -1,4 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
 import com.inso_world.binocular.model.validation.Hexadecimal
@@ -7,7 +6,6 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import java.time.LocalDateTime
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -51,7 +49,6 @@ import kotlin.uuid.Uuid
  * @see Signature
  * @see Developer
  */
-@OptIn(ExperimentalUuidApi::class)
 data class Commit(
     @field:Size(min = 40, max = 40)
     @field:Hexadecimal

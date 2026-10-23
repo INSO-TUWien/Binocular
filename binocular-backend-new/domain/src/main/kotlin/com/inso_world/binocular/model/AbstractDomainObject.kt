@@ -1,9 +1,7 @@
 package com.inso_world.binocular.model
 
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 interface DomainId {
     val value: Uuid
 }
@@ -57,7 +55,6 @@ interface DomainId {
  * ```kotlin
  * // required for kotlin UUID:
  * // https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.uuid/-experimental-uuid-api/
- * @OptIn(ExperimentalUuidApi::class)
  * Commit(
  *   [...]
  * ) : AbstractDomainObject<Commit.Id, String>(

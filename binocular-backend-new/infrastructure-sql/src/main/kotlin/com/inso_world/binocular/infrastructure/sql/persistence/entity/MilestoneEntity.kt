@@ -11,7 +11,6 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.Table
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -19,7 +18,6 @@ import kotlin.uuid.Uuid
  */
 @Entity
 @Table(name = "milestones")
-@OptIn(ExperimentalUuidApi::class)
 internal data class MilestoneEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

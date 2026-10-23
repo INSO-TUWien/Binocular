@@ -1,10 +1,8 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
 import jakarta.validation.constraints.NotBlank
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -28,7 +26,6 @@ import kotlin.uuid.Uuid
  *
  * @property name Human-readable project name; must be non-blank and forms the [uniqueKey].
  */
-@OptIn(ExperimentalUuidApi::class)
 data class Project(
     @field:NotBlank
     val name: String,

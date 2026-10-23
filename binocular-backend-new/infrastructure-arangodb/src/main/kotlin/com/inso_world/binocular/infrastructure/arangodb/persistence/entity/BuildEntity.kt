@@ -7,14 +7,12 @@ import com.arangodb.springframework.annotation.Relations
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.CommitBuildConnectionEntity
 import org.springframework.data.annotation.Id
 import java.util.*
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * ArangoDB-specific Build entity.
  */
 @Document("builds")
-@OptIn(ExperimentalUuidApi::class)
 data class BuildEntity(
     @Id
     var id: String? = null,

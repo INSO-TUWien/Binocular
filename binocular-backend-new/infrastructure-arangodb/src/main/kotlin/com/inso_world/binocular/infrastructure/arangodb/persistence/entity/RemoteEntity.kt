@@ -5,14 +5,12 @@ import com.arangodb.springframework.annotation.Field
 import com.arangodb.springframework.annotation.PersistentIndexed
 import com.arangodb.springframework.annotation.Ref
 import org.springframework.data.annotation.Id
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * ArangoDB-specific Remote entity.
  */
 @Document("remotes")
-@OptIn(ExperimentalUuidApi::class)
 data class RemoteEntity(
     @Id var id: String? = null,
     @Field("iid")

@@ -1,15 +1,12 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package com.inso_world.binocular.model
 
 import java.time.LocalDateTime
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * Domain model for an Issue, representing an issue in a Git repository.
  * This class is database-agnostic and contains no persistence-specific annotations.
  */
-@OptIn(ExperimentalUuidApi::class)
 data class Issue(
 
     @Deprecated("Avoid using database specific id, use business key", ReplaceWith("iid"))

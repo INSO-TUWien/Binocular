@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.mapper
 
 import com.inso_world.binocular.core.persistence.mapper.EntityMapper
@@ -16,7 +14,6 @@ import com.inso_world.binocular.model.Repository
 import com.inso_world.binocular.model.vcs.ReferenceCategory
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -36,7 +33,6 @@ import kotlin.uuid.Uuid
  */
 @Component
 internal class BranchMapper : EntityMapper<Branch, BranchEntity> {
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     @Deprecated("Use toEntity(domain, owner, head) instead", ReplaceWith("toEntity(domain, owner, head)"))
     override fun toEntity(domain: Branch): BranchEntity {
         val owner =
@@ -64,7 +60,6 @@ internal class BranchMapper : EntityMapper<Branch, BranchEntity> {
         head: CommitEntity
     ): BranchEntity = domain.toArangoEntity(owner, head)
 
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun toDomain(entity: BranchEntity): Branch {
         val domain =
             Branch(

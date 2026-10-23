@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.entity
 
 import com.arangodb.springframework.annotation.Document
@@ -10,7 +8,6 @@ import com.arangodb.springframework.annotation.Relations
 import com.inso_world.binocular.infrastructure.arangodb.persistence.entity.edges.ProjectAccountConnectionEntity
 import com.inso_world.binocular.model.Project
 import org.springframework.data.annotation.Id
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -29,7 +26,6 @@ import kotlin.uuid.Uuid
  * ### Indexes
  * - [iid]: Unique persistent index for UUID-based lookups
  */
-@OptIn(ExperimentalUuidApi::class)
 @Document("projects")
 data class ProjectEntity(
     @Id
@@ -81,7 +77,6 @@ data class ProjectEntity(
  *
  * @return ProjectEntity for persistence
  */
-@OptIn(ExperimentalUuidApi::class)
 internal fun Project.toArangoEntity(): ProjectEntity =
     ProjectEntity(
         id = this.id,

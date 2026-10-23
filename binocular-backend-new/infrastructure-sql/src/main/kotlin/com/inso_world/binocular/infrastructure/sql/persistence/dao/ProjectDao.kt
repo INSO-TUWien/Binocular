@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.persistence.dao
 
 import com.inso_world.binocular.infrastructure.sql.persistence.dao.interfaces.IProjectDao
@@ -9,7 +7,6 @@ import com.inso_world.binocular.model.Project
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Repository
-import kotlin.uuid.ExperimentalUuidApi
 
 @Repository
 internal open class ProjectDao(
@@ -23,7 +20,6 @@ internal open class ProjectDao(
 
     override fun findByName(name: String): ProjectEntity? = projectRepo.findByName(name)
 
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun findByIid(iid: Project.Id): ProjectEntity? = projectRepo.findByIid(iid.value)
 
     override fun findByIid(iid: Any): ProjectEntity? {

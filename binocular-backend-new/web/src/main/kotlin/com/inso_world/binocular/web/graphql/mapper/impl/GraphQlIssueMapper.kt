@@ -3,9 +3,7 @@ package com.inso_world.binocular.web.graphql.mapper.impl
 import com.inso_world.binocular.model.Issue
 import com.inso_world.binocular.web.graphql.model.IssueDto
 import org.springframework.stereotype.Component
-import kotlin.uuid.ExperimentalUuidApi
 
-@OptIn(ExperimentalUuidApi::class)
 @Component
 class GraphQlIssueMapper(
     private val mentionMapper: GraphQlMentionMapper

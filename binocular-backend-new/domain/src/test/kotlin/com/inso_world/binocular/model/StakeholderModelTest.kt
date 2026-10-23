@@ -4,14 +4,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
  * BDD tests for Stakeholder abstract base class.
  * Stakeholder represents any person involved in a project (developer, reviewer, etc.)
  */
-@OptIn(ExperimentalUuidApi::class)
 class StakeholderModelTest {
     @Nested
     inner class Construction {

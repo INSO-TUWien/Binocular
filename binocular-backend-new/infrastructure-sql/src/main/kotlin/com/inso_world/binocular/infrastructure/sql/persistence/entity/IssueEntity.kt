@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.persistence.entity
 
 import com.inso_world.binocular.infrastructure.sql.persistence.converter.KotlinUuidConverter
@@ -25,7 +23,6 @@ import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
 import java.time.LocalDateTime
 import java.util.Objects
-import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * SQL-specific Issue entity.
@@ -165,7 +162,6 @@ internal data class IssueEntity(
         this.labels.addAll(labels.map { LabelEntity(null, it, this) })
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     fun toDomain(): Issue =
         Issue(
             project = this.project.iid,

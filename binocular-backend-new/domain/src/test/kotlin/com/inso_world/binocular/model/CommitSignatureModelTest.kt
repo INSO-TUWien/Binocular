@@ -6,9 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.time.LocalDateTime
-import kotlin.uuid.ExperimentalUuidApi
 
-@OptIn(ExperimentalUuidApi::class)
 class CommitSignatureModelTest {
     private lateinit var repository: Repository
     private lateinit var author: Developer

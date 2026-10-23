@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.arangodb.persistence.dao.nosql.arangodb
 
 import com.arangodb.springframework.repository.ArangoRepository
@@ -161,7 +159,6 @@ open class MappedArangoDbDao<D : Any, E : Any, I : Serializable>(
         TODO("Not yet implemented")
     }
 
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     override fun findByIid(iid: Any): D? {
         val uIid =
             when (iid) {
@@ -179,7 +176,6 @@ open class MappedArangoDbDao<D : Any, E : Any, I : Serializable>(
 
     override fun findByIids(iids: Collection<Any>): List<D> = iids.mapNotNull { findByIid(it) }
 
-    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     private fun java.util.UUID.toKotlinUuid(): kotlin.uuid.Uuid =
         kotlin.uuid.Uuid.fromLongs(this.mostSignificantBits, this.leastSignificantBits)
 }

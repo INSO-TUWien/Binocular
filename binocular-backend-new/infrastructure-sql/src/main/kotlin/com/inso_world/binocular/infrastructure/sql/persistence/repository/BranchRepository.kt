@@ -1,11 +1,8 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-
 package com.inso_world.binocular.infrastructure.sql.persistence.repository
 
 import com.inso_world.binocular.infrastructure.sql.persistence.entity.BranchEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 internal interface BranchRepository :
@@ -16,9 +13,7 @@ internal interface BranchRepository :
         name: String,
     ): BranchEntity?
 
-    @OptIn(ExperimentalUuidApi::class)
     fun findByIid(iid: Uuid): BranchEntity?
 
-    @OptIn(ExperimentalUuidApi::class)
     fun findAllByIidIn(iids: Collection<Uuid>): List<BranchEntity>
 }
